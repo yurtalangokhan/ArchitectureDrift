@@ -1,0 +1,27 @@
+# =============================================================================
+# Astronomy Shop Controlled Mutation
+#
+# Final mutation-oracle schema will be implemented in WP-03.
+# =============================================================================
+
+schema_version: "1.0"
+
+mutation_id: AS-M01
+system_id: astronomy-shop
+
+description: >
+  Introduces an unexpected connector from checkout to recommendation.
+
+status: planned
+
+source: checkout
+target: recommendation
+relation: CALLS
+
+expected_delta:
+  added_relations:
+    - source: checkout
+      target: recommendation
+      relation: CALLS
+
+  removed_relations: []

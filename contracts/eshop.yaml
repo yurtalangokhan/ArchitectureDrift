@@ -1,0 +1,10 @@
+# =============================================================================
+# .NET eShop Architecture Contract
+#
+# The final schema will be implemented in WP-02.
+# =============================================================================
+
+schema_version: "1.0"
+system_id: eshop
+
+contracts: []

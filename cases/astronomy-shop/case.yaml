@@ -1,0 +1,13 @@
+schema_version: "1.0"
+
+id: astronomy-shop
+name: OpenTelemetry Astronomy Shop
+
+description: >
+  OpenTelemetry Astronomy Shop case system used in the
+  Multi-Evidence Architecture Conformance experiment.
+
+evidence_modes:
+  - non-runtime
+  - runtime
+  - fused
