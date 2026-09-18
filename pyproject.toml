@@ -6,28 +6,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "multi-evidence-conformance"
 version = "0.1.0"
-description = "Multi-Evidence Architecture Conformance research framework"
+description = "Research prototype for multi-evidence software architecture conformance analysis."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Gokhan Yurtalan" }
+]
 
 dependencies = [
-    "pydantic>=2.8,<3.0",
-    "networkx>=3.3,<4.0",
+    "pydantic>=2.13.5,<3.0",
     "PyYAML>=6.0,<7.0",
+    "networkx>=3.6.1,<4.0",
 ]
 
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0,<10.0",
-    "pytest-cov>=5.0,<8.0",
-    "ruff>=0.8,<1.0",
-    "mypy>=1.10,<2.0",
+    "pytest-cov>=6.0,<8.0",
+    "ruff>=0.12,<1.0",
+    "mypy>=1.18,<3.0",
+    "types-PyYAML>=6.0",
+    "types-networkx>=3.6.1",
 ]
-
-
-[project.scripts]
-archdrift = "archdrift.cli:main"
 
 
 [tool.setuptools.packages.find]
@@ -35,14 +38,29 @@ where = ["src"]
 
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-ra"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+
+
+[tool.coverage.run]
+branch = true
+source = ["archdrift"]
+
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 80
 
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 
 [tool.ruff.lint]
@@ -50,12 +68,26 @@ select = [
     "E",
     "F",
     "I",
-    "UP",
     "B",
+    "UP",
+    "SIM",
 ]
 
 
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
-packages = ["archdrift"]
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+plugins = ["pydantic.mypy"]
+
+
+[[tool.mypy.overrides]]
+module = "yaml.*"
+ignore_missing_imports = false

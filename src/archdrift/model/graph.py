@@ -1,26 +1,20 @@
 from __future__ import annotations
 
-import copy
 from enum import StrEnum
-from typing import Any, Literal, Self
+from pathlib import Path
+from typing import Any, Literal
 
 import networkx as nx
+import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-# =============================================================================
-# Canonical Vocabulary
-# =============================================================================
+from archdrift.model.evidence import (
+    EvidenceRecord,
+    deduplicate_evidence,
+)
 
 
 class NodeType(StrEnum):
-    """
-    Canonical architectural node types.
-
-    These types are deliberately technology-independent so that architecture
-    reconstructed from different evidence channels can be compared using the
-    same graph vocabulary.
-    """
-
     SERVICE = "SERVICE"
     DATASTORE = "DATASTORE"
     BROKER = "BROKER"
@@ -30,10 +24,6 @@ class NodeType(StrEnum):
 
 
 class RelationType(StrEnum):
-    """
-    Canonical directed architectural relation types.
-    """
-
     CALLS = "CALLS"
     READS_FROM = "READS_FROM"
     WRITES_TO = "WRITES_TO"
@@ -44,689 +34,643 @@ class RelationType(StrEnum):
     EXPOSES_TO = "EXPOSES_TO"
 
 
-# =============================================================================
-# Exceptions
-# =============================================================================
-
-
-class ArchitectureGraphError(Exception):
+class GraphView(StrEnum):
     """
-    Base exception for Canonical Architecture Graph operations.
+    Identifies the architectural view represented by a graph.
     """
 
-
-class DuplicateNodeError(ArchitectureGraphError):
-    """
-    Raised when a node with the same canonical identifier already exists.
-    """
-
-
-class UnknownNodeError(ArchitectureGraphError):
-    """
-    Raised when an operation references a node that does not exist.
-    """
+    CANONICAL = "CANONICAL"
+    CONTRACT = "CONTRACT"
+    SOURCE = "SOURCE"
+    DEPLOYMENT = "DEPLOYMENT"
+    NON_RUNTIME = "NON_RUNTIME"
+    RUNTIME = "RUNTIME"
+    FUSED = "FUSED"
 
 
-class DuplicateRelationError(ArchitectureGraphError):
-    """
-    Raised when the same canonical relation already exists.
-    """
+class GraphMetadata(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        validate_assignment=True,
+    )
 
+    system_id: str = Field(min_length=1)
 
-class UnknownRelationError(ArchitectureGraphError):
-    """
-    Raised when an operation references a relation that does not exist.
-    """
+    variant: str = Field(
+        default="baseline",
+        min_length=1,
+    )
 
+    revision: str | None = None
 
-# =============================================================================
-# Validation Helpers
-# =============================================================================
+    view: GraphView = GraphView.CANONICAL
 
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
-def _validate_identifier(value: str) -> str:
-    """
-    Validate and normalize canonical identifiers.
+    @field_validator("system_id", "variant")
+    @classmethod
+    def normalize_required_string(cls, value: str) -> str:
+        value = value.strip()
 
-    Canonical identifiers must:
+        if not value:
+            raise ValueError("value must not be empty")
 
-    - not be empty
-    - not contain whitespace
+        return value
 
-    Examples:
+    @field_validator("revision")
+    @classmethod
+    def normalize_optional_string(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
 
-        checkout
-        recommendation
-        frontend-proxy
-        postgres
-        kafka
-        service-a
-    """
+        value = value.strip()
 
-    normalized = value.strip()
-
-    if not normalized:
-        raise ValueError("Identifier must not be empty.")
-
-    if any(character.isspace() for character in normalized):
-        raise ValueError(
-            f"Identifier must not contain whitespace: {value!r}"
-        )
-
-    return normalized
-
-
-# =============================================================================
-# Canonical Domain Models
-# =============================================================================
+        return value or None
 
 
 class ArchitectureNode(BaseModel):
-    """
-    Canonical architectural element.
-
-    Node identity is determined only by ``id``.
-
-    Evidence-specific information must not be used as graph identity.
-    """
-
     model_config = ConfigDict(
         extra="forbid",
-        frozen=True,
+        validate_assignment=True,
     )
 
-    id: str = Field(
-        description="Stable canonical identifier of the architectural element."
-    )
+    id: str = Field(min_length=1)
 
-    type: NodeType = Field(
-        description="Canonical architectural node type."
-    )
+    type: NodeType
 
-    name: str | None = Field(
-        default=None,
-        description="Optional human-readable node name.",
-    )
+    subtype: str | None = None
 
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-        description=(
-            "Optional metadata that does not participate in node identity."
-        ),
-    )
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("id")
     @classmethod
-    def validate_id(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def normalize_id(cls, value: str) -> str:
+        value = value.strip()
+
+        if not value:
+            raise ValueError("node id must not be empty")
+
+        return value
+
+    @field_validator("subtype")
+    @classmethod
+    def normalize_subtype(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+
+        return value or None
 
 
-class ArchitectureRelation(BaseModel):
+class ArchitectureEdge(BaseModel):
     """
-    Directed canonical relation between two architecture nodes.
+    Typed directed architectural relation.
 
-    Canonical relation identity is:
+    Edge identity:
 
-        source + relation type + target
+        (source, target, relation, protocol)
 
-    Example:
+    Protocol is part of the identity because a change such as:
 
-        checkout --CALLS--> recommendation
+        HTTP -> gRPC
+
+    must be observable as an architectural graph delta.
     """
 
     model_config = ConfigDict(
         extra="forbid",
-        frozen=True,
+        validate_assignment=True,
     )
 
-    source: str = Field(
-        description="Canonical source node identifier."
-    )
+    source: str = Field(min_length=1)
 
-    target: str = Field(
-        description="Canonical target node identifier."
-    )
+    target: str = Field(min_length=1)
 
-    type: RelationType = Field(
-        description="Canonical architectural relation type."
-    )
+    relation: RelationType
 
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-        description=(
-            "Optional relation metadata such as protocol or endpoint. "
-            "Metadata does not participate in relation identity."
-        ),
-    )
+    protocol: str | None = None
+
+    evidence: list[EvidenceRecord] = Field(default_factory=list)
+
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("source", "target")
     @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def normalize_endpoint(cls, value: str) -> str:
+        value = value.strip()
+
+        if not value:
+            raise ValueError("edge endpoint must not be empty")
+
+        return value
+
+    @field_validator("protocol")
+    @classmethod
+    def normalize_protocol(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip().lower()
+
+        return value or None
+
+    @field_validator("evidence")
+    @classmethod
+    def normalize_evidence(
+        cls,
+        value: list[EvidenceRecord],
+    ) -> list[EvidenceRecord]:
+        """
+        Deduplicates evidence without assigning to self from inside
+        a model-level validator.
+
+        Using a field validator avoids recursive assignment validation.
+        """
+
+        return deduplicate_evidence(value)
 
     @property
-    def signature(self) -> tuple[str, RelationType, str]:
-        """
-        Return the canonical relation identity.
-        """
-
+    def identity(
+        self,
+    ) -> tuple[str, str, RelationType, str | None]:
         return (
             self.source,
-            self.type,
             self.target,
+            self.relation,
+            self.protocol,
+        )
+
+    @property
+    def networkx_key(self) -> str:
+        protocol = self.protocol or "-"
+
+        return f"{self.relation.value}:{protocol}"
+
+    def merge_with(
+        self,
+        other: ArchitectureEdge,
+    ) -> ArchitectureEdge:
+        """
+        Merges two observations of the same architectural relation.
+
+        Evidence provenance is combined and duplicate evidence is removed.
+        """
+
+        if self.identity != other.identity:
+            raise ValueError(
+                "Only architecture edges with identical identities can be merged."
+            )
+
+        merged_attributes = dict(self.attributes)
+
+        for key, value in other.attributes.items():
+            if (
+                key in merged_attributes
+                and merged_attributes[key] != value
+            ):
+                raise ValueError(
+                    f"Conflicting canonical edge attribute '{key}' "
+                    f"for edge {self.identity}."
+                )
+
+            merged_attributes[key] = value
+
+        return ArchitectureEdge(
+            source=self.source,
+            target=self.target,
+            relation=self.relation,
+            protocol=self.protocol,
+            evidence=deduplicate_evidence(
+                [
+                    *self.evidence,
+                    *other.evidence,
+                ]
+            ),
+            attributes=merged_attributes,
         )
 
 
-class CanonicalArchitectureModel(BaseModel):
+class ArchitectureGraph(BaseModel):
     """
-    Serializable representation of a Canonical Architecture Graph.
+    Canonical directed typed architecture graph.
 
-    This model is independent from NetworkX and can later be serialized
-    to JSON/YAML or used by mutation and graph-delta analysis.
+    Duplicate relations are normalized according to:
+
+        (source, target, relation, protocol)
+
+    Provenance from multiple observations of the same relation is merged.
     """
 
     model_config = ConfigDict(
         extra="forbid",
+        validate_assignment=True,
     )
 
     schema_version: Literal["1.0"] = "1.0"
 
-    system_id: str = Field(
-        description="Identifier of the case system."
-    )
+    metadata: GraphMetadata
 
-    nodes: list[ArchitectureNode] = Field(
-        default_factory=list,
-    )
+    nodes: list[ArchitectureNode] = Field(default_factory=list)
 
-    relations: list[ArchitectureRelation] = Field(
-        default_factory=list,
-    )
-
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
-    )
-
-    @field_validator("system_id")
-    @classmethod
-    def validate_system_id(cls, value: str) -> str:
-        return _validate_identifier(value)
+    edges: list[ArchitectureEdge] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def validate_graph_invariants(self) -> Self:
-        """
-        Validate graph-level invariants.
-
-        Invariants:
-
-        1. Node identifiers must be unique.
-        2. Every relation source must exist.
-        3. Every relation target must exist.
-        4. Canonical relation signatures must be unique.
-        """
-
-        node_ids = [
-            node.id
-            for node in self.nodes
-        ]
-
-        if len(node_ids) != len(set(node_ids)):
-            raise ValueError(
-                "Canonical architecture contains duplicate node identifiers."
-            )
-
-        known_nodes = set(node_ids)
-
-        relation_signatures: set[
-            tuple[str, RelationType, str]
-        ] = set()
-
-        for relation in self.relations:
-            if relation.source not in known_nodes:
-                raise ValueError(
-                    "Relation references unknown source node: "
-                    f"{relation.source!r}"
-                )
-
-            if relation.target not in known_nodes:
-                raise ValueError(
-                    "Relation references unknown target node: "
-                    f"{relation.target!r}"
-                )
-
-            if relation.signature in relation_signatures:
-                raise ValueError(
-                    "Canonical architecture contains duplicate relation: "
-                    f"{relation.source} "
-                    f"{relation.type.value} "
-                    f"{relation.target}"
-                )
-
-            relation_signatures.add(
-                relation.signature
-            )
+    def validate_and_normalize_graph(
+        self,
+    ) -> ArchitectureGraph:
+        self._validate_unique_nodes()
+        self._validate_edge_endpoints()
+        self._normalize_edges()
+        self._sort_graph()
 
         return self
 
+    def _validate_unique_nodes(self) -> None:
+        seen: set[str] = set()
 
-# =============================================================================
-# Canonical Architecture Graph
-# =============================================================================
+        for node in self.nodes:
+            if node.id in seen:
+                raise ValueError(
+                    f"Duplicate architecture node id: '{node.id}'"
+                )
 
+            seen.add(node.id)
 
-class CanonicalArchitectureGraph:
-    """
-    Runtime representation of the Canonical Architecture Graph.
+    def _validate_edge_endpoints(self) -> None:
+        node_ids = {
+            node.id
+            for node in self.nodes
+        }
 
-    Internally NetworkX MultiDiGraph is used.
+        for edge in self.edges:
+            if edge.source not in node_ids:
+                raise ValueError(
+                    f"Edge source '{edge.source}' does not exist "
+                    "in the architecture graph."
+                )
 
-    MultiDiGraph is required because the same source-target node pair may
-    contain multiple architectural relation types.
+            if edge.target not in node_ids:
+                raise ValueError(
+                    f"Edge target '{edge.target}' does not exist "
+                    "in the architecture graph."
+                )
 
-    Example:
+    def _normalize_edges(self) -> None:
+        merged: dict[
+            tuple[str, str, RelationType, str | None],
+            ArchitectureEdge,
+        ] = {}
 
-        gateway --ROUTES_TO--> service
-        gateway --CALLS-----> service
+        for edge in self.edges:
+            identity = edge.identity
 
-    NetworkX remains an implementation detail and is not exposed directly.
-    """
+            if identity not in merged:
+                merged[identity] = edge.model_copy(deep=True)
+                continue
 
-    def __init__(
-        self,
-        system_id: str,
-        metadata: dict[str, Any] | None = None,
-    ) -> None:
-        self._system_id = _validate_identifier(system_id)
+            merged[identity] = merged[identity].merge_with(edge)
 
-        self._metadata = copy.deepcopy(
-            metadata or {}
+        # IMPORTANT:
+        # Do not use:
+        #
+        #     self.edges = ...
+        #
+        # inside a model validator when validate_assignment=True.
+        # That would trigger model validation recursively.
+        object.__setattr__(
+            self,
+            "edges",
+            list(merged.values()),
         )
 
-        self._graph = nx.MultiDiGraph()
-
-    # =========================================================================
-    # Properties
-    # =========================================================================
-
-    @property
-    def system_id(self) -> str:
-        """
-        Return case-system identifier.
-        """
-
-        return self._system_id
-
-    @property
-    def node_count(self) -> int:
-        """
-        Return number of canonical architecture nodes.
-        """
-
-        return self._graph.number_of_nodes()
-
-    @property
-    def relation_count(self) -> int:
-        """
-        Return number of canonical architecture relations.
-        """
-
-        return self._graph.number_of_edges()
-
-    @property
-    def metadata(self) -> dict[str, Any]:
-        """
-        Return a defensive copy of graph metadata.
-        """
-
-        return copy.deepcopy(
-            self._metadata
+    def _sort_graph(self) -> None:
+        self.nodes.sort(
+            key=lambda node: node.id
         )
 
-    # =========================================================================
-    # Node Operations
-    # =========================================================================
+        self.edges.sort(
+            key=lambda edge: (
+                edge.source,
+                edge.target,
+                edge.relation.value,
+                edge.protocol or "",
+            )
+        )
 
     def add_node(
         self,
         node: ArchitectureNode,
     ) -> None:
-        """
-        Add a node to the canonical graph.
+        existing = self.get_node(node.id)
 
-        Duplicate identifiers are rejected.
-        """
+        if existing is not None:
+            if existing != node:
+                raise ValueError(
+                    f"Node '{node.id}' already exists "
+                    "with different attributes."
+                )
 
-        if self._graph.has_node(node.id):
-            raise DuplicateNodeError(
-                f"Node already exists: {node.id!r}"
-            )
+            return
 
-        stored_node = node.model_copy(
-            deep=True
-        )
+        self.nodes.append(node)
 
-        self._graph.add_node(
-            stored_node.id,
-            model=stored_node,
-        )
-
-    def has_node(
-        self,
-        node_id: str,
-    ) -> bool:
-        """
-        Return True when a node exists.
-        """
-
-        return self._graph.has_node(
-            node_id
-        )
+        self._sort_graph()
 
     def get_node(
         self,
         node_id: str,
-    ) -> ArchitectureNode:
-        """
-        Retrieve a node by canonical identifier.
-        """
+    ) -> ArchitectureNode | None:
+        for node in self.nodes:
+            if node.id == node_id:
+                return node
 
-        if not self._graph.has_node(node_id):
-            raise UnknownNodeError(
-                f"Unknown node: {node_id!r}"
-            )
+        return None
 
-        node: ArchitectureNode = (
-            self._graph.nodes[node_id]["model"]
-        )
-
-        return node.model_copy(
-            deep=True
-        )
-
-    def remove_node(
+    def add_edge(
         self,
-        node_id: str,
+        edge: ArchitectureEdge,
     ) -> None:
-        """
-        Remove a canonical node.
+        node_ids = {
+            node.id
+            for node in self.nodes
+        }
 
-        NetworkX automatically removes incident relations.
-
-        This capability will later be used by controlled mutation operators.
-        """
-
-        if not self._graph.has_node(node_id):
-            raise UnknownNodeError(
-                f"Unknown node: {node_id!r}"
+        if edge.source not in node_ids:
+            raise ValueError(
+                f"Edge source '{edge.source}' does not exist."
             )
 
-        self._graph.remove_node(
-            node_id
-        )
+        if edge.target not in node_ids:
+            raise ValueError(
+                f"Edge target '{edge.target}' does not exist."
+            )
 
-    # =========================================================================
-    # Relation Operations
-    # =========================================================================
+        for index, existing in enumerate(self.edges):
+            if existing.identity == edge.identity:
+                self.edges[index] = existing.merge_with(edge)
+                self._sort_graph()
+                return
 
-    def add_relation(
+        self.edges.append(edge)
+
+        self._sort_graph()
+
+    def find_edges(
         self,
-        relation: ArchitectureRelation,
-    ) -> None:
-        """
-        Add a directed architectural relation.
-
-        Source and target nodes must already exist.
-
-        Relation identity is:
-
-            source + relation type + target
-        """
-
-        if not self._graph.has_node(
-            relation.source
-        ):
-            raise UnknownNodeError(
-                f"Unknown source node: {relation.source!r}"
-            )
-
-        if not self._graph.has_node(
-            relation.target
-        ):
-            raise UnknownNodeError(
-                f"Unknown target node: {relation.target!r}"
-            )
-
-        edge_key = relation.type.value
-
-        if self._graph.has_edge(
-            relation.source,
-            relation.target,
-            key=edge_key,
-        ):
-            raise DuplicateRelationError(
-                "Relation already exists: "
-                f"{relation.source} "
-                f"{relation.type.value} "
-                f"{relation.target}"
-            )
-
-        stored_relation = relation.model_copy(
-            deep=True
+        *,
+        source: str | None = None,
+        target: str | None = None,
+        relation: RelationType | None = None,
+        protocol: str | None = None,
+    ) -> list[ArchitectureEdge]:
+        normalized_protocol = (
+            protocol.strip().lower()
+            if protocol is not None
+            else None
         )
 
-        self._graph.add_edge(
-            stored_relation.source,
-            stored_relation.target,
-            key=edge_key,
-            model=stored_relation,
-        )
+        matches: list[ArchitectureEdge] = []
 
-    def has_relation(
+        for edge in self.edges:
+            if (
+                source is not None
+                and edge.source != source
+            ):
+                continue
+
+            if (
+                target is not None
+                and edge.target != target
+            ):
+                continue
+
+            if (
+                relation is not None
+                and edge.relation != relation
+            ):
+                continue
+
+            if (
+                protocol is not None
+                and edge.protocol != normalized_protocol
+            ):
+                continue
+
+            matches.append(edge)
+
+        return matches
+
+    def has_edge(
         self,
+        *,
         source: str,
-        relation_type: RelationType,
         target: str,
+        relation: RelationType,
+        protocol: str | None = None,
     ) -> bool:
-        """
-        Return True when the canonical relation exists.
-        """
-
-        return self._graph.has_edge(
-            source,
-            target,
-            key=relation_type.value,
+        return bool(
+            self.find_edges(
+                source=source,
+                target=target,
+                relation=relation,
+                protocol=protocol,
+            )
         )
 
-    def get_relation(
+    def remove_edges(
         self,
+        *,
         source: str,
-        relation_type: RelationType,
         target: str,
-    ) -> ArchitectureRelation:
+        relation: RelationType,
+        protocol: str | None = None,
+    ) -> int:
         """
-        Retrieve a canonical architecture relation.
+        Removes matching architectural relations.
+
+        If protocol is None, every matching protocol is removed.
         """
 
-        if not self.has_relation(
-            source=source,
-            relation_type=relation_type,
-            target=target,
-        ):
-            raise UnknownRelationError(
-                "Unknown relation: "
-                f"{source} "
-                f"{relation_type.value} "
-                f"{target}"
+        normalized_protocol = (
+            protocol.strip().lower()
+            if protocol is not None
+            else None
+        )
+
+        remaining: list[ArchitectureEdge] = []
+
+        removed = 0
+
+        for edge in self.edges:
+            matches = (
+                edge.source == source
+                and edge.target == target
+                and edge.relation == relation
+                and (
+                    protocol is None
+                    or edge.protocol == normalized_protocol
+                )
             )
 
-        relation: ArchitectureRelation = (
-            self._graph.edges[
-                source,
-                target,
-                relation_type.value,
-            ]["model"]
+            if matches:
+                removed += 1
+                continue
+
+            remaining.append(edge)
+
+        # Internal controlled mutation:
+        # bypass validate_assignment to avoid unnecessary model recursion.
+        object.__setattr__(
+            self,
+            "edges",
+            remaining,
         )
 
-        return relation.model_copy(
-            deep=True
-        )
+        self._sort_graph()
 
-    def remove_relation(
+        return removed
+
+    def to_networkx(
         self,
-        source: str,
-        relation_type: RelationType,
-        target: str,
-    ) -> None:
+    ) -> nx.MultiDiGraph[str]:
         """
-        Remove one canonical architecture relation.
-        """
+        Converts the canonical model into a NetworkX MultiDiGraph.
 
-        if not self.has_relation(
-            source=source,
-            relation_type=relation_type,
-            target=target,
-        ):
-            raise UnknownRelationError(
-                "Unknown relation: "
-                f"{source} "
-                f"{relation_type.value} "
-                f"{target}"
-            )
-
-        self._graph.remove_edge(
-            source,
-            target,
-            key=relation_type.value,
-        )
-
-    # =========================================================================
-    # Collections
-    # =========================================================================
-
-    def nodes(
-        self,
-    ) -> tuple[ArchitectureNode, ...]:
-        """
-        Return nodes in deterministic order.
-
-        Deterministic ordering is important for repeatable experiments.
+        Node identifiers are always strings.
         """
 
-        nodes = [
-            data["model"].model_copy(deep=True)
-            for _, data
-            in self._graph.nodes(data=True)
-        ]
+        graph: nx.MultiDiGraph[str] = nx.MultiDiGraph()
 
-        nodes.sort(
-            key=lambda node: node.id
-        )
-
-        return tuple(nodes)
-
-    def relations(
-        self,
-    ) -> tuple[ArchitectureRelation, ...]:
-        """
-        Return relations in deterministic order.
-        """
-
-        relations = [
-            data["model"].model_copy(deep=True)
-            for _, _, _, data
-            in self._graph.edges(
-                keys=True,
-                data=True,
-            )
-        ]
-
-        relations.sort(
-            key=lambda relation: (
-                relation.source,
-                relation.type.value,
-                relation.target,
+        graph.graph.update(
+            self.metadata.model_dump(
+                mode="json",
+                exclude_none=True,
             )
         )
 
-        return tuple(relations)
+        graph.graph["schema_version"] = self.schema_version
 
-    # =========================================================================
-    # Serialization Model
-    # =========================================================================
+        for node in self.nodes:
+            node_data = node.model_dump(
+                mode="json",
+                exclude={"id"},
+                exclude_none=True,
+            )
 
-    def to_model(
-        self,
-    ) -> CanonicalArchitectureModel:
-        """
-        Convert graph into its serializable canonical model.
-        """
+            graph.add_node(
+                node.id,
+                **node_data,
+            )
 
-        return CanonicalArchitectureModel(
-            system_id=self.system_id,
-            nodes=list(self.nodes()),
-            relations=list(self.relations()),
-            metadata=self.metadata,
-        )
+        for edge in self.edges:
+            edge_data = edge.model_dump(
+                mode="json",
+                exclude={
+                    "source",
+                    "target",
+                    "relation",
+                },
+                exclude_none=True,
+            )
 
-    @classmethod
-    def from_model(
-        cls,
-        model: CanonicalArchitectureModel,
-    ) -> CanonicalArchitectureGraph:
-        """
-        Build a graph from a serialized canonical model.
-        """
+            edge_data["relation"] = edge.relation.value
+            edge_data["evidence_count"] = len(edge.evidence)
 
-        graph = cls(
-            system_id=model.system_id,
-            metadata=copy.deepcopy(
-                model.metadata
-            ),
-        )
-
-        for node in model.nodes:
-            graph.add_node(node)
-
-        for relation in model.relations:
-            graph.add_relation(relation)
+            graph.add_edge(
+                edge.source,
+                edge.target,
+                key=edge.networkx_key,
+                **edge_data,
+            )
 
         return graph
 
-    # =========================================================================
-    # Controlled Mutation Support
-    # =========================================================================
-
-    def copy(
+    def to_yaml(
         self,
-    ) -> CanonicalArchitectureGraph:
-        """
-        Create an independent graph copy.
+        path: str | Path,
+    ) -> None:
+        target = Path(path)
 
-        Controlled architectural mutations must always operate on a copy of
-        the baseline graph rather than modifying the baseline in-place.
-        """
-
-        canonical_model = self.to_model().model_copy(
-            deep=True
+        target.parent.mkdir(
+            parents=True,
+            exist_ok=True,
         )
 
-        return CanonicalArchitectureGraph.from_model(
-            canonical_model
+        payload = self.model_dump(
+            mode="json",
+            exclude_none=True,
         )
 
-    # =========================================================================
-    # NetworkX Interoperability
-    # =========================================================================
+        with target.open(
+            "w",
+            encoding="utf-8",
+        ) as file:
+            yaml.safe_dump(
+                payload,
+                file,
+                sort_keys=False,
+                allow_unicode=True,
+            )
 
-    def as_networkx(
+    @classmethod
+    def from_yaml(
+        cls,
+        path: str | Path,
+    ) -> ArchitectureGraph:
+        source = Path(path)
+
+        with source.open(
+            "r",
+            encoding="utf-8",
+        ) as file:
+            payload = yaml.safe_load(file)
+
+        if not isinstance(payload, dict):
+            raise ValueError(
+                f"Architecture graph YAML '{source}' "
+                "must contain a mapping at the root level."
+            )
+
+        return cls.model_validate(payload)
+
+    def to_json(
         self,
-    ) -> nx.MultiDiGraph:
-        """
-        Return a defensive copy of the internal NetworkX graph.
+        path: str | Path,
+    ) -> None:
+        target = Path(path)
 
-        Returning a copy prevents consumers from bypassing graph invariants.
-        """
+        target.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-        return copy.deepcopy(
-            self._graph
+        target.write_text(
+            self.model_dump_json(
+                indent=2,
+                exclude_none=True,
+            ),
+            encoding="utf-8",
+        )
+
+    @classmethod
+    def from_json(
+        cls,
+        path: str | Path,
+    ) -> ArchitectureGraph:
+        source = Path(path)
+
+        return cls.model_validate_json(
+            source.read_text(
+                encoding="utf-8"
+            )
         )

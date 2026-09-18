@@ -1,202 +1,208 @@
+from pathlib import Path
+
+import networkx as nx
 import pytest
 from pydantic import ValidationError
 
-from archdrift.model import (
+from archdrift.model.evidence import EvidenceRecord, EvidenceType
+from archdrift.model.graph import (
+    ArchitectureEdge,
+    ArchitectureGraph,
     ArchitectureNode,
-    ArchitectureRelation,
-    CanonicalArchitectureGraph,
-    CanonicalArchitectureModel,
-    DuplicateNodeError,
-    DuplicateRelationError,
+    GraphMetadata,
+    GraphView,
     NodeType,
     RelationType,
-    UnknownNodeError,
-    UnknownRelationError,
 )
 
-# =============================================================================
-# Test Fixtures / Helpers
-# =============================================================================
 
-
-def create_astronomy_graph() -> CanonicalArchitectureGraph:
-    """
-    Create a minimal Astronomy Shop graph used by WP-01 tests.
-    """
-
-    graph = CanonicalArchitectureGraph(
-        system_id="astronomy-shop"
-    )
-
-    graph.add_node(
-        ArchitectureNode(
-            id="checkout",
-            type=NodeType.SERVICE,
-            name="Checkout Service",
-        )
-    )
-
-    graph.add_node(
-        ArchitectureNode(
-            id="recommendation",
-            type=NodeType.SERVICE,
-            name="Recommendation Service",
-        )
-    )
-
-    return graph
-
-
-# =============================================================================
-# Enum Tests
-# =============================================================================
-
-
-def test_node_types_match_canonical_vocabulary() -> None:
-    assert set(NodeType) == {
-        NodeType.SERVICE,
-        NodeType.DATASTORE,
-        NodeType.BROKER,
-        NodeType.GATEWAY,
-        NodeType.REGISTRY,
-        NodeType.EXTERNAL,
-    }
-
-
-def test_relation_types_match_canonical_vocabulary() -> None:
-    assert set(RelationType) == {
-        RelationType.CALLS,
-        RelationType.READS_FROM,
-        RelationType.WRITES_TO,
-        RelationType.PUBLISHES_TO,
-        RelationType.SUBSCRIBES_TO,
-        RelationType.ROUTES_TO,
-        RelationType.DISCOVERS_VIA,
-        RelationType.EXPOSES_TO,
-    }
-
-
-# =============================================================================
-# ArchitectureNode Tests
-# =============================================================================
-
-
-def test_architecture_node_can_be_created() -> None:
-    node = ArchitectureNode(
-        id="checkout",
-        type=NodeType.SERVICE,
-        name="Checkout Service",
-    )
-
-    assert node.id == "checkout"
-    assert node.type == NodeType.SERVICE
-    assert node.name == "Checkout Service"
-
-
-def test_architecture_node_identifier_is_trimmed() -> None:
-    node = ArchitectureNode(
-        id="checkout",
-        type=NodeType.SERVICE,
-    )
-
-    assert node.id == "checkout"
-
-
-def test_architecture_node_rejects_blank_identifier() -> None:
-    with pytest.raises(ValidationError):
-        ArchitectureNode(
-            id="   ",
-            type=NodeType.SERVICE,
-        )
-
-
-def test_architecture_node_rejects_identifier_with_whitespace() -> None:
-    with pytest.raises(ValidationError):
-        ArchitectureNode(
-            id="checkout service",
-            type=NodeType.SERVICE,
-        )
-
-
-def test_architecture_node_rejects_unknown_fields() -> None:
-    with pytest.raises(ValidationError):
-        ArchitectureNode(
-            id="checkout",
-            type=NodeType.SERVICE,
-            unknown_field="invalid",
-        )
-
-
-# =============================================================================
-# ArchitectureRelation Tests
-# =============================================================================
-
-
-def test_relation_can_be_created() -> None:
-    relation = ArchitectureRelation(
-        source="checkout",
-        target="recommendation",
-        type=RelationType.CALLS,
-    )
-
-    assert relation.source == "checkout"
-    assert relation.target == "recommendation"
-    assert relation.type == RelationType.CALLS
-
-
-def test_relation_signature_is_canonical_triplet() -> None:
-    relation = ArchitectureRelation(
-        source="checkout",
-        target="recommendation",
-        type=RelationType.CALLS,
-    )
-
-    assert relation.signature == (
-        "checkout",
-        RelationType.CALLS,
-        "recommendation",
-    )
-
-
-# =============================================================================
-# CanonicalArchitectureModel Tests
-# =============================================================================
-
-
-def test_canonical_model_accepts_valid_graph() -> None:
-    model = CanonicalArchitectureModel(
-        system_id="astronomy-shop",
+def build_graph() -> ArchitectureGraph:
+    return ArchitectureGraph(
+        metadata=GraphMetadata(
+            system_id="test-system",
+            variant="baseline",
+            revision="abc123",
+            view=GraphView.RUNTIME,
+        ),
         nodes=[
             ArchitectureNode(
                 id="checkout",
                 type=NodeType.SERVICE,
             ),
             ArchitectureNode(
-                id="recommendation",
+                id="payment",
                 type=NodeType.SERVICE,
             ),
         ],
-        relations=[
-            ArchitectureRelation(
-                source="checkout",
-                target="recommendation",
-                type=RelationType.CALLS,
-            )
-        ],
+        edges=[],
     )
 
-    assert model.system_id == "astronomy-shop"
-    assert len(model.nodes) == 2
-    assert len(model.relations) == 1
+
+def test_graph_can_be_created() -> None:
+    graph = build_graph()
+
+    assert graph.metadata.system_id == "test-system"
+    assert len(graph.nodes) == 2
+    assert graph.edges == []
 
 
-def test_canonical_model_rejects_duplicate_nodes() -> None:
-    with pytest.raises(
-        ValidationError,
-        match="duplicate node identifiers",
-    ):
-        CanonicalArchitectureModel(
-            system_id="astronomy-shop",
+def test_add_edge() -> None:
+    graph = build_graph()
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+        )
+    )
+
+    assert len(graph.edges) == 1
+
+    assert graph.has_edge(
+        source="checkout",
+        target="payment",
+        relation=RelationType.CALLS,
+        protocol="grpc",
+    )
+
+
+def test_protocol_is_normalized() -> None:
+    edge = ArchitectureEdge(
+        source="checkout",
+        target="payment",
+        relation=RelationType.CALLS,
+        protocol=" GRPC ",
+    )
+
+    assert edge.protocol == "grpc"
+
+
+def test_different_protocols_are_distinct_edges() -> None:
+    graph = build_graph()
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="http",
+        )
+    )
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+        )
+    )
+
+    assert len(graph.edges) == 2
+
+
+def test_duplicate_edges_merge_evidence() -> None:
+    graph = build_graph()
+
+    deployment_evidence = EvidenceRecord(
+        type=EvidenceType.DEPLOYMENT_CONFIG,
+        artifact="compose.yaml",
+        locator="PAYMENT_ADDR",
+    )
+
+    runtime_evidence = EvidenceRecord(
+        type=EvidenceType.RUNTIME_TRACE,
+        artifact="trace.json",
+        locator="trace-001",
+    )
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+            evidence=[deployment_evidence],
+        )
+    )
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+            evidence=[runtime_evidence],
+        )
+    )
+
+    assert len(graph.edges) == 1
+    assert len(graph.edges[0].evidence) == 2
+
+
+def test_duplicate_evidence_is_removed() -> None:
+    graph = build_graph()
+
+    evidence = EvidenceRecord(
+        type=EvidenceType.RUNTIME_TRACE,
+        artifact="trace.json",
+        locator="trace-001",
+    )
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+            evidence=[evidence],
+        )
+    )
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+            evidence=[evidence],
+        )
+    )
+
+    assert len(graph.edges) == 1
+    assert len(graph.edges[0].evidence) == 1
+
+
+def test_graph_rejects_edge_with_unknown_source() -> None:
+    with pytest.raises(ValidationError):
+        ArchitectureGraph(
+            metadata=GraphMetadata(
+                system_id="test-system",
+            ),
+            nodes=[
+                ArchitectureNode(
+                    id="payment",
+                    type=NodeType.SERVICE,
+                ),
+            ],
+            edges=[
+                ArchitectureEdge(
+                    source="unknown",
+                    target="payment",
+                    relation=RelationType.CALLS,
+                )
+            ],
+        )
+
+
+def test_graph_rejects_duplicate_node_ids() -> None:
+    with pytest.raises(ValidationError):
+        ArchitectureGraph(
+            metadata=GraphMetadata(
+                system_id="test-system",
+            ),
             nodes=[
                 ArchitectureNode(
                     id="checkout",
@@ -204,450 +210,96 @@ def test_canonical_model_rejects_duplicate_nodes() -> None:
                 ),
                 ArchitectureNode(
                     id="checkout",
-                    type=NodeType.SERVICE,
+                    type=NodeType.GATEWAY,
                 ),
             ],
+            edges=[],
         )
 
 
-def test_canonical_model_rejects_unknown_relation_source() -> None:
-    with pytest.raises(
-        ValidationError,
-        match="unknown source node",
-    ):
-        CanonicalArchitectureModel(
-            system_id="astronomy-shop",
-            nodes=[
-                ArchitectureNode(
-                    id="recommendation",
-                    type=NodeType.SERVICE,
-                ),
-            ],
-            relations=[
-                ArchitectureRelation(
-                    source="checkout",
-                    target="recommendation",
-                    type=RelationType.CALLS,
-                ),
-            ],
-        )
+def test_remove_edge() -> None:
+    graph = build_graph()
 
-
-def test_canonical_model_rejects_unknown_relation_target() -> None:
-    with pytest.raises(
-        ValidationError,
-        match="unknown target node",
-    ):
-        CanonicalArchitectureModel(
-            system_id="astronomy-shop",
-            nodes=[
-                ArchitectureNode(
-                    id="checkout",
-                    type=NodeType.SERVICE,
-                ),
-            ],
-            relations=[
-                ArchitectureRelation(
-                    source="checkout",
-                    target="recommendation",
-                    type=RelationType.CALLS,
-                ),
-            ],
-        )
-
-
-def test_canonical_model_rejects_duplicate_relations() -> None:
-    checkout = ArchitectureNode(
-        id="checkout",
-        type=NodeType.SERVICE,
-    )
-
-    recommendation = ArchitectureNode(
-        id="recommendation",
-        type=NodeType.SERVICE,
-    )
-
-    relation = ArchitectureRelation(
-        source="checkout",
-        target="recommendation",
-        type=RelationType.CALLS,
-    )
-
-    with pytest.raises(
-        ValidationError,
-        match="duplicate relation",
-    ):
-        CanonicalArchitectureModel(
-            system_id="astronomy-shop",
-            nodes=[
-                checkout,
-                recommendation,
-            ],
-            relations=[
-                relation,
-                relation,
-            ],
-        )
-
-
-# =============================================================================
-# CanonicalArchitectureGraph Node Tests
-# =============================================================================
-
-
-def test_graph_adds_nodes() -> None:
-    graph = create_astronomy_graph()
-
-    assert graph.node_count == 2
-    assert graph.has_node("checkout")
-    assert graph.has_node("recommendation")
-
-
-def test_graph_can_get_node() -> None:
-    graph = create_astronomy_graph()
-
-    node = graph.get_node(
-        "checkout"
-    )
-
-    assert node.id == "checkout"
-    assert node.type == NodeType.SERVICE
-
-
-def test_graph_rejects_duplicate_node() -> None:
-    graph = create_astronomy_graph()
-
-    with pytest.raises(DuplicateNodeError):
-        graph.add_node(
-            ArchitectureNode(
-                id="checkout",
-                type=NodeType.SERVICE,
-            )
-        )
-
-
-def test_graph_rejects_unknown_node_lookup() -> None:
-    graph = create_astronomy_graph()
-
-    with pytest.raises(UnknownNodeError):
-        graph.get_node(
-            "unknown-service"
-        )
-
-
-def test_graph_can_remove_node() -> None:
-    graph = create_astronomy_graph()
-
-    graph.remove_node(
-        "recommendation"
-    )
-
-    assert graph.node_count == 1
-    assert not graph.has_node(
-        "recommendation"
-    )
-
-
-# =============================================================================
-# CanonicalArchitectureGraph Relation Tests
-# =============================================================================
-
-
-def test_graph_adds_relation() -> None:
-    graph = create_astronomy_graph()
-
-    relation = ArchitectureRelation(
-        source="checkout",
-        target="recommendation",
-        type=RelationType.CALLS,
-    )
-
-    graph.add_relation(relation)
-
-    assert graph.relation_count == 1
-
-    assert graph.has_relation(
-        source="checkout",
-        relation_type=RelationType.CALLS,
-        target="recommendation",
-    )
-
-
-def test_graph_rejects_relation_with_unknown_source() -> None:
-    graph = create_astronomy_graph()
-
-    with pytest.raises(UnknownNodeError):
-        graph.add_relation(
-            ArchitectureRelation(
-                source="unknown-service",
-                target="recommendation",
-                type=RelationType.CALLS,
-            )
-        )
-
-
-def test_graph_rejects_relation_with_unknown_target() -> None:
-    graph = create_astronomy_graph()
-
-    with pytest.raises(UnknownNodeError):
-        graph.add_relation(
-            ArchitectureRelation(
-                source="checkout",
-                target="unknown-service",
-                type=RelationType.CALLS,
-            )
-        )
-
-
-def test_graph_rejects_duplicate_relation() -> None:
-    graph = create_astronomy_graph()
-
-    relation = ArchitectureRelation(
-        source="checkout",
-        target="recommendation",
-        type=RelationType.CALLS,
-    )
-
-    graph.add_relation(relation)
-
-    with pytest.raises(
-        DuplicateRelationError
-    ):
-        graph.add_relation(relation)
-
-
-def test_graph_supports_multiple_relation_types_between_same_nodes() -> None:
-    graph = create_astronomy_graph()
-
-    graph.add_relation(
-        ArchitectureRelation(
+    graph.add_edge(
+        ArchitectureEdge(
             source="checkout",
-            target="recommendation",
-            type=RelationType.CALLS,
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
         )
     )
 
-    graph.add_relation(
-        ArchitectureRelation(
-            source="checkout",
-            target="recommendation",
-            type=RelationType.EXPOSES_TO,
-        )
-    )
-
-    assert graph.relation_count == 2
-
-
-def test_graph_can_get_relation() -> None:
-    graph = create_astronomy_graph()
-
-    graph.add_relation(
-        ArchitectureRelation(
-            source="checkout",
-            target="recommendation",
-            type=RelationType.CALLS,
-        )
-    )
-
-    relation = graph.get_relation(
+    removed = graph.remove_edges(
         source="checkout",
-        relation_type=RelationType.CALLS,
-        target="recommendation",
+        target="payment",
+        relation=RelationType.CALLS,
+        protocol="grpc",
     )
 
-    assert relation.signature == (
+    assert removed == 1
+    assert graph.edges == []
+
+
+def test_to_networkx_returns_multidigraph() -> None:
+    graph = build_graph()
+
+    graph.add_edge(
+        ArchitectureEdge(
+            source="checkout",
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
+        )
+    )
+
+    nx_graph = graph.to_networkx()
+
+    assert isinstance(nx_graph, nx.MultiDiGraph)
+
+    assert nx_graph.has_edge(
         "checkout",
-        RelationType.CALLS,
-        "recommendation",
+        "payment",
+        key="CALLS:grpc",
     )
 
 
-def test_graph_can_remove_relation() -> None:
-    graph = create_astronomy_graph()
+def test_yaml_round_trip(tmp_path: Path) -> None:
+    graph = build_graph()
 
-    graph.add_relation(
-        ArchitectureRelation(
+    graph.add_edge(
+        ArchitectureEdge(
             source="checkout",
-            target="recommendation",
-            type=RelationType.CALLS,
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
         )
     )
 
-    graph.remove_relation(
-        source="checkout",
-        relation_type=RelationType.CALLS,
-        target="recommendation",
-    )
+    output = tmp_path / "graph.yaml"
 
-    assert graph.relation_count == 0
+    graph.to_yaml(output)
+
+    loaded = ArchitectureGraph.from_yaml(output)
+
+    assert loaded == graph
 
 
-def test_graph_rejects_unknown_relation_removal() -> None:
-    graph = create_astronomy_graph()
+def test_json_round_trip(tmp_path: Path) -> None:
+    graph = build_graph()
 
-    with pytest.raises(
-        UnknownRelationError
-    ):
-        graph.remove_relation(
+    graph.add_edge(
+        ArchitectureEdge(
             source="checkout",
-            relation_type=RelationType.CALLS,
-            target="recommendation",
-        )
-
-
-# =============================================================================
-# Determinism Tests
-# =============================================================================
-
-
-def test_nodes_are_returned_in_deterministic_order() -> None:
-    graph = CanonicalArchitectureGraph(
-        system_id="test-system"
-    )
-
-    graph.add_node(
-        ArchitectureNode(
-            id="z-service",
-            type=NodeType.SERVICE,
+            target="payment",
+            relation=RelationType.CALLS,
+            protocol="grpc",
         )
     )
 
-    graph.add_node(
-        ArchitectureNode(
-            id="a-service",
-            type=NodeType.SERVICE,
-        )
-    )
+    output = tmp_path / "graph.json"
 
-    node_ids = [
-        node.id
-        for node in graph.nodes()
-    ]
+    graph.to_json(output)
 
-    assert node_ids == [
-        "a-service",
-        "z-service",
-    ]
+    loaded = ArchitectureGraph.from_json(output)
 
-
-def test_relations_are_returned_in_deterministic_order() -> None:
-    graph = CanonicalArchitectureGraph(
-        system_id="test-system"
-    )
-
-    for node_id in [
-        "service-a",
-        "service-b",
-        "service-c",
-    ]:
-        graph.add_node(
-            ArchitectureNode(
-                id=node_id,
-                type=NodeType.SERVICE,
-            )
-        )
-
-    graph.add_relation(
-        ArchitectureRelation(
-            source="service-b",
-            target="service-c",
-            type=RelationType.CALLS,
-        )
-    )
-
-    graph.add_relation(
-        ArchitectureRelation(
-            source="service-a",
-            target="service-b",
-            type=RelationType.CALLS,
-        )
-    )
-
-    signatures = [
-        relation.signature
-        for relation in graph.relations()
-    ]
-
-    assert signatures == [
-        (
-            "service-a",
-            RelationType.CALLS,
-            "service-b",
-        ),
-        (
-            "service-b",
-            RelationType.CALLS,
-            "service-c",
-        ),
-    ]
-
-
-# =============================================================================
-# Serialization / Reconstruction Tests
-# =============================================================================
-
-
-def test_graph_round_trip_preserves_architecture() -> None:
-    graph = create_astronomy_graph()
-
-    graph.add_relation(
-        ArchitectureRelation(
-            source="checkout",
-            target="recommendation",
-            type=RelationType.CALLS,
-        )
-    )
-
-    model = graph.to_model()
-
-    restored = CanonicalArchitectureGraph.from_model(
-        model
-    )
-
-    assert restored.system_id == graph.system_id
-    assert restored.node_count == graph.node_count
-    assert restored.relation_count == graph.relation_count
-
-    assert restored.has_relation(
-        source="checkout",
-        relation_type=RelationType.CALLS,
-        target="recommendation",
-    )
-
-
-# =============================================================================
-# Baseline / Mutant Isolation Tests
-# =============================================================================
-
-
-def test_graph_copy_is_independent_from_baseline() -> None:
-    baseline = create_astronomy_graph()
-
-    mutant = baseline.copy()
-
-    mutant.add_relation(
-        ArchitectureRelation(
-            source="checkout",
-            target="recommendation",
-            type=RelationType.CALLS,
-        )
-    )
-
-    assert baseline.relation_count == 0
-    assert mutant.relation_count == 1
-
-
-def test_networkx_projection_cannot_mutate_canonical_graph() -> None:
-    graph = create_astronomy_graph()
-
-    networkx_graph = graph.as_networkx()
-
-    networkx_graph.add_node(
-        "rogue-service"
-    )
-
-    assert "rogue-service" in networkx_graph
-
-    assert not graph.has_node(
-        "rogue-service"
-    )
+    assert loaded == graph

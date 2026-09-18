@@ -1,17 +1,21 @@
 Metadata-Version: 2.4
 Name: multi-evidence-conformance
 Version: 0.1.0
-Summary: Multi-Evidence Architecture Conformance research framework
-Requires-Python: >=3.11
+Summary: Research prototype for multi-evidence software architecture conformance analysis.
+Author: Gokhan Yurtalan
+License: MIT
+Requires-Python: >=3.12
 Description-Content-Type: text/markdown
-Requires-Dist: pydantic<3.0,>=2.8
-Requires-Dist: networkx<4.0,>=3.3
+Requires-Dist: pydantic<3.0,>=2.13.5
 Requires-Dist: PyYAML<7.0,>=6.0
+Requires-Dist: networkx<4.0,>=3.6.1
 Provides-Extra: dev
 Requires-Dist: pytest<10.0,>=8.0; extra == "dev"
-Requires-Dist: pytest-cov<8.0,>=5.0; extra == "dev"
-Requires-Dist: ruff<1.0,>=0.8; extra == "dev"
-Requires-Dist: mypy<2.0,>=1.10; extra == "dev"
+Requires-Dist: pytest-cov<8.0,>=6.0; extra == "dev"
+Requires-Dist: ruff<1.0,>=0.12; extra == "dev"
+Requires-Dist: mypy<3.0,>=1.18; extra == "dev"
+Requires-Dist: types-PyYAML>=6.0; extra == "dev"
+Requires-Dist: types-networkx>=3.6.1; extra == "dev"
 
 # Multi-Evidence Architecture Conformance
 
