@@ -21,6 +21,8 @@ dependencies = [
     "networkx>=3.6.1,<4.0",
 ]
 
+[project.scripts]
+archdrift = "archdrift.cli:main"
 
 [project.optional-dependencies]
 dev = [

@@ -1,18 +1,19 @@
-from pathlib import Path
-
 import networkx as nx
 import pytest
 from pydantic import ValidationError
 
-from archdrift.model.evidence import EvidenceRecord, EvidenceType
-from archdrift.model.graph import (
-    ArchitectureEdge,
+from archdrift.model import (
     ArchitectureGraph,
     ArchitectureNode,
+    ArchitectureRelation,
+    DuplicateNodeError,
+    DuplicateRelationError,
     GraphMetadata,
-    GraphView,
+    GraphRole,
     NodeType,
     RelationType,
+    UnknownNodeError,
+    UnknownRelationError,
 )
 
 
@@ -20,11 +21,10 @@ def build_graph() -> ArchitectureGraph:
     return ArchitectureGraph(
         metadata=GraphMetadata(
             system_id="test-system",
-            variant="baseline",
+            role=GraphRole.BASELINE,
             revision="abc123",
-            view=GraphView.RUNTIME,
         ),
-        nodes=[
+        nodes=(
             ArchitectureNode(
                 id="checkout",
                 type=NodeType.SERVICE,
@@ -33,177 +33,95 @@ def build_graph() -> ArchitectureGraph:
                 id="payment",
                 type=NodeType.SERVICE,
             ),
-        ],
-        edges=[],
+        ),
     )
+
+
+def test_canonical_node_vocabulary() -> None:
+    assert set(NodeType) == {
+        NodeType.SERVICE,
+        NodeType.DATASTORE,
+        NodeType.BROKER,
+        NodeType.GATEWAY,
+        NodeType.REGISTRY,
+        NodeType.EXTERNAL,
+    }
+
+
+def test_canonical_relation_vocabulary() -> None:
+    assert set(RelationType) == {
+        RelationType.CALLS,
+        RelationType.READS_FROM,
+        RelationType.WRITES_TO,
+        RelationType.PUBLISHES_TO,
+        RelationType.SUBSCRIBES_TO,
+        RelationType.ROUTES_TO,
+        RelationType.DISCOVERS_VIA,
+        RelationType.EXPOSES_TO,
+    }
 
 
 def test_graph_can_be_created() -> None:
     graph = build_graph()
 
     assert graph.metadata.system_id == "test-system"
+    assert graph.metadata.role is GraphRole.BASELINE
     assert len(graph.nodes) == 2
-    assert graph.edges == []
+    assert graph.relations == ()
 
 
-def test_add_edge() -> None:
-    graph = build_graph()
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-        )
-    )
-
-    assert len(graph.edges) == 1
-
-    assert graph.has_edge(
+def test_relation_identity_is_canonical_triplet() -> None:
+    relation = ArchitectureRelation(
         source="checkout",
-        target="payment",
         relation=RelationType.CALLS,
-        protocol="grpc",
-    )
-
-
-def test_protocol_is_normalized() -> None:
-    edge = ArchitectureEdge(
-        source="checkout",
         target="payment",
-        relation=RelationType.CALLS,
-        protocol=" GRPC ",
     )
 
-    assert edge.protocol == "grpc"
-
-
-def test_different_protocols_are_distinct_edges() -> None:
-    graph = build_graph()
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="http",
-        )
+    assert relation.identity == (
+        "checkout",
+        RelationType.CALLS,
+        "payment",
     )
 
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-        )
-    )
 
-    assert len(graph.edges) == 2
-
-
-def test_duplicate_edges_merge_evidence() -> None:
-    graph = build_graph()
-
-    deployment_evidence = EvidenceRecord(
-        type=EvidenceType.DEPLOYMENT_CONFIG,
-        artifact="compose.yaml",
-        locator="PAYMENT_ADDR",
-    )
-
-    runtime_evidence = EvidenceRecord(
-        type=EvidenceType.RUNTIME_TRACE,
-        artifact="trace.json",
-        locator="trace-001",
-    )
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-            evidence=[deployment_evidence],
-        )
-    )
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-            evidence=[runtime_evidence],
-        )
-    )
-
-    assert len(graph.edges) == 1
-    assert len(graph.edges[0].evidence) == 2
-
-
-def test_duplicate_evidence_is_removed() -> None:
-    graph = build_graph()
-
-    evidence = EvidenceRecord(
-        type=EvidenceType.RUNTIME_TRACE,
-        artifact="trace.json",
-        locator="trace-001",
-    )
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-            evidence=[evidence],
-        )
-    )
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-            evidence=[evidence],
-        )
-    )
-
-    assert len(graph.edges) == 1
-    assert len(graph.edges[0].evidence) == 1
-
-
-def test_graph_rejects_edge_with_unknown_source() -> None:
-    with pytest.raises(ValidationError):
-        ArchitectureGraph(
-            metadata=GraphMetadata(
-                system_id="test-system",
+def test_nodes_are_sorted_deterministically() -> None:
+    graph = ArchitectureGraph(
+        metadata=GraphMetadata(
+            system_id="test-system",
+            role=GraphRole.BASELINE,
+        ),
+        nodes=(
+            ArchitectureNode(
+                id="payment",
+                type=NodeType.SERVICE,
             ),
-            nodes=[
-                ArchitectureNode(
-                    id="payment",
-                    type=NodeType.SERVICE,
-                ),
-            ],
-            edges=[
-                ArchitectureEdge(
-                    source="unknown",
-                    target="payment",
-                    relation=RelationType.CALLS,
-                )
-            ],
-        )
+            ArchitectureNode(
+                id="checkout",
+                type=NodeType.SERVICE,
+            ),
+        ),
+    )
+
+    assert [
+        node.id
+        for node in graph.nodes
+    ] == [
+        "checkout",
+        "payment",
+    ]
 
 
 def test_graph_rejects_duplicate_node_ids() -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError,
+        match="duplicate node identifiers",
+    ):
         ArchitectureGraph(
             metadata=GraphMetadata(
                 system_id="test-system",
+                role=GraphRole.BASELINE,
             ),
-            nodes=[
+            nodes=(
                 ArchitectureNode(
                     id="checkout",
                     type=NodeType.SERVICE,
@@ -212,94 +130,241 @@ def test_graph_rejects_duplicate_node_ids() -> None:
                     id="checkout",
                     type=NodeType.GATEWAY,
                 ),
-            ],
-            edges=[],
+            ),
         )
 
 
-def test_remove_edge() -> None:
-    graph = build_graph()
+def test_graph_rejects_unknown_relation_source() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="unknown source",
+    ):
+        ArchitectureGraph(
+            metadata=GraphMetadata(
+                system_id="test-system",
+                role=GraphRole.BASELINE,
+            ),
+            nodes=(
+                ArchitectureNode(
+                    id="payment",
+                    type=NodeType.SERVICE,
+                ),
+            ),
+            relations=(
+                ArchitectureRelation(
+                    source="unknown",
+                    relation=RelationType.CALLS,
+                    target="payment",
+                ),
+            ),
+        )
 
-    graph.add_edge(
-        ArchitectureEdge(
+
+def test_graph_rejects_unknown_relation_target() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="unknown target",
+    ):
+        ArchitectureGraph(
+            metadata=GraphMetadata(
+                system_id="test-system",
+                role=GraphRole.BASELINE,
+            ),
+            nodes=(
+                ArchitectureNode(
+                    id="checkout",
+                    type=NodeType.SERVICE,
+                ),
+            ),
+            relations=(
+                ArchitectureRelation(
+                    source="checkout",
+                    relation=RelationType.CALLS,
+                    target="unknown",
+                ),
+            ),
+        )
+
+
+def test_with_relation_returns_new_graph() -> None:
+    baseline = build_graph()
+
+    mutant = baseline.with_relation(
+        ArchitectureRelation(
             source="checkout",
-            target="payment",
             relation=RelationType.CALLS,
-            protocol="grpc",
+            target="payment",
         )
     )
 
-    removed = graph.remove_edges(
+    assert baseline.relations == ()
+
+    assert mutant.has_relation(
         source="checkout",
-        target="payment",
         relation=RelationType.CALLS,
-        protocol="grpc",
+        target="payment",
     )
 
-    assert removed == 1
-    assert graph.edges == []
+
+def test_duplicate_relation_is_rejected() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    with pytest.raises(DuplicateRelationError):
+        graph.with_relation(
+            ArchitectureRelation(
+                source="checkout",
+                relation=RelationType.CALLS,
+                target="payment",
+            )
+        )
 
 
-def test_to_networkx_returns_multidigraph() -> None:
+def test_relation_can_be_removed_without_mutating_original() -> None:
+    original = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    updated = original.without_relation(
+        source="checkout",
+        relation=RelationType.CALLS,
+        target="payment",
+    )
+
+    assert len(original.relations) == 1
+    assert updated.relations == ()
+
+
+def test_unknown_relation_removal_is_rejected() -> None:
     graph = build_graph()
 
-    graph.add_edge(
-        ArchitectureEdge(
+    with pytest.raises(UnknownRelationError):
+        graph.without_relation(
             source="checkout",
-            target="payment",
             relation=RelationType.CALLS,
-            protocol="grpc",
+            target="payment",
+        )
+
+
+def test_node_can_be_added_without_mutating_original() -> None:
+    graph = build_graph()
+
+    updated = graph.with_node(
+        ArchitectureNode(
+            id="recommendation",
+            type=NodeType.SERVICE,
+        )
+    )
+
+    assert graph.get_node("recommendation") is None
+    assert updated.get_node("recommendation") is not None
+
+
+def test_duplicate_node_addition_is_rejected() -> None:
+    graph = build_graph()
+
+    with pytest.raises(DuplicateNodeError):
+        graph.with_node(
+            ArchitectureNode(
+                id="checkout",
+                type=NodeType.SERVICE,
+            )
+        )
+
+
+def test_unknown_node_requirement_is_rejected() -> None:
+    graph = build_graph()
+
+    with pytest.raises(UnknownNodeError):
+        graph.require_node("recommendation")
+
+
+def test_removing_node_removes_incident_relations() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    updated = graph.without_node("payment")
+
+    assert updated.get_node("payment") is None
+    assert updated.relations == ()
+
+
+def test_multiple_relation_types_between_nodes_are_supported() -> None:
+    graph = build_graph()
+
+    graph = graph.with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    graph = graph.with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.EXPOSES_TO,
+            target="payment",
+        )
+    )
+
+    assert len(graph.relations) == 2
+
+
+def test_networkx_projection_is_multidigraph() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
         )
     )
 
     nx_graph = graph.to_networkx()
 
-    assert isinstance(nx_graph, nx.MultiDiGraph)
+    assert isinstance(
+        nx_graph,
+        nx.MultiDiGraph,
+    )
 
     assert nx_graph.has_edge(
         "checkout",
         "payment",
-        key="CALLS:grpc",
+        key="CALLS",
     )
 
 
-def test_yaml_round_trip(tmp_path: Path) -> None:
-    graph = build_graph()
-
-    graph.add_edge(
-        ArchitectureEdge(
+def test_find_relations_filters_by_source() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
             source="checkout",
-            target="payment",
             relation=RelationType.CALLS,
-            protocol="grpc",
+            target="payment",
         )
     )
 
-    output = tmp_path / "graph.yaml"
-
-    graph.to_yaml(output)
-
-    loaded = ArchitectureGraph.from_yaml(output)
-
-    assert loaded == graph
-
-
-def test_json_round_trip(tmp_path: Path) -> None:
-    graph = build_graph()
-
-    graph.add_edge(
-        ArchitectureEdge(
-            source="checkout",
-            target="payment",
-            relation=RelationType.CALLS,
-            protocol="grpc",
-        )
+    result = graph.find_relations(
+        source="checkout"
     )
 
-    output = tmp_path / "graph.json"
+    assert len(result) == 1
 
-    graph.to_json(output)
-
-    loaded = ArchitectureGraph.from_json(output)
-
-    assert loaded == graph
+    assert result[0].identity == (
+        "checkout",
+        RelationType.CALLS,
+        "payment",
+    )

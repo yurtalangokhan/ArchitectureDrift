@@ -13,7 +13,40 @@ from pydantic import (
     model_validator,
 )
 
-from archdrift.model.graph import RelationType
+from archdrift.model._validation import (
+    normalize_identifier,
+    normalize_optional_text,
+)
+from archdrift.model.graph import (
+    RelationIdentity,
+    RelationType,
+)
+
+# =============================================================================
+# Exceptions
+# =============================================================================
+
+
+class ArchitectureContractError(ValueError):
+    """
+    Base exception for architecture contract operations.
+    """
+
+
+class UnknownContractError(
+    ArchitectureContractError,
+    LookupError,
+):
+    """
+    Raised when a contract identifier cannot be found.
+    """
+
+
+class ContractDocumentLoadError(ArchitectureContractError):
+    """
+    Raised when an architecture contract document cannot be loaded.
+    """
+
 
 # =============================================================================
 # Contract Vocabulary
@@ -24,8 +57,8 @@ class ContractType(StrEnum):
     """
     Supported architecture contract types.
 
-    Contract types intentionally describe architectural expectations rather
-    than implementation-specific evidence.
+    These types define architectural expectations independently from
+    evidence acquisition mechanisms.
     """
 
     FORBIDDEN_RELATION = "FORBIDDEN_RELATION"
@@ -37,33 +70,15 @@ class ContractType(StrEnum):
 
 
 # =============================================================================
-# Validation Helpers
+# Internal Validation Helpers
 # =============================================================================
 
 
-def _validate_identifier(value: str) -> str:
-    """
-    Validate canonical identifiers used by architecture contracts.
-    """
-
-    normalized = value.strip()
-
-    if not normalized:
-        raise ValueError("Identifier must not be empty.")
-
-    if any(character.isspace() for character in normalized):
-        raise ValueError(
-            f"Identifier must not contain whitespace: {value!r}"
-        )
-
-    return normalized
-
-
-def _validate_unique_relation_types(
+def _normalize_relation_types(
     relations: tuple[RelationType, ...],
 ) -> tuple[RelationType, ...]:
     """
-    Ensure a relation collection is non-empty and contains no duplicates.
+    Validate and deterministically order relation types.
     """
 
     if not relations:
@@ -76,14 +91,19 @@ def _validate_unique_relation_types(
             "Relation types must not contain duplicates."
         )
 
-    return relations
+    return tuple(
+        sorted(
+            relations,
+            key=lambda relation: relation.value,
+        )
+    )
 
 
-def _validate_unique_identifiers(
+def _normalize_identifiers(
     identifiers: tuple[str, ...],
 ) -> tuple[str, ...]:
     """
-    Ensure an identifier collection is non-empty and unique.
+    Validate, deduplicate, and deterministically order identifiers.
     """
 
     if not identifiers:
@@ -92,7 +112,10 @@ def _validate_unique_identifiers(
         )
 
     normalized = tuple(
-        _validate_identifier(identifier)
+        normalize_identifier(
+            identifier,
+            field_name="identifier",
+        )
         for identifier in identifiers
     )
 
@@ -101,7 +124,7 @@ def _validate_unique_identifiers(
             "Identifiers must not contain duplicates."
         )
 
-    return normalized
+    return tuple(sorted(normalized))
 
 
 # =============================================================================
@@ -111,12 +134,12 @@ def _validate_unique_identifiers(
 
 class ArchitectureContractBase(BaseModel):
     """
-    Base model shared by all architecture contracts.
+    Base type for every architecture contract.
 
-    Contract identity is represented by ``id``.
+    Contracts represent ground-truth architectural expectations.
 
-    Contracts describe expected architecture behavior. They do not contain
-    runtime/static evidence information.
+    They deliberately contain no evidence-channel, runtime, source-code,
+    confidence, or detection information.
     """
 
     model_config = ConfigDict(
@@ -125,12 +148,12 @@ class ArchitectureContractBase(BaseModel):
     )
 
     id: str = Field(
-        description="Unique identifier of the architecture contract."
+        description="Unique contract identifier."
     )
 
     description: str | None = Field(
         default=None,
-        description="Human-readable explanation of the contract.",
+        description="Human-readable architectural expectation.",
     )
 
     rationale: str | None = Field(
@@ -140,80 +163,120 @@ class ArchitectureContractBase(BaseModel):
 
     @field_validator("id")
     @classmethod
-    def validate_id(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_id(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="contract id",
+        )
+
+    @field_validator(
+        "description",
+        "rationale",
+    )
+    @classmethod
+    def normalize_text(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        return normalize_optional_text(value)
 
 
 # =============================================================================
-# Relation Contracts
+# Relation Contract Base
 # =============================================================================
 
 
-class ForbiddenRelationContract(ArchitectureContractBase):
+class _RelationContractBase(ArchitectureContractBase):
     """
-    Declares that a canonical architecture relation must not exist.
+    Internal base type for contracts addressing one canonical relation.
+    """
+
+    source: str
+
+    relation: RelationType
+
+    target: str
+
+    @field_validator(
+        "source",
+        "target",
+    )
+    @classmethod
+    def validate_endpoint(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="relation endpoint",
+        )
+
+    @property
+    def relation_identity(self) -> RelationIdentity:
+        """
+        Return the canonical relation addressed by this contract.
+        """
+
+        return (
+            self.source,
+            self.relation,
+            self.target,
+        )
+
+
+# =============================================================================
+# Forbidden Relation
+# =============================================================================
+
+
+class ForbiddenRelationContract(_RelationContractBase):
+    """
+    Requires a canonical relation to be absent.
 
     Example:
 
         checkout --CALLS--> recommendation
 
-    can be explicitly forbidden.
+    can be forbidden with a FORBIDDEN_RELATION contract.
     """
 
     type: Literal[
         ContractType.FORBIDDEN_RELATION
     ] = ContractType.FORBIDDEN_RELATION
 
-    source: str
-    relation: RelationType
-    target: str
 
-    @field_validator("source", "target")
-    @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
+# =============================================================================
+# Required Relation
+# =============================================================================
 
 
-class RequiredRelationContract(ArchitectureContractBase):
+class RequiredRelationContract(_RelationContractBase):
     """
-    Declares that a canonical architecture relation must exist.
+    Requires a canonical relation to exist.
     """
 
     type: Literal[
         ContractType.REQUIRED_RELATION
     ] = ContractType.REQUIRED_RELATION
 
-    source: str
-    relation: RelationType
-    target: str
-
-    @field_validator("source", "target")
-    @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
-
 
 # =============================================================================
-# Resource Ownership Contract
+# Resource Ownership
 # =============================================================================
 
 
 class ResourceOwnershipContract(ArchitectureContractBase):
     """
-    Declares architectural ownership of a resource.
+    Declares exclusive architectural ownership of a resource.
 
-    The owner identifies the service permitted to access the resource using
-    the configured relations.
+    The owner is the architectural element permitted to access the resource
+    using the configured access relation types.
 
-    Example:
-
-        owner: order-service
-        resource: order-db
-        relations:
-            - READS_FROM
-            - WRITES_TO
-
-    A later conformance evaluator can detect access from non-owner services.
+    Other nodes using one of these access relations are considered ownership
+    violations by the future conformance evaluator.
     """
 
     type: Literal[
@@ -229,10 +292,19 @@ class ResourceOwnershipContract(ArchitectureContractBase):
         RelationType.WRITES_TO,
     )
 
-    @field_validator("owner", "resource")
+    @field_validator(
+        "owner",
+        "resource",
+    )
     @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_endpoint(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="resource ownership endpoint",
+        )
 
     @field_validator("relations")
     @classmethod
@@ -240,18 +312,18 @@ class ResourceOwnershipContract(ArchitectureContractBase):
         cls,
         value: tuple[RelationType, ...],
     ) -> tuple[RelationType, ...]:
-        value = _validate_unique_relation_types(value)
+        normalized = _normalize_relation_types(value)
 
         allowed = {
             RelationType.READS_FROM,
             RelationType.WRITES_TO,
         }
 
-        invalid = [
+        invalid = tuple(
             relation
-            for relation in value
+            for relation in normalized
             if relation not in allowed
-        ]
+        )
 
         if invalid:
             invalid_values = ", ".join(
@@ -260,34 +332,40 @@ class ResourceOwnershipContract(ArchitectureContractBase):
             )
 
             raise ValueError(
-                "RESOURCE_OWNERSHIP only supports "
+                "RESOURCE_OWNERSHIP supports only "
                 "READS_FROM and WRITES_TO relations. "
                 f"Invalid relations: {invalid_values}"
             )
 
-        return value
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_distinct_owner_and_resource(
+        self,
+    ) -> Self:
+        if self.owner == self.resource:
+            raise ValueError(
+                "RESOURCE_OWNERSHIP requires distinct "
+                "owner and resource nodes."
+            )
+
+        return self
 
 
 # =============================================================================
-# Exposure Contract
+# Exposure
 # =============================================================================
 
 
 class ExposureContract(ArchitectureContractBase):
     """
-    Restricts where an architectural element may be exposed.
+    Restricts the targets to which one architectural node may be exposed.
 
-    Example:
+    The conformance evaluator will inspect EXPOSES_TO relations originating
+    from ``subject``.
 
-        subject: checkout
-        allowed_targets:
-            - frontend-proxy
-
-    The evaluator will inspect EXPOSES_TO relations originating from
-    ``subject``.
-
-    ``require_exposure`` determines whether at least one allowed exposure
-    must exist.
+    If ``require_exposure`` is true, absence of any allowed exposure will
+    also constitute a violation.
     """
 
     type: Literal[
@@ -302,8 +380,14 @@ class ExposureContract(ArchitectureContractBase):
 
     @field_validator("subject")
     @classmethod
-    def validate_subject(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_subject(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="exposure subject",
+        )
 
     @field_validator("allowed_targets")
     @classmethod
@@ -311,32 +395,39 @@ class ExposureContract(ArchitectureContractBase):
         cls,
         value: tuple[str, ...],
     ) -> tuple[str, ...]:
-        return _validate_unique_identifiers(value)
+        return _normalize_identifiers(value)
+
+    @model_validator(mode="after")
+    def validate_subject_not_target(
+        self,
+    ) -> Self:
+        if self.subject in self.allowed_targets:
+            raise ValueError(
+                "EXPOSURE subject must not also appear "
+                "in allowed_targets."
+            )
+
+        return self
 
 
 # =============================================================================
-# Mediation Contract
+# Mediation
 # =============================================================================
 
 
 class MediationContract(ArchitectureContractBase):
     """
-    Requires communication between two nodes to pass through a mediator.
+    Requires communication between source and target to traverse a mediator.
 
     Example:
 
-        service-a
-            |
-            CALLS
-            v
-        api-gateway
-            |
-            ROUTES_TO
-            v
-        service-b
+        frontend --CALLS--> gateway --ROUTES_TO--> checkout
 
-    If ``forbid_direct`` is true, the direct source-to-target relation is
-    explicitly prohibited.
+    ``direct_relation`` explicitly identifies the source-to-target relation
+    that must be absent when ``forbid_direct`` is true.
+
+    This explicit field avoids implicit interpretation by the conformance
+    engine.
     """
 
     type: Literal[
@@ -355,17 +446,27 @@ class MediationContract(ArchitectureContractBase):
 
     forbid_direct: bool = True
 
+    direct_relation: RelationType | None = None
+
     @field_validator(
         "source",
         "target",
         "mediator",
     )
     @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_endpoint(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="mediation endpoint",
+        )
 
     @model_validator(mode="after")
-    def validate_distinct_nodes(self) -> Self:
+    def validate_mediation_semantics(
+        self,
+    ) -> Self:
         nodes = {
             self.source,
             self.target,
@@ -378,33 +479,32 @@ class MediationContract(ArchitectureContractBase):
                 "and mediator nodes."
             )
 
+        if self.forbid_direct and self.direct_relation is None:
+            raise ValueError(
+                "MEDIATION requires direct_relation when "
+                "forbid_direct is true."
+            )
+
+        if not self.forbid_direct and self.direct_relation is not None:
+            raise ValueError(
+                "MEDIATION direct_relation must be omitted when "
+                "forbid_direct is false."
+            )
+
         return self
 
 
 # =============================================================================
-# Communication Mode Contract
+# Communication Mode
 # =============================================================================
 
 
 class CommunicationModeContract(ArchitectureContractBase):
     """
-    Restricts the relation types permitted between two architectural nodes.
+    Restricts canonical relation types permitted from source to target.
 
-    This contract captures architectural communication style without binding
-    the contract to a concrete protocol.
-
-    Example:
-
-        source: checkout
-        target: payment
-
-        allowed_relations:
-            - CALLS
-
-    Another example for asynchronous interaction may allow:
-
-        PUBLISHES_TO
-        SUBSCRIBES_TO
+    The contract intentionally operates on architectural communication
+    semantics rather than concrete protocols such as HTTP or gRPC.
     """
 
     type: Literal[
@@ -417,10 +517,19 @@ class CommunicationModeContract(ArchitectureContractBase):
 
     allowed_relations: tuple[RelationType, ...]
 
-    @field_validator("source", "target")
+    @field_validator(
+        "source",
+        "target",
+    )
     @classmethod
-    def validate_endpoint(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_endpoint(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="communication endpoint",
+        )
 
     @field_validator("allowed_relations")
     @classmethod
@@ -428,11 +537,23 @@ class CommunicationModeContract(ArchitectureContractBase):
         cls,
         value: tuple[RelationType, ...],
     ) -> tuple[RelationType, ...]:
-        return _validate_unique_relation_types(value)
+        return _normalize_relation_types(value)
+
+    @model_validator(mode="after")
+    def validate_distinct_endpoints(
+        self,
+    ) -> Self:
+        if self.source == self.target:
+            raise ValueError(
+                "COMMUNICATION_MODE requires distinct "
+                "source and target nodes."
+            )
+
+        return self
 
 
 # =============================================================================
-# Discriminated Contract Union
+# Discriminated Union
 # =============================================================================
 
 
@@ -448,29 +569,31 @@ ArchitectureContract = Annotated[
 
 
 # =============================================================================
-# Architecture Contract Document
+# Contract Document
 # =============================================================================
 
 
 class ArchitectureContractDocument(BaseModel):
     """
-    Ground-truth architecture contract document for one case system.
+    Immutable ground-truth contract document for one case system.
 
-    A single document contains the set of architectural expectations used
-    during conformance evaluation.
+    Contract ordering is normalized by contract identifier so serialization
+    and experiment execution are deterministic.
     """
 
     model_config = ConfigDict(
         extra="forbid",
+        frozen=True,
     )
 
     schema_version: Literal["1.0"] = "1.0"
 
     system_id: str
 
-    contracts: list[ArchitectureContract] = Field(
-        default_factory=list,
-    )
+    contracts: tuple[
+        ArchitectureContract,
+        ...,
+    ] = ()
 
     metadata: dict[str, Any] = Field(
         default_factory=dict,
@@ -478,14 +601,30 @@ class ArchitectureContractDocument(BaseModel):
 
     @field_validator("system_id")
     @classmethod
-    def validate_system_id(cls, value: str) -> str:
-        return _validate_identifier(value)
+    def validate_system_id(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_identifier(
+            value,
+            field_name="system_id",
+        )
 
-    @model_validator(mode="after")
-    def validate_contract_ids(self) -> Self:
+    @field_validator("contracts")
+    @classmethod
+    def validate_contracts(
+        cls,
+        value: tuple[
+            ArchitectureContract,
+            ...,
+        ],
+    ) -> tuple[
+        ArchitectureContract,
+        ...,
+    ]:
         contract_ids = [
             contract.id
-            for contract in self.contracts
+            for contract in value
         ]
 
         if len(contract_ids) != len(set(contract_ids)):
@@ -494,31 +633,58 @@ class ArchitectureContractDocument(BaseModel):
                 "duplicate contract identifiers."
             )
 
-        return self
+        return tuple(
+            sorted(
+                value,
+                key=lambda contract: contract.id,
+            )
+        )
 
     def get_contract(
         self,
         contract_id: str,
     ) -> ArchitectureContract:
         """
-        Retrieve a contract by identifier.
+        Return a contract by identifier.
 
         Raises:
-            KeyError:
-                If the contract does not exist.
+            UnknownContractError:
+                When no contract with the requested identifier exists.
         """
 
+        normalized_id = normalize_identifier(
+            contract_id,
+            field_name="contract id",
+        )
+
         for contract in self.contracts:
-            if contract.id == contract_id:
+            if contract.id == normalized_id:
                 return contract
 
-        raise KeyError(
-            f"Unknown architecture contract: {contract_id!r}"
+        raise UnknownContractError(
+            f"Unknown architecture contract: {normalized_id!r}"
+        )
+
+    def contracts_of_type(
+        self,
+        contract_type: ContractType,
+    ) -> tuple[
+        ArchitectureContract,
+        ...,
+    ]:
+        """
+        Return contracts matching one contract type.
+        """
+
+        return tuple(
+            contract
+            for contract in self.contracts
+            if contract.type is contract_type
         )
 
 
 # =============================================================================
-# YAML Loader
+# YAML Boundary
 # =============================================================================
 
 
@@ -528,22 +694,11 @@ def load_contract_document(
     """
     Load and validate an architecture contract YAML document.
 
-    Args:
-        path:
-            Path to the architecture contract YAML file.
+    YAML syntax/structure failures are converted into a stable domain-level
+    ContractDocumentLoadError.
 
-    Returns:
-        Validated ArchitectureContractDocument.
-
-    Raises:
-        FileNotFoundError:
-            If the YAML file does not exist.
-
-        ValueError:
-            If the YAML root structure is invalid.
-
-        pydantic.ValidationError:
-            If contract contents violate the schema.
+    Pydantic ValidationError is intentionally allowed to propagate so callers
+    retain detailed field-level schema diagnostics.
     """
 
     contract_path = Path(path)
@@ -553,19 +708,26 @@ def load_contract_document(
             f"Architecture contract file not found: {contract_path}"
         )
 
-    with contract_path.open(
-        "r",
-        encoding="utf-8",
-    ) as file:
-        raw_document = yaml.safe_load(file)
+    try:
+        with contract_path.open(
+            "r",
+            encoding="utf-8",
+        ) as file:
+            raw_document = yaml.safe_load(file)
+
+    except yaml.YAMLError as exc:
+        raise ContractDocumentLoadError(
+            "Invalid YAML in architecture contract file: "
+            f"{contract_path}"
+        ) from exc
 
     if raw_document is None:
-        raise ValueError(
+        raise ContractDocumentLoadError(
             f"Architecture contract file is empty: {contract_path}"
         )
 
     if not isinstance(raw_document, dict):
-        raise ValueError(
+        raise ContractDocumentLoadError(
             "Architecture contract YAML root must be a mapping."
         )
 

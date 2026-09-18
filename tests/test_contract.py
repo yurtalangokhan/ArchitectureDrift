@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from archdrift.model import (
     ArchitectureContractDocument,
     CommunicationModeContract,
+    ContractDocumentLoadError,
     ContractType,
     ExposureContract,
     ForbiddenRelationContract,
@@ -13,11 +14,12 @@ from archdrift.model import (
     RelationType,
     RequiredRelationContract,
     ResourceOwnershipContract,
+    UnknownContractError,
     load_contract_document,
 )
 
 # =============================================================================
-# Contract Type Vocabulary
+# Vocabulary
 # =============================================================================
 
 
@@ -45,13 +47,41 @@ def test_forbidden_relation_contract_can_be_created() -> None:
         target="recommendation",
     )
 
-    assert contract.type == ContractType.FORBIDDEN_RELATION
+    assert contract.type is ContractType.FORBIDDEN_RELATION
 
-    assert contract.source == "checkout"
+    assert contract.relation_identity == (
+        "checkout",
+        RelationType.CALLS,
+        "recommendation",
+    )
 
-    assert contract.relation == RelationType.CALLS
 
-    assert contract.target == "recommendation"
+def test_contract_identifier_is_normalized() -> None:
+    contract = ForbiddenRelationContract(
+        id="  AS-C001  ",
+        source="checkout",
+        relation=RelationType.CALLS,
+        target="recommendation",
+    )
+
+    assert contract.id == "AS-C001"
+
+
+def test_contract_optional_text_is_normalized() -> None:
+    contract = ForbiddenRelationContract(
+        id="AS-C001",
+        description="  Direct communication is forbidden.  ",
+        rationale="   ",
+        source="checkout",
+        relation=RelationType.CALLS,
+        target="recommendation",
+    )
+
+    assert contract.description == (
+        "Direct communication is forbidden."
+    )
+
+    assert contract.rationale is None
 
 
 # =============================================================================
@@ -67,9 +97,13 @@ def test_required_relation_contract_can_be_created() -> None:
         target="checkout",
     )
 
-    assert contract.type == ContractType.REQUIRED_RELATION
+    assert contract.type is ContractType.REQUIRED_RELATION
 
-    assert contract.relation == RelationType.CALLS
+    assert contract.relation_identity == (
+        "frontend",
+        RelationType.CALLS,
+        "checkout",
+    )
 
 
 # =============================================================================
@@ -77,16 +111,12 @@ def test_required_relation_contract_can_be_created() -> None:
 # =============================================================================
 
 
-def test_resource_ownership_contract_can_be_created() -> None:
+def test_resource_ownership_defaults_to_read_write() -> None:
     contract = ResourceOwnershipContract(
         id="TEST-C002",
         owner="order-service",
         resource="order-db",
     )
-
-    assert contract.owner == "order-service"
-
-    assert contract.resource == "order-db"
 
     assert contract.relations == (
         RelationType.READS_FROM,
@@ -97,7 +127,7 @@ def test_resource_ownership_contract_can_be_created() -> None:
 def test_resource_ownership_rejects_invalid_relation() -> None:
     with pytest.raises(
         ValidationError,
-        match="RESOURCE_OWNERSHIP",
+        match="RESOURCE_OWNERSHIP supports only",
     ):
         ResourceOwnershipContract(
             id="TEST-C002",
@@ -106,6 +136,34 @@ def test_resource_ownership_rejects_invalid_relation() -> None:
             relations=(
                 RelationType.CALLS,
             ),
+        )
+
+
+def test_resource_ownership_rejects_duplicate_relations() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not contain duplicates",
+    ):
+        ResourceOwnershipContract(
+            id="TEST-C002",
+            owner="order-service",
+            resource="order-db",
+            relations=(
+                RelationType.READS_FROM,
+                RelationType.READS_FROM,
+            ),
+        )
+
+
+def test_resource_ownership_requires_distinct_nodes() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="distinct owner and resource",
+    ):
+        ResourceOwnershipContract(
+            id="TEST-C002",
+            owner="order-service",
+            resource="order-service",
         )
 
 
@@ -119,20 +177,34 @@ def test_exposure_contract_can_be_created() -> None:
         id="TEST-C003",
         subject="checkout",
         allowed_targets=(
+            "external-client",
             "frontend-proxy",
         ),
     )
 
-    assert contract.type == ContractType.EXPOSURE
-
-    assert contract.subject == "checkout"
-
     assert contract.allowed_targets == (
+        "external-client",
         "frontend-proxy",
     )
 
 
-def test_exposure_contract_rejects_empty_targets() -> None:
+def test_exposure_targets_are_deterministic() -> None:
+    contract = ExposureContract(
+        id="TEST-C003",
+        subject="checkout",
+        allowed_targets=(
+            "frontend-proxy",
+            "external-client",
+        ),
+    )
+
+    assert contract.allowed_targets == (
+        "external-client",
+        "frontend-proxy",
+    )
+
+
+def test_exposure_requires_at_least_one_target() -> None:
     with pytest.raises(
         ValidationError,
         match="At least one identifier",
@@ -141,6 +213,35 @@ def test_exposure_contract_rejects_empty_targets() -> None:
             id="TEST-C003",
             subject="checkout",
             allowed_targets=(),
+        )
+
+
+def test_exposure_rejects_duplicate_targets() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not contain duplicates",
+    ):
+        ExposureContract(
+            id="TEST-C003",
+            subject="checkout",
+            allowed_targets=(
+                "frontend",
+                "frontend",
+            ),
+        )
+
+
+def test_exposure_rejects_subject_as_target() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not also appear",
+    ):
+        ExposureContract(
+            id="TEST-C003",
+            subject="checkout",
+            allowed_targets=(
+                "checkout",
+            ),
         )
 
 
@@ -157,17 +258,25 @@ def test_mediation_contract_can_be_created() -> None:
         mediator="gateway",
         source_to_mediator_relation=RelationType.CALLS,
         mediator_to_target_relation=RelationType.ROUTES_TO,
+        forbid_direct=True,
+        direct_relation=RelationType.CALLS,
     )
 
-    assert contract.type == ContractType.MEDIATION
-
     assert contract.source == "frontend"
-
+    assert contract.mediator == "gateway"
     assert contract.target == "checkout"
 
-    assert contract.mediator == "gateway"
+    assert (
+        contract.source_to_mediator_relation
+        is RelationType.CALLS
+    )
 
-    assert contract.forbid_direct is True
+    assert (
+        contract.mediator_to_target_relation
+        is RelationType.ROUTES_TO
+    )
+
+    assert contract.direct_relation is RelationType.CALLS
 
 
 def test_mediation_requires_distinct_nodes() -> None:
@@ -182,7 +291,56 @@ def test_mediation_requires_distinct_nodes() -> None:
             mediator="frontend",
             source_to_mediator_relation=RelationType.CALLS,
             mediator_to_target_relation=RelationType.ROUTES_TO,
+            direct_relation=RelationType.CALLS,
         )
+
+
+def test_mediation_requires_direct_relation_when_forbidden() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="requires direct_relation",
+    ):
+        MediationContract(
+            id="TEST-C004",
+            source="frontend",
+            target="checkout",
+            mediator="gateway",
+            source_to_mediator_relation=RelationType.CALLS,
+            mediator_to_target_relation=RelationType.ROUTES_TO,
+            forbid_direct=True,
+        )
+
+
+def test_mediation_rejects_unused_direct_relation() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must be omitted",
+    ):
+        MediationContract(
+            id="TEST-C004",
+            source="frontend",
+            target="checkout",
+            mediator="gateway",
+            source_to_mediator_relation=RelationType.CALLS,
+            mediator_to_target_relation=RelationType.ROUTES_TO,
+            forbid_direct=False,
+            direct_relation=RelationType.CALLS,
+        )
+
+
+def test_mediation_can_allow_direct_relation() -> None:
+    contract = MediationContract(
+        id="TEST-C004",
+        source="frontend",
+        target="checkout",
+        mediator="gateway",
+        source_to_mediator_relation=RelationType.CALLS,
+        mediator_to_target_relation=RelationType.ROUTES_TO,
+        forbid_direct=False,
+    )
+
+    assert contract.direct_relation is None
+    assert contract.forbid_direct is False
 
 
 # =============================================================================
@@ -199,8 +357,6 @@ def test_communication_mode_contract_can_be_created() -> None:
             RelationType.CALLS,
         ),
     )
-
-    assert contract.type == ContractType.COMMUNICATION_MODE
 
     assert contract.allowed_relations == (
         RelationType.CALLS,
@@ -220,38 +376,40 @@ def test_communication_mode_requires_relation() -> None:
         )
 
 
+def test_communication_mode_rejects_duplicate_relations() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not contain duplicates",
+    ):
+        CommunicationModeContract(
+            id="TEST-C005",
+            source="checkout",
+            target="payment",
+            allowed_relations=(
+                RelationType.CALLS,
+                RelationType.CALLS,
+            ),
+        )
+
+
+def test_communication_mode_requires_distinct_nodes() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="distinct source and target",
+    ):
+        CommunicationModeContract(
+            id="TEST-C005",
+            source="checkout",
+            target="checkout",
+            allowed_relations=(
+                RelationType.CALLS,
+            ),
+        )
+
+
 # =============================================================================
 # Discriminated Union
 # =============================================================================
-
-
-def test_document_resolves_forbidden_relation_contract() -> None:
-    document = ArchitectureContractDocument.model_validate(
-        {
-            "schema_version": "1.0",
-            "system_id": "astronomy-shop",
-            "contracts": [
-                {
-                    "id": "AS-C001",
-                    "type": "FORBIDDEN_RELATION",
-                    "source": "checkout",
-                    "relation": "CALLS",
-                    "target": "recommendation",
-                }
-            ],
-        }
-    )
-
-    assert len(document.contracts) == 1
-
-    contract = document.contracts[0]
-
-    assert isinstance(
-        contract,
-        ForbiddenRelationContract,
-    )
-
-    assert contract.type == ContractType.FORBIDDEN_RELATION
 
 
 def test_document_resolves_all_contract_types() -> None:
@@ -296,6 +454,8 @@ def test_document_resolves_all_contract_types() -> None:
                     "mediator": "gateway",
                     "source_to_mediator_relation": "CALLS",
                     "mediator_to_target_relation": "ROUTES_TO",
+                    "forbid_direct": True,
+                    "direct_relation": "CALLS",
                 },
                 {
                     "id": "C006",
@@ -344,7 +504,7 @@ def test_document_resolves_all_contract_types() -> None:
 
 
 # =============================================================================
-# Document Validation
+# Contract Document
 # =============================================================================
 
 
@@ -355,7 +515,6 @@ def test_document_rejects_duplicate_contract_ids() -> None:
     ):
         ArchitectureContractDocument.model_validate(
             {
-                "schema_version": "1.0",
                 "system_id": "test-system",
                 "contracts": [
                     {
@@ -377,17 +536,45 @@ def test_document_rejects_duplicate_contract_ids() -> None:
         )
 
 
+def test_document_orders_contracts_deterministically() -> None:
+    document = ArchitectureContractDocument(
+        system_id="test-system",
+        contracts=(
+            RequiredRelationContract(
+                id="C002",
+                source="b",
+                relation=RelationType.CALLS,
+                target="c",
+            ),
+            ForbiddenRelationContract(
+                id="C001",
+                source="a",
+                relation=RelationType.CALLS,
+                target="b",
+            ),
+        ),
+    )
+
+    assert tuple(
+        contract.id
+        for contract in document.contracts
+    ) == (
+        "C001",
+        "C002",
+    )
+
+
 def test_document_can_get_contract_by_id() -> None:
     document = ArchitectureContractDocument(
         system_id="astronomy-shop",
-        contracts=[
+        contracts=(
             ForbiddenRelationContract(
                 id="AS-C001",
                 source="checkout",
                 relation=RelationType.CALLS,
                 target="recommendation",
-            )
-        ],
+            ),
+        ),
     )
 
     contract = document.get_contract(
@@ -397,33 +584,58 @@ def test_document_can_get_contract_by_id() -> None:
     assert contract.id == "AS-C001"
 
 
-def test_document_rejects_unknown_contract_lookup() -> None:
+def test_unknown_contract_lookup_raises_domain_error() -> None:
     document = ArchitectureContractDocument(
-        system_id="astronomy-shop",
+        system_id="astronomy-shop"
     )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(
+        UnknownContractError
+    ):
         document.get_contract(
             "UNKNOWN"
         )
 
 
+def test_document_filters_contracts_by_type() -> None:
+    document = ArchitectureContractDocument(
+        system_id="test-system",
+        contracts=(
+            RequiredRelationContract(
+                id="C002",
+                source="b",
+                relation=RelationType.CALLS,
+                target="c",
+            ),
+            ForbiddenRelationContract(
+                id="C001",
+                source="a",
+                relation=RelationType.CALLS,
+                target="b",
+            ),
+        ),
+    )
+
+    result = document.contracts_of_type(
+        ContractType.FORBIDDEN_RELATION
+    )
+
+    assert len(result) == 1
+    assert result[0].id == "C001"
+
+
 # =============================================================================
-# YAML Loading
+# Repository YAML
 # =============================================================================
 
 
 def test_load_astronomy_shop_contract_file() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
-    contract_path = (
+    document = load_contract_document(
         project_root
         / "contracts"
         / "astronomy-shop.yaml"
-    )
-
-    document = load_contract_document(
-        contract_path
     )
 
     assert document.system_id == "astronomy-shop"
@@ -439,17 +651,81 @@ def test_load_astronomy_shop_contract_file() -> None:
         ForbiddenRelationContract,
     )
 
-    assert contract.source == "checkout"
+    assert contract.relation_identity == (
+        "checkout",
+        RelationType.CALLS,
+        "recommendation",
+    )
 
-    assert contract.target == "recommendation"
 
-    assert contract.relation == RelationType.CALLS
+# =============================================================================
+# YAML Boundary
+# =============================================================================
 
 
-def test_loader_rejects_missing_file() -> None:
+def test_loader_rejects_missing_file(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(
         FileNotFoundError
     ):
         load_contract_document(
-            "does-not-exist.yaml"
+            tmp_path / "missing.yaml"
+        )
+
+
+def test_loader_rejects_empty_document(
+    tmp_path: Path,
+) -> None:
+    contract_file = tmp_path / "empty.yaml"
+
+    contract_file.write_text(
+        "",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ContractDocumentLoadError,
+        match="empty",
+    ):
+        load_contract_document(
+            contract_file
+        )
+
+
+def test_loader_rejects_non_mapping_root(
+    tmp_path: Path,
+) -> None:
+    contract_file = tmp_path / "invalid-root.yaml"
+
+    contract_file.write_text(
+        "- item-one\n- item-two\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ContractDocumentLoadError,
+        match="root must be a mapping",
+    ):
+        load_contract_document(
+            contract_file
+        )
+
+
+def test_loader_rejects_invalid_yaml(
+    tmp_path: Path,
+) -> None:
+    contract_file = tmp_path / "invalid.yaml"
+
+    contract_file.write_text(
+        "contracts: [\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ContractDocumentLoadError,
+        match="Invalid YAML",
+    ):
+        load_contract_document(
+            contract_file
         )

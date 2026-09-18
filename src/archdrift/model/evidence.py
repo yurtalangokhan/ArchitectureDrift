@@ -2,20 +2,43 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+)
+
+from archdrift.model._validation import (
+    normalize_optional_text,
+    normalize_required_text,
+)
+
+
+class EvidenceChannel(StrEnum):
+    """
+    High-level evidence channel used by the experiment.
+
+    FUSED is deliberately not represented here because fused architecture
+    is derived from multiple evidence channels rather than being evidence
+    itself.
+    """
+
+    NON_RUNTIME = "NON_RUNTIME"
+    RUNTIME = "RUNTIME"
 
 
 class EvidenceType(StrEnum):
     """
-    Identifies the origin of architectural evidence.
+    Origin of an architectural observation.
 
-    Ground truth and mutation oracles are deliberately not represented as
-    evidence types. They belong to the experimental oracle rather than the
-    observed architecture.
+    Ground truth, architecture contracts, mutation oracles, and workloads
+    are deliberately excluded.
     """
 
     SOURCE_CODE = "SOURCE_CODE"
@@ -23,34 +46,32 @@ class EvidenceType(StrEnum):
     DEPLOYMENT_CONFIG = "DEPLOYMENT_CONFIG"
     API_SPEC = "API_SPEC"
     RUNTIME_TRACE = "RUNTIME_TRACE"
-    WORKLOAD_ASSERTION = "WORKLOAD_ASSERTION"
 
 
 class EvidenceRecord(BaseModel):
     """
-    Provenance information for an observed architectural relation.
+    Provenance record describing why an architectural observation exists.
 
-    EvidenceRecord answers the question:
+    Evidence records are independent from the Canonical Architecture Graph.
 
-        "Why do we believe this architectural relation exists?"
+    Example evidence sources include:
 
-    Examples:
-        - a Docker Compose environment variable,
-        - an Aspire WithReference declaration,
-        - an OpenTelemetry span,
-        - a source-code service client reference.
+    - Docker Compose configuration
+    - .NET Aspire WithReference declarations
+    - repository configuration
+    - OpenAPI documents
+    - OpenTelemetry traces
     """
 
     model_config = ConfigDict(
         extra="forbid",
-        validate_assignment=True,
+        frozen=True,
     )
 
     type: EvidenceType
 
     artifact: str = Field(
-        min_length=1,
-        description="Source artifact containing the evidence.",
+        description="Artifact containing the architectural evidence."
     )
 
     locator: str | None = Field(
@@ -63,7 +84,9 @@ class EvidenceRecord(BaseModel):
 
     observed_at: datetime | None = Field(
         default=None,
-        description="Timestamp at which runtime evidence was observed.",
+        description=(
+            "Timestamp at which runtime evidence was observed."
+        ),
     )
 
     attributes: dict[str, Any] = Field(
@@ -73,30 +96,40 @@ class EvidenceRecord(BaseModel):
 
     @field_validator("artifact")
     @classmethod
-    def normalize_artifact(cls, value: str) -> str:
-        value = value.strip()
-
-        if not value:
-            raise ValueError("artifact must not be empty")
-
-        return value
+    def validate_artifact(
+        cls,
+        value: str,
+    ) -> str:
+        return normalize_required_text(
+            value,
+            field_name="artifact",
+        )
 
     @field_validator("locator")
     @classmethod
-    def normalize_locator(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
+    def validate_locator(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        return normalize_optional_text(value)
 
-        value = value.strip()
+    @property
+    def channel(self) -> EvidenceChannel:
+        """
+        Return the experiment-level evidence channel.
+        """
 
-        return value or None
+        if self.type is EvidenceType.RUNTIME_TRACE:
+            return EvidenceChannel.RUNTIME
+
+        return EvidenceChannel.NON_RUNTIME
 
     def fingerprint(self) -> str:
         """
-        Returns a deterministic SHA-256 fingerprint for the evidence record.
+        Return a deterministic SHA-256 fingerprint.
 
-        The fingerprint is used to remove duplicate provenance records when
-        several adapters report the same evidence.
+        Fingerprints are used for evidence deduplication without coupling
+        evidence identity to architecture relation identity.
         """
 
         serialized = json.dumps(
@@ -109,22 +142,24 @@ class EvidenceRecord(BaseModel):
             ensure_ascii=False,
         )
 
-        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+        return hashlib.sha256(
+            serialized.encode("utf-8")
+        ).hexdigest()
 
 
 def deduplicate_evidence(
-    records: list[EvidenceRecord],
-) -> list[EvidenceRecord]:
+    records: Iterable[EvidenceRecord],
+) -> tuple[EvidenceRecord, ...]:
     """
-    Removes duplicate evidence records while preserving deterministic order.
+    Remove duplicate evidence records and return deterministic output.
     """
 
-    unique: dict[str, EvidenceRecord] = {}
+    unique = {
+        record.fingerprint(): record
+        for record in records
+    }
 
-    for record in records:
-        unique[record.fingerprint()] = record
-
-    return sorted(
-        unique.values(),
-        key=lambda item: item.fingerprint(),
+    return tuple(
+        unique[fingerprint]
+        for fingerprint in sorted(unique)
     )

@@ -1,64 +1,118 @@
-from archdrift.model.evidence import (
+from datetime import UTC, datetime
+
+from archdrift.model import (
+    EvidenceChannel,
     EvidenceRecord,
     EvidenceType,
     deduplicate_evidence,
 )
 
 
-def test_evidence_fingerprint_is_deterministic() -> None:
-    first = EvidenceRecord(
-        type=EvidenceType.RUNTIME_TRACE,
-        artifact="traces.json",
-        locator="trace-001",
-        attributes={
-            "service": "checkout",
-            "target": "payment",
-        },
+def test_evidence_type_vocabulary() -> None:
+    assert set(EvidenceType) == {
+        EvidenceType.SOURCE_CODE,
+        EvidenceType.REPOSITORY_CONFIG,
+        EvidenceType.DEPLOYMENT_CONFIG,
+        EvidenceType.API_SPEC,
+        EvidenceType.RUNTIME_TRACE,
+    }
+
+
+def test_static_evidence_is_non_runtime() -> None:
+    evidence = EvidenceRecord(
+        type=EvidenceType.DEPLOYMENT_CONFIG,
+        artifact="compose.yaml",
     )
 
-    second = EvidenceRecord(
+    assert evidence.channel is EvidenceChannel.NON_RUNTIME
+
+
+def test_runtime_trace_is_runtime_evidence() -> None:
+    evidence = EvidenceRecord(
         type=EvidenceType.RUNTIME_TRACE,
-        artifact="traces.json",
-        locator="trace-001",
-        attributes={
-            "target": "payment",
-            "service": "checkout",
-        },
+        artifact="trace.json",
+        observed_at=datetime(
+            2026,
+            9,
+            18,
+            tzinfo=UTC,
+        ),
     )
 
-    assert first.fingerprint() == second.fingerprint()
+    assert evidence.channel is EvidenceChannel.RUNTIME
+
+
+def test_artifact_is_normalized() -> None:
+    evidence = EvidenceRecord(
+        type=EvidenceType.SOURCE_CODE,
+        artifact="  src/service.py  ",
+    )
+
+    assert evidence.artifact == "src/service.py"
+
+
+def test_blank_locator_becomes_none() -> None:
+    evidence = EvidenceRecord(
+        type=EvidenceType.SOURCE_CODE,
+        artifact="src/service.py",
+        locator="   ",
+    )
+
+    assert evidence.locator is None
+
+
+def test_fingerprint_is_deterministic() -> None:
+    evidence_a = EvidenceRecord(
+        type=EvidenceType.RUNTIME_TRACE,
+        artifact="trace.json",
+        locator="span-001",
+    )
+
+    evidence_b = EvidenceRecord(
+        type=EvidenceType.RUNTIME_TRACE,
+        artifact="trace.json",
+        locator="span-001",
+    )
+
+    assert (
+        evidence_a.fingerprint()
+        == evidence_b.fingerprint()
+    )
 
 
 def test_different_evidence_has_different_fingerprint() -> None:
-    first = EvidenceRecord(
+    evidence_a = EvidenceRecord(
         type=EvidenceType.RUNTIME_TRACE,
-        artifact="traces.json",
-        locator="trace-001",
+        artifact="trace.json",
+        locator="span-001",
     )
 
-    second = EvidenceRecord(
+    evidence_b = EvidenceRecord(
         type=EvidenceType.RUNTIME_TRACE,
-        artifact="traces.json",
-        locator="trace-002",
+        artifact="trace.json",
+        locator="span-002",
     )
 
-    assert first.fingerprint() != second.fingerprint()
+    assert (
+        evidence_a.fingerprint()
+        != evidence_b.fingerprint()
+    )
 
 
 def test_duplicate_evidence_is_removed() -> None:
     evidence = EvidenceRecord(
-        type=EvidenceType.DEPLOYMENT_CONFIG,
-        artifact="compose.yaml",
-        locator="PAYMENT_ADDR",
+        type=EvidenceType.RUNTIME_TRACE,
+        artifact="trace.json",
+        locator="span-001",
     )
 
     result = deduplicate_evidence(
         [
             evidence,
             evidence,
-            evidence,
         ]
     )
 
-    assert len(result) == 1
-    assert result[0] == evidence
+    assert result == (
+        evidence,
+    )
