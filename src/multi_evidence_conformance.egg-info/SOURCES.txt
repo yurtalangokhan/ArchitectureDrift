@@ -18,6 +18,7 @@ src/archdrift/experiments/activation.py
 src/archdrift/experiments/reporting.py
 src/archdrift/experiments/runner.py
 src/archdrift/model/__init__.py
+src/archdrift/model/_validation.py
 src/archdrift/model/contract.py
 src/archdrift/model/evidence.py
 src/archdrift/model/graph.py
@@ -25,10 +26,13 @@ src/archdrift/model/mutation.py
 src/multi_evidence_conformance.egg-info/PKG-INFO
 src/multi_evidence_conformance.egg-info/SOURCES.txt
 src/multi_evidence_conformance.egg-info/dependency_links.txt
+src/multi_evidence_conformance.egg-info/entry_points.txt
 src/multi_evidence_conformance.egg-info/requires.txt
 src/multi_evidence_conformance.egg-info/top_level.txt
+tests/test_architecture_boundaries.py
 tests/test_contract.py
 tests/test_evidence.py
 tests/test_graph.py
 tests/test_graph_delta.py
 tests/test_mutation.py
+tests/test_public_api.py

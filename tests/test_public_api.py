@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import archdrift.model as model
 
-
 EXPECTED_PUBLIC_API = {
     # Graph
     "ArchitectureGraph",
@@ -14,17 +13,16 @@ EXPECTED_PUBLIC_API = {
     "GraphMetadata",
     "GraphRole",
     "NodeType",
+    "ReconstructionMode",
     "RelationIdentity",
     "RelationType",
     "UnknownNodeError",
     "UnknownRelationError",
-
     # Evidence
     "EvidenceChannel",
     "EvidenceRecord",
     "EvidenceType",
     "deduplicate_evidence",
-
     # Contracts
     "ArchitectureContract",
     "ArchitectureContractBase",
@@ -32,6 +30,7 @@ EXPECTED_PUBLIC_API = {
     "ArchitectureContractError",
     "CommunicationModeContract",
     "ContractDocumentLoadError",
+    "ContractDocumentMetadata",
     "ContractType",
     "ExposureContract",
     "ForbiddenRelationContract",
@@ -40,6 +39,27 @@ EXPECTED_PUBLIC_API = {
     "ResourceOwnershipContract",
     "UnknownContractError",
     "load_contract_document",
+    # Mutations
+    "AddNodeOperation",
+    "AddRelationOperation",
+    "ExpectedGraphDelta",
+    "MutationOperation",
+    "MutationOperationBase",
+    "MutationOperationType",
+    "MutationOracle",
+    "MutationOracleError",
+    "MutationOracleLoadError",
+    "MutationOracleMetadata",
+    "RemoveNodeOperation",
+    "RemoveRelationOperation",
+    "load_mutation_oracle",
+    
+    "InteractionType",
+    "NormalizedEndpoint",
+    "NormalizedNodeObservation",
+    "NormalizedObservation",
+    "NormalizedRelationObservation",
+    "ObservationKind",
 }
 
 

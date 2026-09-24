@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any, Literal, Self
+from typing import Literal, Self
 
 import networkx as nx
 from pydantic import (
     BaseModel,
     ConfigDict,
-    Field,
     field_validator,
     model_validator,
 )
@@ -23,9 +22,7 @@ from archdrift.model._validation import (
 
 
 class NodeType(StrEnum):
-    """
-    Canonical architectural node types.
-    """
+    """Canonical architectural node types."""
 
     SERVICE = "SERVICE"
     DATASTORE = "DATASTORE"
@@ -36,9 +33,7 @@ class NodeType(StrEnum):
 
 
 class RelationType(StrEnum):
-    """
-    Canonical directed architectural relation types.
-    """
+    """Canonical directed architectural relation types."""
 
     CALLS = "CALLS"
     READS_FROM = "READS_FROM"
@@ -52,23 +47,36 @@ class RelationType(StrEnum):
 
 class GraphRole(StrEnum):
     """
-    Experimental role represented by an architecture graph.
-
-    Evidence mode is deliberately not represented here.
-
-    BASELINE:
-        Reference architecture before controlled mutation.
-
-    MUTANT:
-        Architecture after controlled mutation.
-
-    OBSERVED:
-        Architecture reconstructed from evidence.
+    Experimental role represented by a canonical architecture graph.
     """
 
     BASELINE = "BASELINE"
     MUTANT = "MUTANT"
     OBSERVED = "OBSERVED"
+
+
+class ReconstructionMode(StrEnum):
+    """
+    Evidence configuration used to reconstruct an OBSERVED graph.
+
+    This is graph-generation metadata, not evidence itself.
+    """
+
+    NON_RUNTIME = "NON_RUNTIME"
+    RUNTIME = "RUNTIME"
+    FUSED = "FUSED"
+
+
+# =============================================================================
+# Type Aliases
+# =============================================================================
+
+
+RelationIdentity = tuple[
+    str,
+    RelationType,
+    str,
+]
 
 
 # =============================================================================
@@ -77,43 +85,42 @@ class GraphRole(StrEnum):
 
 
 class ArchitectureGraphError(ValueError):
-    """
-    Base exception for canonical architecture graph operations.
-    """
+    """Base exception for canonical graph operations."""
 
 
 class DuplicateNodeError(ArchitectureGraphError):
-    """
-    Raised when a canonical node identifier already exists.
-    """
+    """Raised when a node identifier already exists."""
 
 
 class UnknownNodeError(ArchitectureGraphError):
-    """
-    Raised when an operation references an unknown node.
-    """
+    """Raised when an operation references an unknown node."""
 
 
 class DuplicateRelationError(ArchitectureGraphError):
-    """
-    Raised when a canonical relation already exists.
-    """
+    """Raised when a canonical relation already exists."""
 
 
 class UnknownRelationError(ArchitectureGraphError):
-    """
-    Raised when a canonical relation does not exist.
-    """
+    """Raised when a canonical relation does not exist."""
 
 
 # =============================================================================
-# Metadata
+# Graph Metadata
 # =============================================================================
 
 
 class GraphMetadata(BaseModel):
     """
-    Metadata describing one Canonical Architecture Graph.
+    Immutable metadata describing one canonical architecture graph.
+
+    BASELINE:
+        Original reference graph.
+
+    MUTANT:
+        Reference graph after one controlled mutation.
+
+    OBSERVED:
+        Architecture reconstructed from one evidence configuration.
     """
 
     model_config = ConfigDict(
@@ -125,23 +132,11 @@ class GraphMetadata(BaseModel):
 
     role: GraphRole
 
-    variant: str | None = Field(
-        default=None,
-        description=(
-            "Optional experiment variant identifier, such as AS-M01."
-        ),
-    )
+    variant: str | None = None
 
-    revision: str | None = Field(
-        default=None,
-        description=(
-            "Optional source-system revision used for reproducibility."
-        ),
-    )
+    reconstruction_mode: ReconstructionMode | None = None
 
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-    )
+    revision: str | None = None
 
     @field_validator("system_id")
     @classmethod
@@ -176,6 +171,42 @@ class GraphMetadata(BaseModel):
     ) -> str | None:
         return normalize_optional_text(value)
 
+    @model_validator(mode="after")
+    def validate_role_semantics(
+        self,
+    ) -> Self:
+        if self.role is GraphRole.BASELINE:
+            if self.variant is not None:
+                raise ValueError(
+                    "BASELINE graph must not define a variant."
+                )
+
+            if self.reconstruction_mode is not None:
+                raise ValueError(
+                    "BASELINE graph must not define "
+                    "a reconstruction_mode."
+                )
+
+        elif self.role is GraphRole.MUTANT:
+            if self.variant is None:
+                raise ValueError(
+                    "MUTANT graph requires a variant identifier."
+                )
+
+            if self.reconstruction_mode is not None:
+                raise ValueError(
+                    "MUTANT graph must not define "
+                    "a reconstruction_mode."
+                )
+
+        elif self.role is GraphRole.OBSERVED:
+            if self.reconstruction_mode is None:
+                raise ValueError(
+                    "OBSERVED graph requires a reconstruction_mode."
+                )
+
+        return self
+
 
 # =============================================================================
 # Canonical Node
@@ -186,7 +217,7 @@ class ArchitectureNode(BaseModel):
     """
     Canonical architectural element.
 
-    Node identity is defined exclusively by ``id``.
+    Canonical identity is exclusively ``id``.
     """
 
     model_config = ConfigDict(
@@ -197,13 +228,6 @@ class ArchitectureNode(BaseModel):
     id: str
 
     type: NodeType
-
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-        description=(
-            "Metadata that does not participate in canonical node identity."
-        ),
-    )
 
     @field_validator("id")
     @classmethod
@@ -222,23 +246,16 @@ class ArchitectureNode(BaseModel):
 # =============================================================================
 
 
-RelationIdentity = tuple[
-    str,
-    RelationType,
-    str,
-]
-
-
 class ArchitectureRelation(BaseModel):
     """
-    Directed canonical architectural relation.
+    Directed canonical architecture relation.
 
     Canonical identity:
 
         (source, relation, target)
 
-    Protocol, evidence source, trace identifiers, configuration locations,
-    and other observational properties are deliberately excluded.
+    Protocols and evidence provenance deliberately do not participate in
+    canonical identity.
     """
 
     model_config = ConfigDict(
@@ -251,14 +268,6 @@ class ArchitectureRelation(BaseModel):
     relation: RelationType
 
     target: str
-
-    attributes: dict[str, Any] = Field(
-        default_factory=dict,
-        description=(
-            "Optional canonical metadata that does not participate "
-            "in relation identity."
-        ),
-    )
 
     @field_validator(
         "source",
@@ -276,9 +285,7 @@ class ArchitectureRelation(BaseModel):
 
     @property
     def identity(self) -> RelationIdentity:
-        """
-        Return the canonical relation identity.
-        """
+        """Return canonical relation identity."""
 
         return (
             self.source,
@@ -288,9 +295,7 @@ class ArchitectureRelation(BaseModel):
 
     @property
     def networkx_key(self) -> str:
-        """
-        Return deterministic NetworkX MultiDiGraph edge key.
-        """
+        """Return deterministic MultiDiGraph edge key."""
 
         return self.relation.value
 
@@ -304,11 +309,11 @@ class ArchitectureGraph(BaseModel):
     """
     Immutable Canonical Architecture Graph.
 
-    The graph is intentionally evidence-independent.
+    The Pydantic representation is the domain source of truth.
 
-    Mutating operations return a new graph rather than modifying the
-    baseline instance in place. This behavior is especially useful for
-    controlled baseline -> mutant experiments.
+    NetworkX is only an analysis projection.
+
+    Transformation methods always return a new validated graph instance.
     """
 
     model_config = ConfigDict(
@@ -334,10 +339,10 @@ class ArchitectureGraph(BaseModel):
         cls,
         value: tuple[ArchitectureNode, ...],
     ) -> tuple[ArchitectureNode, ...]:
-        node_ids = [
+        node_ids = tuple(
             node.id
             for node in value
-        ]
+        )
 
         if len(node_ids) != len(set(node_ids)):
             raise ValueError(
@@ -358,10 +363,10 @@ class ArchitectureGraph(BaseModel):
         cls,
         value: tuple[ArchitectureRelation, ...],
     ) -> tuple[ArchitectureRelation, ...]:
-        identities = [
+        identities = tuple(
             relation.identity
             for relation in value
-        ]
+        )
 
         if len(identities) != len(set(identities)):
             raise ValueError(
@@ -372,10 +377,10 @@ class ArchitectureGraph(BaseModel):
         return tuple(
             sorted(
                 value,
-                key=lambda relation: (
-                    relation.source,
-                    relation.relation.value,
-                    relation.target,
+                key=lambda item: (
+                    item.source,
+                    item.relation.value,
+                    item.target,
                 ),
             )
         )
@@ -384,10 +389,7 @@ class ArchitectureGraph(BaseModel):
     def validate_relation_endpoints(
         self,
     ) -> Self:
-        node_ids = {
-            node.id
-            for node in self.nodes
-        }
+        node_ids = self.node_ids
 
         for relation in self.relations:
             if relation.source not in node_ids:
@@ -405,16 +407,46 @@ class ArchitectureGraph(BaseModel):
         return self
 
     # =========================================================================
-    # Lookup
+    # Canonical Sets
+    # =========================================================================
+
+    @property
+    def node_ids(self) -> frozenset[str]:
+        """
+        Return canonical node identifiers.
+
+        This representation will later be used directly by Graph Delta.
+        """
+
+        return frozenset(
+            node.id
+            for node in self.nodes
+        )
+
+    @property
+    def relation_identities(
+        self,
+    ) -> frozenset[RelationIdentity]:
+        """
+        Return canonical relation identities.
+
+        This representation will later be used directly by Graph Delta.
+        """
+
+        return frozenset(
+            relation.identity
+            for relation in self.relations
+        )
+
+    # =========================================================================
+    # Node Lookup
     # =========================================================================
 
     def get_node(
         self,
         node_id: str,
     ) -> ArchitectureNode | None:
-        """
-        Return node by canonical identifier.
-        """
+        """Return node by canonical identifier."""
 
         for node in self.nodes:
             if node.id == node_id:
@@ -426,9 +458,7 @@ class ArchitectureGraph(BaseModel):
         self,
         node_id: str,
     ) -> ArchitectureNode:
-        """
-        Return node or raise UnknownNodeError.
-        """
+        """Return node or raise UnknownNodeError."""
 
         node = self.get_node(node_id)
 
@@ -439,6 +469,10 @@ class ArchitectureGraph(BaseModel):
 
         return node
 
+    # =========================================================================
+    # Relation Lookup
+    # =========================================================================
+
     def get_relation(
         self,
         *,
@@ -446,9 +480,7 @@ class ArchitectureGraph(BaseModel):
         relation: RelationType,
         target: str,
     ) -> ArchitectureRelation | None:
-        """
-        Return a canonical relation by identity.
-        """
+        """Return relation by canonical identity."""
 
         identity: RelationIdentity = (
             source,
@@ -469,9 +501,7 @@ class ArchitectureGraph(BaseModel):
         relation: RelationType,
         target: str,
     ) -> ArchitectureRelation:
-        """
-        Return relation or raise UnknownRelationError.
-        """
+        """Return relation or raise UnknownRelationError."""
 
         item = self.get_relation(
             source=source,
@@ -494,9 +524,7 @@ class ArchitectureGraph(BaseModel):
         relation: RelationType,
         target: str,
     ) -> bool:
-        """
-        Return True when the canonical relation exists.
-        """
+        """Return whether a canonical relation exists."""
 
         return (
             self.get_relation(
@@ -514,11 +542,9 @@ class ArchitectureGraph(BaseModel):
         relation: RelationType | None = None,
         target: str | None = None,
     ) -> tuple[ArchitectureRelation, ...]:
-        """
-        Find relations matching optional canonical filters.
-        """
+        """Return canonical relations matching optional filters."""
 
-        result = []
+        result: list[ArchitectureRelation] = []
 
         for item in self.relations:
             if (
@@ -551,13 +577,9 @@ class ArchitectureGraph(BaseModel):
         self,
         node: ArchitectureNode,
     ) -> ArchitectureGraph:
-        """
-        Return a new graph containing the supplied node.
-        """
+        """Return a new graph containing the supplied node."""
 
-        existing = self.get_node(node.id)
-
-        if existing is not None:
+        if self.get_node(node.id) is not None:
             raise DuplicateNodeError(
                 f"Architecture node already exists: {node.id!r}"
             )
@@ -574,9 +596,9 @@ class ArchitectureGraph(BaseModel):
         node_id: str,
     ) -> ArchitectureGraph:
         """
-        Return a new graph without the specified node.
+        Return a new graph without the supplied node.
 
-        Incident relations are removed with the node.
+        Incident relations are removed automatically.
         """
 
         self.require_node(node_id)
@@ -605,18 +627,17 @@ class ArchitectureGraph(BaseModel):
         self,
         relation: ArchitectureRelation,
     ) -> ArchitectureGraph:
-        """
-        Return a new graph containing the supplied relation.
-        """
+        """Return a new graph containing the supplied relation."""
 
-        self.require_node(relation.source)
-        self.require_node(relation.target)
+        self.require_node(
+            relation.source
+        )
 
-        if self.get_relation(
-            source=relation.source,
-            relation=relation.relation,
-            target=relation.target,
-        ) is not None:
+        self.require_node(
+            relation.target
+        )
+
+        if relation.identity in self.relation_identities:
             raise DuplicateRelationError(
                 "Architecture relation already exists: "
                 f"{relation.source} "
@@ -638,9 +659,7 @@ class ArchitectureGraph(BaseModel):
         relation: RelationType,
         target: str,
     ) -> ArchitectureGraph:
-        """
-        Return a new graph without the specified relation.
-        """
+        """Return a new graph without the supplied relation."""
 
         existing = self.require_relation(
             source=source,
@@ -665,17 +684,15 @@ class ArchitectureGraph(BaseModel):
         relations: tuple[ArchitectureRelation, ...] | None = None,
     ) -> ArchitectureGraph:
         """
-        Rebuild the graph through normal Pydantic validation.
+        Create a fully revalidated graph.
 
-        ``model_copy(update=...)`` is deliberately not used because Pydantic
+        model_copy(update=...) is intentionally not used because Pydantic
         does not validate update payloads by default.
         """
 
         return ArchitectureGraph(
             schema_version=self.schema_version,
-            metadata=self.metadata.model_copy(
-                deep=True
-            ),
+            metadata=self.metadata,
             nodes=(
                 self.nodes
                 if nodes is None
@@ -696,50 +713,41 @@ class ArchitectureGraph(BaseModel):
         self,
     ) -> nx.MultiDiGraph[str]:
         """
-        Project the canonical model into a NetworkX MultiDiGraph.
+        Project the canonical graph into NetworkX.
 
-        NetworkX is an analysis representation, not the source of truth.
+        The returned graph is an analysis representation. Mutating it cannot
+        mutate the ArchitectureGraph instance.
         """
 
         graph: nx.MultiDiGraph[str] = nx.MultiDiGraph()
 
-        graph.graph.update(
-            self.metadata.model_dump(
-                mode="json",
-                exclude_none=True,
-            )
-        )
-
         graph.graph["schema_version"] = self.schema_version
+        graph.graph["system_id"] = self.metadata.system_id
+        graph.graph["role"] = self.metadata.role.value
+
+        if self.metadata.variant is not None:
+            graph.graph["variant"] = self.metadata.variant
+
+        if self.metadata.reconstruction_mode is not None:
+            graph.graph[
+                "reconstruction_mode"
+            ] = self.metadata.reconstruction_mode.value
+
+        if self.metadata.revision is not None:
+            graph.graph["revision"] = self.metadata.revision
 
         for node in self.nodes:
-            payload = node.model_dump(
-                mode="json",
-                exclude={"id"},
-            )
-
             graph.add_node(
                 node.id,
-                **payload,
+                type=node.type.value,
             )
 
         for relation in self.relations:
-            payload = relation.model_dump(
-                mode="json",
-                exclude={
-                    "source",
-                    "target",
-                    "relation",
-                },
-            )
-
-            payload["relation"] = relation.relation.value
-
             graph.add_edge(
                 relation.source,
                 relation.target,
                 key=relation.networkx_key,
-                **payload,
+                relation=relation.relation.value,
             )
 
         return graph

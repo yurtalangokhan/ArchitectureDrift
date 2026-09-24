@@ -4,23 +4,19 @@ system_id: astronomy-shop
 
 metadata:
   case_system: OpenTelemetry Astronomy Shop
-  purpose: controlled-architecture-conformance-experiment
+  purpose: Controlled architecture conformance experiment
 
 contracts:
-
   - id: AS-C001
-
     type: FORBIDDEN_RELATION
 
     description: >
       Checkout must not directly invoke the recommendation service.
 
     rationale: >
-      This contract is used as the architectural expectation associated
+      This contract defines the architectural expectation associated
       with controlled mutation AS-M01.
 
     source: checkout
-
     relation: CALLS
-
     target: recommendation

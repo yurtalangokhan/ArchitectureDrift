@@ -1,27 +1,38 @@
-# =============================================================================
-# Astronomy Shop Controlled Mutation
-#
-# Final mutation-oracle schema will be implemented in WP-03.
-# =============================================================================
-
 schema_version: "1.0"
 
 mutation_id: AS-M01
 system_id: astronomy-shop
 
 description: >
-  Introduces an unexpected connector from checkout to recommendation.
+  Introduce an unexpected direct CALLS relation from the checkout service
+  to the recommendation service.
 
-status: planned
+rationale: >
+  The mutation intentionally violates AS-C001 and is used as the first
+  vertical slice for evaluating whether non-runtime, runtime, and fused
+  evidence can detect an unexpected architectural connector.
 
-source: checkout
-target: recommendation
-relation: CALLS
+metadata:
+  case_system: OpenTelemetry Astronomy Shop
+  purpose: Controlled architecture conformance experiment
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: checkout
+      relation: CALLS
+      target: recommendation
 
 expected_delta:
+  added_nodes: []
+  removed_nodes: []
+
   added_relations:
     - source: checkout
-      target: recommendation
       relation: CALLS
+      target: recommendation
 
   removed_relations: []
+
+expected_violated_contracts:
+  - AS-C001

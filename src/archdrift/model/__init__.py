@@ -5,6 +5,7 @@ from archdrift.model.contract import (
     ArchitectureContractError,
     CommunicationModeContract,
     ContractDocumentLoadError,
+    ContractDocumentMetadata,
     ContractType,
     ExposureContract,
     ForbiddenRelationContract,
@@ -30,10 +31,34 @@ from archdrift.model.graph import (
     GraphMetadata,
     GraphRole,
     NodeType,
+    ReconstructionMode,
     RelationIdentity,
     RelationType,
     UnknownNodeError,
     UnknownRelationError,
+)
+from archdrift.model.mutation import (
+    AddNodeOperation,
+    AddRelationOperation,
+    ExpectedGraphDelta,
+    MutationOperation,
+    MutationOperationBase,
+    MutationOperationType,
+    MutationOracle,
+    MutationOracleError,
+    MutationOracleLoadError,
+    MutationOracleMetadata,
+    RemoveNodeOperation,
+    RemoveRelationOperation,
+    load_mutation_oracle,
+)
+from archdrift.model.observation import (
+    InteractionType,
+    NormalizedEndpoint,
+    NormalizedNodeObservation,
+    NormalizedObservation,
+    NormalizedRelationObservation,
+    ObservationKind,
 )
 
 __all__ = [
@@ -47,17 +72,16 @@ __all__ = [
     "GraphMetadata",
     "GraphRole",
     "NodeType",
+    "ReconstructionMode",
     "RelationIdentity",
     "RelationType",
     "UnknownNodeError",
     "UnknownRelationError",
-
     # Evidence
     "EvidenceChannel",
     "EvidenceRecord",
     "EvidenceType",
     "deduplicate_evidence",
-
     # Contracts
     "ArchitectureContract",
     "ArchitectureContractBase",
@@ -65,6 +89,7 @@ __all__ = [
     "ArchitectureContractError",
     "CommunicationModeContract",
     "ContractDocumentLoadError",
+    "ContractDocumentMetadata",
     "ContractType",
     "ExposureContract",
     "ForbiddenRelationContract",
@@ -73,4 +98,25 @@ __all__ = [
     "ResourceOwnershipContract",
     "UnknownContractError",
     "load_contract_document",
+    # Mutations
+    "AddNodeOperation",
+    "AddRelationOperation",
+    "ExpectedGraphDelta",
+    "MutationOperation",
+    "MutationOperationBase",
+    "MutationOperationType",
+    "MutationOracle",
+    "MutationOracleError",
+    "MutationOracleLoadError",
+    "MutationOracleMetadata",
+    "RemoveNodeOperation",
+    "RemoveRelationOperation",
+    "load_mutation_oracle",
+  
+    "InteractionType",
+    "NormalizedEndpoint",
+    "NormalizedNodeObservation",
+    "NormalizedObservation",
+    "NormalizedRelationObservation",
+    "ObservationKind",
 ]

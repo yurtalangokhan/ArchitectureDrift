@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Literal, Self
 
 import yaml
 from pydantic import (
@@ -28,24 +28,18 @@ from archdrift.model.graph import (
 
 
 class ArchitectureContractError(ValueError):
-    """
-    Base exception for architecture contract operations.
-    """
+    """Base exception for architecture contract operations."""
 
 
 class UnknownContractError(
     ArchitectureContractError,
     LookupError,
 ):
-    """
-    Raised when a contract identifier cannot be found.
-    """
+    """Raised when a contract identifier cannot be found."""
 
 
 class ContractDocumentLoadError(ArchitectureContractError):
-    """
-    Raised when an architecture contract document cannot be loaded.
-    """
+    """Raised when an architecture contract document cannot be loaded."""
 
 
 # =============================================================================
@@ -57,8 +51,7 @@ class ContractType(StrEnum):
     """
     Supported architecture contract types.
 
-    These types define architectural expectations independently from
-    evidence acquisition mechanisms.
+    These values are part of the experiment's stable ground-truth vocabulary.
     """
 
     FORBIDDEN_RELATION = "FORBIDDEN_RELATION"
@@ -103,7 +96,7 @@ def _normalize_identifiers(
     identifiers: tuple[str, ...],
 ) -> tuple[str, ...]:
     """
-    Validate, deduplicate, and deterministically order identifiers.
+    Validate and deterministically order identifier collections.
     """
 
     if not identifiers:
@@ -128,18 +121,53 @@ def _normalize_identifiers(
 
 
 # =============================================================================
+# Document Metadata
+# =============================================================================
+
+
+class ContractDocumentMetadata(BaseModel):
+    """
+    Optional immutable metadata associated with one contract document.
+
+    Metadata does not participate in contract semantics or conformance
+    evaluation.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    case_system: str | None = None
+
+    purpose: str | None = None
+
+    revision: str | None = None
+
+    @field_validator(
+        "case_system",
+        "purpose",
+        "revision",
+    )
+    @classmethod
+    def normalize_text(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        return normalize_optional_text(value)
+
+
+# =============================================================================
 # Base Contract
 # =============================================================================
 
 
 class ArchitectureContractBase(BaseModel):
     """
-    Base type for every architecture contract.
+    Base model shared by all architecture contracts.
 
-    Contracts represent ground-truth architectural expectations.
-
-    They deliberately contain no evidence-channel, runtime, source-code,
-    confidence, or detection information.
+    Contracts represent ground-truth architectural expectations and contain
+    no evidence-specific information.
     """
 
     model_config = ConfigDict(
@@ -191,7 +219,7 @@ class ArchitectureContractBase(BaseModel):
 
 class _RelationContractBase(ArchitectureContractBase):
     """
-    Internal base type for contracts addressing one canonical relation.
+    Internal base model for contracts addressing one canonical relation.
     """
 
     source: str
@@ -216,9 +244,7 @@ class _RelationContractBase(ArchitectureContractBase):
 
     @property
     def relation_identity(self) -> RelationIdentity:
-        """
-        Return the canonical relation addressed by this contract.
-        """
+        """Return the canonical relation addressed by this contract."""
 
         return (
             self.source,
@@ -235,12 +261,6 @@ class _RelationContractBase(ArchitectureContractBase):
 class ForbiddenRelationContract(_RelationContractBase):
     """
     Requires a canonical relation to be absent.
-
-    Example:
-
-        checkout --CALLS--> recommendation
-
-    can be forbidden with a FORBIDDEN_RELATION contract.
     """
 
     type: Literal[
@@ -272,11 +292,8 @@ class ResourceOwnershipContract(ArchitectureContractBase):
     """
     Declares exclusive architectural ownership of a resource.
 
-    The owner is the architectural element permitted to access the resource
-    using the configured access relation types.
-
-    Other nodes using one of these access relations are considered ownership
-    violations by the future conformance evaluator.
+    Nodes other than ``owner`` accessing ``resource`` through one of the
+    configured relations constitute ownership violations.
     """
 
     type: Literal[
@@ -359,13 +376,10 @@ class ResourceOwnershipContract(ArchitectureContractBase):
 
 class ExposureContract(ArchitectureContractBase):
     """
-    Restricts the targets to which one architectural node may be exposed.
+    Restricts EXPOSES_TO relations originating from ``subject``.
 
-    The conformance evaluator will inspect EXPOSES_TO relations originating
-    from ``subject``.
-
-    If ``require_exposure`` is true, absence of any allowed exposure will
-    also constitute a violation.
+    When ``require_exposure`` is true, at least one allowed exposure must
+    exist.
     """
 
     type: Literal[
@@ -417,17 +431,10 @@ class ExposureContract(ArchitectureContractBase):
 
 class MediationContract(ArchitectureContractBase):
     """
-    Requires communication between source and target to traverse a mediator.
+    Requires communication from source to target to traverse a mediator.
 
-    Example:
-
-        frontend --CALLS--> gateway --ROUTES_TO--> checkout
-
-    ``direct_relation`` explicitly identifies the source-to-target relation
-    that must be absent when ``forbid_direct`` is true.
-
-    This explicit field avoids implicit interpretation by the conformance
-    engine.
+    ``direct_relation`` explicitly defines which source-to-target relation is
+    forbidden when ``forbid_direct`` is true.
     """
 
     type: Literal[
@@ -479,13 +486,19 @@ class MediationContract(ArchitectureContractBase):
                 "and mediator nodes."
             )
 
-        if self.forbid_direct and self.direct_relation is None:
+        if (
+            self.forbid_direct
+            and self.direct_relation is None
+        ):
             raise ValueError(
                 "MEDIATION requires direct_relation when "
                 "forbid_direct is true."
             )
 
-        if not self.forbid_direct and self.direct_relation is not None:
+        if (
+            not self.forbid_direct
+            and self.direct_relation is not None
+        ):
             raise ValueError(
                 "MEDIATION direct_relation must be omitted when "
                 "forbid_direct is false."
@@ -503,8 +516,7 @@ class CommunicationModeContract(ArchitectureContractBase):
     """
     Restricts canonical relation types permitted from source to target.
 
-    The contract intentionally operates on architectural communication
-    semantics rather than concrete protocols such as HTTP or gRPC.
+    Concrete transport protocols are deliberately excluded.
     """
 
     type: Literal[
@@ -553,7 +565,7 @@ class CommunicationModeContract(ArchitectureContractBase):
 
 
 # =============================================================================
-# Discriminated Union
+# Discriminated Contract Union
 # =============================================================================
 
 
@@ -577,8 +589,8 @@ class ArchitectureContractDocument(BaseModel):
     """
     Immutable ground-truth contract document for one case system.
 
-    Contract ordering is normalized by contract identifier so serialization
-    and experiment execution are deterministic.
+    Contract ordering is normalized by contract identifier for deterministic
+    serialization and experiment execution.
     """
 
     model_config = ConfigDict(
@@ -595,8 +607,8 @@ class ArchitectureContractDocument(BaseModel):
         ...,
     ] = ()
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
+    metadata: ContractDocumentMetadata = Field(
+        default_factory=ContractDocumentMetadata,
     )
 
     @field_validator("system_id")
@@ -622,10 +634,10 @@ class ArchitectureContractDocument(BaseModel):
         ArchitectureContract,
         ...,
     ]:
-        contract_ids = [
+        contract_ids = tuple(
             contract.id
             for contract in value
-        ]
+        )
 
         if len(contract_ids) != len(set(contract_ids)):
             raise ValueError(
@@ -640,16 +652,23 @@ class ArchitectureContractDocument(BaseModel):
             )
         )
 
+    @property
+    def contract_ids(self) -> frozenset[str]:
+        """
+        Return all ground-truth contract identifiers.
+        """
+
+        return frozenset(
+            contract.id
+            for contract in self.contracts
+        )
+
     def get_contract(
         self,
         contract_id: str,
     ) -> ArchitectureContract:
         """
         Return a contract by identifier.
-
-        Raises:
-            UnknownContractError:
-                When no contract with the requested identifier exists.
         """
 
         normalized_id = normalize_identifier(
@@ -684,7 +703,7 @@ class ArchitectureContractDocument(BaseModel):
 
 
 # =============================================================================
-# YAML Boundary
+# YAML Loader
 # =============================================================================
 
 
@@ -692,13 +711,13 @@ def load_contract_document(
     path: str | Path,
 ) -> ArchitectureContractDocument:
     """
-    Load and validate an architecture contract YAML document.
+    Load and validate one architecture contract YAML document.
 
-    YAML syntax/structure failures are converted into a stable domain-level
-    ContractDocumentLoadError.
+    YAML syntax and root-structure failures are translated into a stable
+    domain-level exception.
 
-    Pydantic ValidationError is intentionally allowed to propagate so callers
-    retain detailed field-level schema diagnostics.
+    Pydantic ValidationError intentionally propagates so callers retain
+    detailed schema diagnostics.
     """
 
     contract_path = Path(path)

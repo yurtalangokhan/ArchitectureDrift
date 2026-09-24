@@ -11,6 +11,7 @@ from archdrift.model import (
     GraphMetadata,
     GraphRole,
     NodeType,
+    ReconstructionMode,
     RelationType,
     UnknownNodeError,
     UnknownRelationError,
@@ -368,3 +369,171 @@ def test_find_relations_filters_by_source() -> None:
         RelationType.CALLS,
         "payment",
     )
+
+def test_mutant_graph_requires_variant() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="requires a variant",
+    ):
+        GraphMetadata(
+            system_id="astronomy-shop",
+            role=GraphRole.MUTANT,
+        )
+
+
+def test_mutant_graph_accepts_mutation_variant() -> None:
+    metadata = GraphMetadata(
+        system_id="astronomy-shop",
+        role=GraphRole.MUTANT,
+        variant="AS-M01",
+    )
+
+    assert metadata.variant == "AS-M01"
+
+
+def test_baseline_rejects_variant() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not define a variant",
+    ):
+        GraphMetadata(
+            system_id="astronomy-shop",
+            role=GraphRole.BASELINE,
+            variant="AS-M01",
+        )
+
+
+def test_baseline_rejects_reconstruction_mode() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="must not define a reconstruction_mode",
+    ):
+        GraphMetadata(
+            system_id="astronomy-shop",
+            role=GraphRole.BASELINE,
+            reconstruction_mode=ReconstructionMode.RUNTIME,
+        )
+
+
+def test_observed_graph_requires_reconstruction_mode() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="requires a reconstruction_mode",
+    ):
+        GraphMetadata(
+            system_id="astronomy-shop",
+            role=GraphRole.OBSERVED,
+        )
+
+
+def test_observed_non_runtime_graph_metadata() -> None:
+    metadata = GraphMetadata(
+        system_id="astronomy-shop",
+        role=GraphRole.OBSERVED,
+        reconstruction_mode=ReconstructionMode.NON_RUNTIME,
+    )
+
+    assert (
+        metadata.reconstruction_mode
+        is ReconstructionMode.NON_RUNTIME
+    )
+
+
+def test_observed_runtime_graph_metadata() -> None:
+    metadata = GraphMetadata(
+        system_id="astronomy-shop",
+        role=GraphRole.OBSERVED,
+        reconstruction_mode=ReconstructionMode.RUNTIME,
+    )
+
+    assert (
+        metadata.reconstruction_mode
+        is ReconstructionMode.RUNTIME
+    )
+
+
+def test_observed_fused_graph_metadata() -> None:
+    metadata = GraphMetadata(
+        system_id="astronomy-shop",
+        role=GraphRole.OBSERVED,
+        reconstruction_mode=ReconstructionMode.FUSED,
+    )
+
+    assert (
+        metadata.reconstruction_mode
+        is ReconstructionMode.FUSED
+    )
+
+
+def test_observed_mutant_graph_can_reference_variant() -> None:
+    metadata = GraphMetadata(
+        system_id="astronomy-shop",
+        role=GraphRole.OBSERVED,
+        variant="AS-M01",
+        reconstruction_mode=ReconstructionMode.FUSED,
+    )
+
+    assert metadata.variant == "AS-M01"
+
+
+def test_node_ids_are_exposed_as_frozen_set() -> None:
+    graph = build_graph()
+
+    assert graph.node_ids == frozenset(
+        {
+            "checkout",
+            "payment",
+        }
+    )
+
+
+def test_relation_identities_are_exposed_as_frozen_set() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    assert graph.relation_identities == frozenset(
+        {
+            (
+                "checkout",
+                RelationType.CALLS,
+                "payment",
+            )
+        }
+    )
+
+
+def test_graph_json_round_trip_preserves_model() -> None:
+    graph = build_graph().with_relation(
+        ArchitectureRelation(
+            source="checkout",
+            relation=RelationType.CALLS,
+            target="payment",
+        )
+    )
+
+    serialized = graph.model_dump_json()
+
+    restored = ArchitectureGraph.model_validate_json(
+        serialized
+    )
+
+    assert restored == graph
+
+
+def test_networkx_mutation_does_not_change_canonical_graph() -> None:
+    graph = build_graph()
+
+    projected = graph.to_networkx()
+
+    projected.add_node(
+        "rogue-service",
+        type="SERVICE",
+    )
+
+    assert "rogue-service" in projected
+    assert "rogue-service" not in graph.node_ids

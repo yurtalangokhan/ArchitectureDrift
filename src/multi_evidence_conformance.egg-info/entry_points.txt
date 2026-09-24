@@ -1,0 +1,2 @@
+[console_scripts]
+archdrift = archdrift.cli:main

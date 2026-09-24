@@ -7,6 +7,7 @@ from archdrift.model import (
     ArchitectureContractDocument,
     CommunicationModeContract,
     ContractDocumentLoadError,
+    ContractDocumentMetadata,
     ContractType,
     ExposureContract,
     ForbiddenRelationContract,
@@ -729,3 +730,146 @@ def test_loader_rejects_invalid_yaml(
         load_contract_document(
             contract_file
         )
+
+def test_contract_document_metadata_is_typed() -> None:
+    document = ArchitectureContractDocument(
+        system_id="astronomy-shop",
+        metadata=ContractDocumentMetadata(
+            case_system="OpenTelemetry Astronomy Shop",
+            purpose="Controlled experiment",
+            revision="abc123",
+        ),
+    )
+
+    assert (
+        document.metadata.case_system
+        == "OpenTelemetry Astronomy Shop"
+    )
+
+    assert (
+        document.metadata.purpose
+        == "Controlled experiment"
+    )
+
+    assert document.metadata.revision == "abc123"
+
+
+def test_contract_document_metadata_can_be_loaded_from_mapping() -> None:
+    document = ArchitectureContractDocument.model_validate(
+        {
+            "system_id": "astronomy-shop",
+            "metadata": {
+                "case_system": "OpenTelemetry Astronomy Shop",
+                "purpose": "Controlled experiment",
+            },
+        }
+    )
+
+    assert isinstance(
+        document.metadata,
+        ContractDocumentMetadata,
+    )
+
+
+def test_contract_ids_are_exposed_as_frozen_set() -> None:
+    document = ArchitectureContractDocument(
+        system_id="test-system",
+        contracts=(
+            ForbiddenRelationContract(
+                id="C001",
+                source="a",
+                relation=RelationType.CALLS,
+                target="b",
+            ),
+            RequiredRelationContract(
+                id="C002",
+                source="b",
+                relation=RelationType.CALLS,
+                target="c",
+            ),
+        ),
+    )
+
+    assert document.contract_ids == frozenset(
+        {
+            "C001",
+            "C002",
+        }
+    )
+
+
+def test_contract_document_json_round_trip() -> None:
+    document = ArchitectureContractDocument(
+        system_id="astronomy-shop",
+        metadata=ContractDocumentMetadata(
+            case_system="OpenTelemetry Astronomy Shop",
+            purpose="Controlled experiment",
+        ),
+        contracts=(
+            ForbiddenRelationContract(
+                id="AS-C001",
+                source="checkout",
+                relation=RelationType.CALLS,
+                target="recommendation",
+            ),
+        ),
+    )
+
+    serialized = document.model_dump_json()
+
+    restored = (
+        ArchitectureContractDocument.model_validate_json(
+            serialized
+        )
+    )
+
+    assert restored == document
+
+
+def test_contract_document_is_deterministic() -> None:
+    document = ArchitectureContractDocument(
+        system_id="test-system",
+        contracts=(
+            RequiredRelationContract(
+                id="C002",
+                source="b",
+                relation=RelationType.CALLS,
+                target="c",
+            ),
+            ForbiddenRelationContract(
+                id="C001",
+                source="a",
+                relation=RelationType.CALLS,
+                target="b",
+            ),
+        ),
+    )
+
+    assert tuple(
+        contract.id
+        for contract in document.contracts
+    ) == (
+        "C001",
+        "C002",
+    )
+
+
+def test_repository_astronomy_contract_metadata() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+
+    document = load_contract_document(
+        project_root
+        / "contracts"
+        / "astronomy-shop.yaml"
+    )
+
+    assert (
+        document.metadata.case_system
+        == "OpenTelemetry Astronomy Shop"
+    )
+
+    assert document.contract_ids == frozenset(
+        {
+            "AS-C001",
+        }
+    )
