@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: ES-M02
+system_id: eshop
+
+description: >
+  Introduce an unexpected CALLS relation from WebApp to Webhooks API.
+
+rationale: >
+  Non-runtime-visible controlled service dependency.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: webapp
+      relation: CALLS
+      target: webhooks-api
+
+expected_delta:
+  added_relations:
+    - source: webapp
+      relation: CALLS
+      target: webhooks-api
+
+expected_violated_contracts:
+  - ES-C002

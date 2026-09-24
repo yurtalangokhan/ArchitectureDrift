@@ -1,0 +1,29 @@
+schema_version: "1.0"
+
+suite_id: architecture-drift-main
+
+metadata:
+  purpose: >
+    Cross-system controlled mutation evaluation comparing
+    Non-Runtime, Runtime, and Fused architecture evidence.
+  revision: WP15-01
+
+cases:
+  - cases/astronomy-shop/AS-M01.yaml
+  - cases/astronomy-shop/AS-M02.yaml
+  - cases/astronomy-shop/AS-M03.yaml
+  - cases/astronomy-shop/AS-M04.yaml
+  - cases/astronomy-shop/AS-M05.yaml
+  - cases/astronomy-shop/AS-M06.yaml
+
+  - cases/eshop/ES-M01.yaml
+  - cases/eshop/ES-M02.yaml
+  - cases/eshop/ES-M03.yaml
+  - cases/eshop/ES-M04.yaml
+  - cases/eshop/ES-M05.yaml
+
+  - cases/teastore/TS-M01.yaml
+  - cases/teastore/TS-M02.yaml
+  - cases/teastore/TS-M03.yaml
+  - cases/teastore/TS-M04.yaml
+  - cases/teastore/TS-M05.yaml

@@ -54,12 +54,28 @@ def build_graph(
                 type=NodeType.SERVICE,
             ),
             ArchitectureNode(
+                id="shipping",
+                type=NodeType.SERVICE,
+            ),
+            ArchitectureNode(
+                id="frontend",
+                type=NodeType.SERVICE,
+            ),
+            ArchitectureNode(
+                id="cart",
+                type=NodeType.SERVICE,
+            ),
+            ArchitectureNode(
                 id="gateway",
                 type=NodeType.GATEWAY,
             ),
             ArchitectureNode(
                 id="order-db",
                 type=NodeType.DATASTORE,
+            ),
+            ArchitectureNode(
+                id="kafka",
+                type=NodeType.BROKER,
             ),
             ArchitectureNode(
                 id="external",

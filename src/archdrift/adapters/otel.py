@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
+from typing import TypeVar, cast
 
 from archdrift.model.evidence import (
     EvidenceRecord,
@@ -18,9 +20,6 @@ from archdrift.model.observation import (
     NormalizedObservation,
     NormalizedRelationObservation,
 )
-
-from collections.abc import Hashable, Mapping
-from typing import TypeVar, cast
 
 # =============================================================================
 # Exceptions

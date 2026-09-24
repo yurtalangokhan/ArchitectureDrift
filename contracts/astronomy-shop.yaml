@@ -4,19 +4,68 @@ system_id: astronomy-shop
 
 metadata:
   case_system: OpenTelemetry Astronomy Shop
-  purpose: Controlled architecture conformance experiment
+  purpose: Controlled multi-evidence architecture-conformance experiment
+  revision: AS-CONTRACTS-02
 
 contracts:
   - id: AS-C001
     type: FORBIDDEN_RELATION
-
     description: >
       Checkout must not directly invoke the recommendation service.
-
     rationale: >
-      This contract defines the architectural expectation associated
-      with controlled mutation AS-M01.
-
+      Controlled architecture constraint for mutation AS-M01.
     source: checkout
     relation: CALLS
     target: recommendation
+
+  - id: AS-C002
+    type: FORBIDDEN_RELATION
+    description: >
+      Payment must not directly invoke the shipping service.
+    rationale: >
+      Controlled architecture constraint for mutation AS-M02.
+    source: payment
+    relation: CALLS
+    target: shipping
+
+  - id: AS-C003
+    type: FORBIDDEN_RELATION
+    description: >
+      Frontend must not directly invoke the payment service.
+    rationale: >
+      Checkout remains the intended payment orchestration boundary.
+    source: frontend
+    relation: CALLS
+    target: payment
+
+  - id: AS-C004
+    type: FORBIDDEN_RELATION
+    description: >
+      Cart must not directly invoke the recommendation service.
+    rationale: >
+      Controlled architecture constraint for mutation AS-M04.
+    source: cart
+    relation: CALLS
+    target: recommendation
+
+  - id: AS-C005
+    type: FORBIDDEN_RELATION
+    description: >
+      Frontend must not publish directly to the Kafka broker.
+    rationale: >
+      Controlled asynchronous-communication mutation for AS-M05.
+    source: frontend
+    relation: PUBLISHES_TO
+    target: kafka
+
+  - id: AS-C006
+    type: COMMUNICATION_MODE
+    description: >
+      Checkout-to-Kafka communication may use publishing semantics
+      but must not use subscription semantics.
+    rationale: >
+      Controlled communication-mode mutation for AS-M06.
+    source: checkout
+    target: kafka
+    allowed_relations:
+      - PUBLISHES_TO

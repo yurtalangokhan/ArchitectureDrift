@@ -7,24 +7,6 @@ from archdrift.analysis.conformance import (
     evaluate_contract,
     evaluate_contract_document,
 )
-from archdrift.analysis.graph_delta import (
-    GraphComparisonError,
-    GraphDelta,
-    GraphDeltaError,
-    compute_baseline_mutant_delta,
-    compute_graph_delta,
-    matches_expected_delta,
-)
-from archdrift.analysis.normalize import (
-    INTERACTION_TO_RELATION,
-    CanonicalCandidate,
-    CanonicalNodeCandidate,
-    CanonicalRelationCandidate,
-    canonicalize_node_observation,
-    canonicalize_observation,
-    canonicalize_relation_observation,
-)
-
 from archdrift.analysis.fusion import (
     CandidateConflictError,
     EvidenceGraphViews,
@@ -34,6 +16,36 @@ from archdrift.analysis.fusion import (
     RelationSupport,
     build_evidence_graph_views,
     reconstruct_observed_graph,
+)
+from archdrift.analysis.graph_delta import (
+    GraphComparisonError,
+    GraphDelta,
+    GraphDeltaError,
+    compute_baseline_mutant_delta,
+    compute_graph_delta,
+    matches_expected_delta,
+)
+from archdrift.analysis.metrics import (
+    ContractViolationMetrics,
+    EvidenceViewMetrics,
+    ExperimentMetrics,
+    MetricsConsistencyError,
+    MetricsError,
+    SetDetectionMetrics,
+    StructuralDetectionMetrics,
+    compute_experiment_metrics,
+    compute_set_detection_metrics,
+    evaluate_contract_violation_detection,
+    evaluate_structural_detection,
+)
+from archdrift.analysis.normalize import (
+    INTERACTION_TO_RELATION,
+    CanonicalCandidate,
+    CanonicalNodeCandidate,
+    CanonicalRelationCandidate,
+    canonicalize_node_observation,
+    canonicalize_observation,
+    canonicalize_relation_observation,
 )
 
 __all__ = [
@@ -69,4 +81,16 @@ __all__ = [
     "RelationSupport",
     "build_evidence_graph_views",
     "reconstruct_observed_graph",
+    # Metrics
+    "ContractViolationMetrics",
+    "EvidenceViewMetrics",
+    "ExperimentMetrics",
+    "MetricsConsistencyError",
+    "MetricsError",
+    "SetDetectionMetrics",
+    "StructuralDetectionMetrics",
+    "compute_experiment_metrics",
+    "compute_set_detection_metrics",
+    "evaluate_contract_violation_detection",
+    "evaluate_structural_detection",
 ]

@@ -1,1 +1,68 @@
-"""Controlled experiment execution package."""
+from archdrift.experiments.activation import (
+    MutationActivationError,
+    apply_mutation,
+)
+from archdrift.experiments.runner import (
+    CaseAlias,
+    CaseComponent,
+    CaseDefinition,
+    ExperimentConfigurationError,
+    ExperimentConsistencyError,
+    ExperimentError,
+    ExperimentResult,
+    NonRuntimeEvidenceConfig,
+    RuntimeEvidenceConfig,
+    load_case_definition,
+    run_case,
+)
+
+from archdrift.experiments.reporting import (
+    ReportPaths,
+    write_suite_reports,
+)
+from archdrift.experiments.suite import (
+    CaseInputManifest,
+    EvidenceModeAggregate,
+    ExperimentSuiteDefinition,
+    ExperimentSuiteResult,
+    InputArtifactDigest,
+    ScopeAggregate,
+    SuiteCaseResult,
+    SuiteConfigurationError,
+    SuiteError,
+    SuiteMetadata,
+    build_case_input_manifest,
+    load_suite_definition,
+    run_suite,
+)
+
+__all__ = [
+    "CaseAlias",
+    "CaseComponent",
+    "CaseDefinition",
+    "ExperimentConfigurationError",
+    "ExperimentConsistencyError",
+    "ExperimentError",
+    "ExperimentResult",
+    "MutationActivationError",
+    "NonRuntimeEvidenceConfig",
+    "RuntimeEvidenceConfig",
+    "apply_mutation",
+    "load_case_definition",
+    "run_case",
+    "CaseInputManifest",
+    "EvidenceModeAggregate",
+    "ExperimentSuiteDefinition",
+    "ExperimentSuiteResult",
+    "InputArtifactDigest",
+    "ReportPaths",
+    "ScopeAggregate",
+    "SuiteCaseResult",
+    "SuiteConfigurationError",
+    "SuiteError",
+    "SuiteMetadata",
+    "build_case_input_manifest",
+    "load_suite_definition",
+    "run_suite",
+    "write_suite_reports",
+]

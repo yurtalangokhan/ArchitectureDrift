@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: ES-M03
+system_id: eshop
+
+description: >
+  Introduce an unexpected CALLS relation from Ordering API to Catalog API.
+
+rationale: >
+  Controlled dependency observable through both evidence channels.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: ordering-api
+      relation: CALLS
+      target: catalog-api
+
+expected_delta:
+  added_relations:
+    - source: ordering-api
+      relation: CALLS
+      target: catalog-api
+
+expected_violated_contracts:
+  - ES-C003

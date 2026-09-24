@@ -1,10 +1,60 @@
-# =============================================================================
-# .NET eShop Architecture Contract
-#
-# The final schema will be implemented in WP-02.
-# =============================================================================
-
 schema_version: "1.0"
+
 system_id: eshop
 
-contracts: []
+metadata:
+  case_system: .NET eShop
+  purpose: Controlled multi-evidence architecture-conformance experiment
+  revision: ESHOP-CONTRACTS-01
+
+contracts:
+  - id: ES-C001
+    type: FORBIDDEN_RELATION
+    description: >
+      Basket API must not directly invoke Catalog API.
+    rationale: >
+      Controlled architecture constraint for mutation ES-M01.
+    source: basket-api
+    relation: CALLS
+    target: catalog-api
+
+  - id: ES-C002
+    type: FORBIDDEN_RELATION
+    description: >
+      WebApp must not directly invoke Webhooks API.
+    rationale: >
+      Controlled architecture constraint for mutation ES-M02.
+    source: webapp
+    relation: CALLS
+    target: webhooks-api
+
+  - id: ES-C003
+    type: FORBIDDEN_RELATION
+    description: >
+      Ordering API must not directly invoke Catalog API.
+    rationale: >
+      Controlled architecture constraint for mutation ES-M03.
+    source: ordering-api
+    relation: CALLS
+    target: catalog-api
+
+  - id: ES-C004
+    type: FORBIDDEN_RELATION
+    description: >
+      Payment Processor must not directly invoke Identity API.
+    rationale: >
+      Controlled blind-spot mutation for ES-M04.
+    source: payment-processor
+    relation: CALLS
+    target: identity-api
+
+  - id: ES-C005
+    type: COMMUNICATION_MODE
+    description: >
+      WebApp-to-eventbus communication may publish but must not subscribe.
+    rationale: >
+      Controlled messaging-mode mutation for ES-M05.
+    source: webapp
+    target: eventbus
+    allowed_relations:
+      - PUBLISHES_TO

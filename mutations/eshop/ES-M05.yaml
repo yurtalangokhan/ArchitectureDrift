@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: ES-M05
+system_id: eshop
+
+description: >
+  Introduce an unexpected SUBSCRIBES_TO relation from WebApp to eventbus.
+
+rationale: >
+  Runtime messaging mutation used to evaluate communication-mode detection.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: webapp
+      relation: SUBSCRIBES_TO
+      target: eventbus
+
+expected_delta:
+  added_relations:
+    - source: webapp
+      relation: SUBSCRIBES_TO
+      target: eventbus
+
+expected_violated_contracts:
+  - ES-C005

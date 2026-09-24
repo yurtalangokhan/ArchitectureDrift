@@ -78,9 +78,7 @@ def test_contract_optional_text_is_normalized() -> None:
         target="recommendation",
     )
 
-    assert contract.description == (
-        "Direct communication is forbidden."
-    )
+    assert contract.description == ("Direct communication is forbidden.")
 
     assert contract.rationale is None
 
@@ -134,9 +132,7 @@ def test_resource_ownership_rejects_invalid_relation() -> None:
             id="TEST-C002",
             owner="order-service",
             resource="order-db",
-            relations=(
-                RelationType.CALLS,
-            ),
+            relations=(RelationType.CALLS,),
         )
 
 
@@ -240,9 +236,7 @@ def test_exposure_rejects_subject_as_target() -> None:
         ExposureContract(
             id="TEST-C003",
             subject="checkout",
-            allowed_targets=(
-                "checkout",
-            ),
+            allowed_targets=("checkout",),
         )
 
 
@@ -267,15 +261,9 @@ def test_mediation_contract_can_be_created() -> None:
     assert contract.mediator == "gateway"
     assert contract.target == "checkout"
 
-    assert (
-        contract.source_to_mediator_relation
-        is RelationType.CALLS
-    )
+    assert contract.source_to_mediator_relation is RelationType.CALLS
 
-    assert (
-        contract.mediator_to_target_relation
-        is RelationType.ROUTES_TO
-    )
+    assert contract.mediator_to_target_relation is RelationType.ROUTES_TO
 
     assert contract.direct_relation is RelationType.CALLS
 
@@ -354,14 +342,10 @@ def test_communication_mode_contract_can_be_created() -> None:
         id="TEST-C005",
         source="checkout",
         target="payment",
-        allowed_relations=(
-            RelationType.CALLS,
-        ),
+        allowed_relations=(RelationType.CALLS,),
     )
 
-    assert contract.allowed_relations == (
-        RelationType.CALLS,
-    )
+    assert contract.allowed_relations == (RelationType.CALLS,)
 
 
 def test_communication_mode_requires_relation() -> None:
@@ -402,9 +386,7 @@ def test_communication_mode_requires_distinct_nodes() -> None:
             id="TEST-C005",
             source="checkout",
             target="checkout",
-            allowed_relations=(
-                RelationType.CALLS,
-            ),
+            allowed_relations=(RelationType.CALLS,),
         )
 
 
@@ -443,9 +425,7 @@ def test_document_resolves_all_contract_types() -> None:
                     "id": "C004",
                     "type": "EXPOSURE",
                     "subject": "a",
-                    "allowed_targets": [
-                        "external"
-                    ],
+                    "allowed_targets": ["external"],
                 },
                 {
                     "id": "C005",
@@ -463,9 +443,7 @@ def test_document_resolves_all_contract_types() -> None:
                     "type": "COMMUNICATION_MODE",
                     "source": "a",
                     "target": "b",
-                    "allowed_relations": [
-                        "CALLS"
-                    ],
+                    "allowed_relations": ["CALLS"],
                 },
             ],
         }
@@ -556,10 +534,7 @@ def test_document_orders_contracts_deterministically() -> None:
         ),
     )
 
-    assert tuple(
-        contract.id
-        for contract in document.contracts
-    ) == (
+    assert tuple(contract.id for contract in document.contracts) == (
         "C001",
         "C002",
     )
@@ -578,24 +553,16 @@ def test_document_can_get_contract_by_id() -> None:
         ),
     )
 
-    contract = document.get_contract(
-        "AS-C001"
-    )
+    contract = document.get_contract("AS-C001")
 
     assert contract.id == "AS-C001"
 
 
 def test_unknown_contract_lookup_raises_domain_error() -> None:
-    document = ArchitectureContractDocument(
-        system_id="astronomy-shop"
-    )
+    document = ArchitectureContractDocument(system_id="astronomy-shop")
 
-    with pytest.raises(
-        UnknownContractError
-    ):
-        document.get_contract(
-            "UNKNOWN"
-        )
+    with pytest.raises(UnknownContractError):
+        document.get_contract("UNKNOWN")
 
 
 def test_document_filters_contracts_by_type() -> None:
@@ -617,9 +584,7 @@ def test_document_filters_contracts_by_type() -> None:
         ),
     )
 
-    result = document.contracts_of_type(
-        ContractType.FORBIDDEN_RELATION
-    )
+    result = document.contracts_of_type(ContractType.FORBIDDEN_RELATION)
 
     assert len(result) == 1
     assert result[0].id == "C001"
@@ -634,29 +599,35 @@ def test_load_astronomy_shop_contract_file() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
     document = load_contract_document(
-        project_root
-        / "contracts"
-        / "astronomy-shop.yaml"
+        project_root / "contracts" / "astronomy-shop.yaml"
     )
 
     assert document.system_id == "astronomy-shop"
 
-    assert len(document.contracts) == 1
+    assert len(document.contracts) == 6
 
-    contract = document.get_contract(
-        "AS-C001"
+    assert document.contract_ids == frozenset(
+        {
+            "AS-C001",
+            "AS-C002",
+            "AS-C003",
+            "AS-C004",
+            "AS-C005",
+            "AS-C006",
+        }
     )
 
-    assert isinstance(
-        contract,
-        ForbiddenRelationContract,
-    )
+    assert document.get_contract("AS-C001").type is ContractType.FORBIDDEN_RELATION
 
-    assert contract.relation_identity == (
-        "checkout",
-        RelationType.CALLS,
-        "recommendation",
-    )
+    assert document.get_contract("AS-C002").type is ContractType.FORBIDDEN_RELATION
+
+    assert document.get_contract("AS-C003").type is ContractType.FORBIDDEN_RELATION
+
+    assert document.get_contract("AS-C004").type is ContractType.FORBIDDEN_RELATION
+
+    assert document.get_contract("AS-C005").type is ContractType.FORBIDDEN_RELATION
+
+    assert document.get_contract("AS-C006").type is ContractType.COMMUNICATION_MODE
 
 
 # =============================================================================
@@ -667,12 +638,8 @@ def test_load_astronomy_shop_contract_file() -> None:
 def test_loader_rejects_missing_file(
     tmp_path: Path,
 ) -> None:
-    with pytest.raises(
-        FileNotFoundError
-    ):
-        load_contract_document(
-            tmp_path / "missing.yaml"
-        )
+    with pytest.raises(FileNotFoundError):
+        load_contract_document(tmp_path / "missing.yaml")
 
 
 def test_loader_rejects_empty_document(
@@ -689,9 +656,7 @@ def test_loader_rejects_empty_document(
         ContractDocumentLoadError,
         match="empty",
     ):
-        load_contract_document(
-            contract_file
-        )
+        load_contract_document(contract_file)
 
 
 def test_loader_rejects_non_mapping_root(
@@ -708,9 +673,7 @@ def test_loader_rejects_non_mapping_root(
         ContractDocumentLoadError,
         match="root must be a mapping",
     ):
-        load_contract_document(
-            contract_file
-        )
+        load_contract_document(contract_file)
 
 
 def test_loader_rejects_invalid_yaml(
@@ -727,9 +690,8 @@ def test_loader_rejects_invalid_yaml(
         ContractDocumentLoadError,
         match="Invalid YAML",
     ):
-        load_contract_document(
-            contract_file
-        )
+        load_contract_document(contract_file)
+
 
 def test_contract_document_metadata_is_typed() -> None:
     document = ArchitectureContractDocument(
@@ -741,15 +703,9 @@ def test_contract_document_metadata_is_typed() -> None:
         ),
     )
 
-    assert (
-        document.metadata.case_system
-        == "OpenTelemetry Astronomy Shop"
-    )
+    assert document.metadata.case_system == "OpenTelemetry Astronomy Shop"
 
-    assert (
-        document.metadata.purpose
-        == "Controlled experiment"
-    )
+    assert document.metadata.purpose == "Controlled experiment"
 
     assert document.metadata.revision == "abc123"
 
@@ -817,11 +773,7 @@ def test_contract_document_json_round_trip() -> None:
 
     serialized = document.model_dump_json()
 
-    restored = (
-        ArchitectureContractDocument.model_validate_json(
-            serialized
-        )
-    )
+    restored = ArchitectureContractDocument.model_validate_json(serialized)
 
     assert restored == document
 
@@ -845,10 +797,7 @@ def test_contract_document_is_deterministic() -> None:
         ),
     )
 
-    assert tuple(
-        contract.id
-        for contract in document.contracts
-    ) == (
+    assert tuple(contract.id for contract in document.contracts) == (
         "C001",
         "C002",
     )
@@ -858,18 +807,25 @@ def test_repository_astronomy_contract_metadata() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
     document = load_contract_document(
-        project_root
-        / "contracts"
-        / "astronomy-shop.yaml"
+        project_root / "contracts" / "astronomy-shop.yaml"
     )
 
+    assert document.metadata.case_system == "OpenTelemetry Astronomy Shop"
+
     assert (
-        document.metadata.case_system
-        == "OpenTelemetry Astronomy Shop"
+        document.metadata.purpose
+        == "Controlled multi-evidence architecture-conformance experiment"
     )
+
+    assert document.metadata.revision == "AS-CONTRACTS-02"
 
     assert document.contract_ids == frozenset(
         {
             "AS-C001",
+            "AS-C002",
+            "AS-C003",
+            "AS-C004",
+            "AS-C005",
+            "AS-C006",
         }
     )

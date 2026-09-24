@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+mutation_id: TS-M05
+system_id: teastore
+
+description: >
+  Introduce an unexpected direct CALLS relation from WebUI to Registry.
+
+rationale: >
+  Tests whether the system distinguishes direct invocation from the
+  expected DISCOVERS_VIA communication mode.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: webui
+      relation: CALLS
+      target: registry
+
+expected_delta:
+  added_relations:
+    - source: webui
+      relation: CALLS
+      target: registry
+
+expected_violated_contracts:
+  - TS-C005

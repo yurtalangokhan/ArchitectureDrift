@@ -1,0 +1,39 @@
+schema_version: '1.0'
+case_id: eshop-ES-M02
+system_id: eshop
+variant: ES-M02
+baseline_graph: graphs/baseline/eshop/baseline.yaml
+contract_document: contracts/eshop.yaml
+mutation_oracle: mutations/eshop/ES-M02.yaml
+components:
+- id: basket-api
+  type: SERVICE
+- id: catalog-api
+  type: SERVICE
+- id: identity-api
+  type: SERVICE
+- id: ordering-api
+  type: SERVICE
+- id: order-processor
+  type: SERVICE
+- id: payment-processor
+  type: SERVICE
+- id: webhooks-api
+  type: SERVICE
+- id: webhooksclient
+  type: SERVICE
+- id: webapp
+  type: SERVICE
+- id: redis
+  type: DATASTORE
+- id: postgres
+  type: DATASTORE
+- id: eventbus
+  type: BROKER
+non_runtime:
+  aspire_files:
+  - evidence/non-runtime/eshop/baseline-apphost.cs
+  - evidence/non-runtime/eshop/ES-M02-apphost.cs
+runtime:
+  otlp_files:
+  - evidence/runtime/eshop/baseline-otel.json

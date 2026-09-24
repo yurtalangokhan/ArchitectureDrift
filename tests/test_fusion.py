@@ -1,3 +1,5 @@
+import pytest
+
 from archdrift.analysis import (
     CandidateConflictError,
     CanonicalNodeCandidate,
@@ -15,8 +17,6 @@ from archdrift.model import (
     ReconstructionMode,
     RelationType,
 )
-
-import pytest
 
 
 def non_runtime_evidence(

@@ -1,10 +1,61 @@
-# =============================================================================
-# TeaStore Architecture Contract
-#
-# The final schema will be implemented in WP-02.
-# =============================================================================
-
 schema_version: "1.0"
+
 system_id: teastore
 
-contracts: []
+metadata:
+  case_system: TeaStore
+  purpose: Controlled multi-evidence architecture-conformance experiment
+  revision: TEASTORE-CONTRACTS-01
+
+contracts:
+  - id: TS-C001
+    type: FORBIDDEN_RELATION
+    description: >
+      WebUI must not directly invoke Persistence.
+    rationale: >
+      Controlled runtime-visible mutation for TS-M01.
+    source: webui
+    relation: CALLS
+    target: persistence
+
+  - id: TS-C002
+    type: FORBIDDEN_RELATION
+    description: >
+      Authentication must not directly invoke Image.
+    rationale: >
+      Controlled non-runtime-visible mutation for TS-M02.
+    source: auth
+    relation: CALLS
+    target: image
+
+  - id: TS-C003
+    type: FORBIDDEN_RELATION
+    description: >
+      Recommender must not directly invoke Authentication.
+    rationale: >
+      Controlled mutation visible through both evidence channels.
+    source: recommender
+    relation: CALLS
+    target: auth
+
+  - id: TS-C004
+    type: FORBIDDEN_RELATION
+    description: >
+      Image must not directly invoke Recommender.
+    rationale: >
+      Controlled deliberate blind-spot mutation.
+    source: image
+    relation: CALLS
+    target: recommender
+
+  - id: TS-C005
+    type: COMMUNICATION_MODE
+    description: >
+      WebUI-to-Registry communication must use service-discovery
+      semantics and must not use direct service-call semantics.
+    rationale: >
+      Controlled communication-mode mutation for TS-M05.
+    source: webui
+    target: registry
+    allowed_relations:
+      - DISCOVERS_VIA

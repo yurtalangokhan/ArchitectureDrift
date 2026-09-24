@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: AS-M06
+system_id: astronomy-shop
+
+description: >
+  Introduce an unexpected SUBSCRIBES_TO relation from checkout to Kafka.
+
+rationale: >
+  Exercises communication-mode conformance using runtime messaging evidence.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: checkout
+      relation: SUBSCRIBES_TO
+      target: kafka
+
+expected_delta:
+  added_relations:
+    - source: checkout
+      relation: SUBSCRIBES_TO
+      target: kafka
+
+expected_violated_contracts:
+  - AS-C006

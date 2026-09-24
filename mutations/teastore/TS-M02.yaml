@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+mutation_id: TS-M02
+system_id: teastore
+
+description: >
+  Introduce an unexpected direct CALLS relation from Authentication
+  to Image.
+
+rationale: >
+  Non-runtime-visible controlled dependency.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: auth
+      relation: CALLS
+      target: image
+
+expected_delta:
+  added_relations:
+    - source: auth
+      relation: CALLS
+      target: image
+
+expected_violated_contracts:
+  - TS-C002

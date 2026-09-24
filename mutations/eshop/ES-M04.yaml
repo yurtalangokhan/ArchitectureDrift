@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: ES-M04
+system_id: eshop
+
+description: >
+  Introduce an unexpected CALLS relation from Payment Processor to Identity API.
+
+rationale: >
+  Controlled mutation intentionally absent from the configured evidence.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: payment-processor
+      relation: CALLS
+      target: identity-api
+
+expected_delta:
+  added_relations:
+    - source: payment-processor
+      relation: CALLS
+      target: identity-api
+
+expected_violated_contracts:
+  - ES-C004

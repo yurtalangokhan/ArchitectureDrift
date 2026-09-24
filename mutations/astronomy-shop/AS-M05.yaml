@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+mutation_id: AS-M05
+system_id: astronomy-shop
+
+description: >
+  Introduce an unexpected PUBLISHES_TO relation from frontend to Kafka.
+
+rationale: >
+  Exercises messaging-specific runtime evidence and canonical relation
+  normalization.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: frontend
+      relation: PUBLISHES_TO
+      target: kafka
+
+expected_delta:
+  added_relations:
+    - source: frontend
+      relation: PUBLISHES_TO
+      target: kafka
+
+expected_violated_contracts:
+  - AS-C005

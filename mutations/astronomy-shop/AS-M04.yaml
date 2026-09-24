@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+mutation_id: AS-M04
+system_id: astronomy-shop
+
+description: >
+  Introduce an unexpected direct CALLS relation from cart to recommendation.
+
+rationale: >
+  Represents a dormant or otherwise unobserved mutation that is not exposed
+  by the configured non-runtime or runtime evidence.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: cart
+      relation: CALLS
+      target: recommendation
+
+expected_delta:
+  added_relations:
+    - source: cart
+      relation: CALLS
+      target: recommendation
+
+expected_violated_contracts:
+  - AS-C004

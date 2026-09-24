@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+mutation_id: AS-M03
+system_id: astronomy-shop
+
+description: >
+  Introduce an unexpected direct CALLS relation from frontend to payment.
+
+rationale: >
+  Tests a mutation observable in both non-runtime and runtime evidence.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: frontend
+      relation: CALLS
+      target: payment
+
+expected_delta:
+  added_relations:
+    - source: frontend
+      relation: CALLS
+      target: payment
+
+expected_violated_contracts:
+  - AS-C003

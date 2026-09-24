@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+mutation_id: TS-M04
+system_id: teastore
+
+description: >
+  Introduce an unexpected direct CALLS relation from Image to Recommender.
+
+rationale: >
+  Controlled mutation intentionally absent from both configured
+  evidence channels.
+
+operations:
+  - operation: ADD_RELATION
+    relation:
+      source: image
+      relation: CALLS
+      target: recommender
+
+expected_delta:
+  added_relations:
+    - source: image
+      relation: CALLS
+      target: recommender
+
+expected_violated_contracts:
+  - TS-C004
