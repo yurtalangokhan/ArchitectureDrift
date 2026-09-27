@@ -1,0 +1,107 @@
+schema_version: "1.0"
+
+subjects:
+
+  astronomy-shop:
+    subject_root: subjects/astronomy-shop
+
+    non_runtime:
+      compose:
+        project_directory: .
+        files:
+          - compose.yaml
+          - compose.full.yaml
+
+    scope:
+      nodes:
+        - ad
+        - cart
+        - checkout
+        - currency
+        - email
+        - frontend
+        - kafka
+        - payment
+        - product-catalog
+        - quote
+        - recommendation
+        - shipping
+
+      node_types:
+        ad: SERVICE
+        cart: SERVICE
+        checkout: SERVICE
+        currency: SERVICE
+        email: SERVICE
+        frontend: SERVICE
+        kafka: BROKER
+        payment: SERVICE
+        product-catalog: SERVICE
+        quote: SERVICE
+        recommendation: SERVICE
+        shipping: SERVICE
+
+  eshop:
+    subject_root: subjects/eshop
+
+    non_runtime:
+      aspire:
+        files:
+          - src/eShop.AppHost/Program.cs
+
+    scope:
+      nodes:
+        - basket-api
+        - catalog-api
+        - identity-api
+        - ordering-api
+        - order-processor
+        - payment-processor
+        - webhooks-api
+        - webhooksclient
+        - webapp
+        - redis
+        - postgres
+        - eventbus
+
+      node_types:
+        basket-api: SERVICE
+        catalog-api: SERVICE
+        identity-api: SERVICE
+        ordering-api: SERVICE
+        order-processor: SERVICE
+        payment-processor: SERVICE
+        webhooks-api: SERVICE
+        webhooksclient: SERVICE
+        webapp: SERVICE
+        redis: DATASTORE
+        postgres: DATASTORE
+        eventbus: BROKER
+
+  teastore:
+    subject_root: subjects/teastore
+
+    non_runtime:
+      compose:
+        project_directory: examples/docker
+        files:
+          - examples/docker/docker-compose_default.yaml
+
+    scope:
+      nodes:
+        - webui
+        - auth
+        - recommender
+        - persistence
+        - image
+        - registry
+        - database
+
+      node_types:
+        webui: SERVICE
+        auth: SERVICE
+        recommender: SERVICE
+        persistence: SERVICE
+        image: SERVICE
+        registry: REGISTRY
+        database: DATASTORE

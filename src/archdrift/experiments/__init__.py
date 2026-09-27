@@ -2,6 +2,10 @@ from archdrift.experiments.activation import (
     MutationActivationError,
     apply_mutation,
 )
+from archdrift.experiments.reporting import (
+    ReportPaths,
+    write_suite_reports,
+)
 from archdrift.experiments.runner import (
     CaseAlias,
     CaseComponent,
@@ -15,10 +19,23 @@ from archdrift.experiments.runner import (
     load_case_definition,
     run_case,
 )
-
-from archdrift.experiments.reporting import (
-    ReportPaths,
-    write_suite_reports,
+from archdrift.experiments.subjects import (
+    LockedSubject,
+    SubjectAcquisitionError,
+    SubjectCheckout,
+    SubjectConfigurationError,
+    SubjectLock,
+    SubjectManifest,
+    SubjectRepositoryError,
+    SubjectSpec,
+    acquire_subjects,
+    acquire_subjects_from_lock,
+    create_subject_lock,
+    load_subject_lock,
+    load_subject_manifest,
+    resolve_subject_lock,
+    verify_subjects,
+    write_subject_lock,
 )
 from archdrift.experiments.suite import (
     CaseInputManifest,
@@ -65,4 +82,20 @@ __all__ = [
     "load_suite_definition",
     "run_suite",
     "write_suite_reports",
+    "LockedSubject",
+    "SubjectAcquisitionError",
+    "SubjectCheckout",
+    "SubjectConfigurationError",
+    "SubjectLock",
+    "SubjectManifest",
+    "SubjectRepositoryError",
+    "SubjectSpec",
+    "acquire_subjects",
+    "acquire_subjects_from_lock",
+    "create_subject_lock",
+    "load_subject_lock",
+    "load_subject_manifest",
+    "resolve_subject_lock",
+    "verify_subjects",
+    "write_subject_lock",
 ]

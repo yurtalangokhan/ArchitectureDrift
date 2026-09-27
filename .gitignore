@@ -31,3 +31,6 @@ results/
 # Temporary files
 *.log
 *.tmp
+
+/subjects/*
+!/subjects/.gitkeep

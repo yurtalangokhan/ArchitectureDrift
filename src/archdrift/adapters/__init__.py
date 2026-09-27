@@ -11,6 +11,11 @@ from archdrift.adapters.compose import (
     ComposeAdapter,
     ComposeAdapterError,
 )
+from archdrift.adapters.compose_render import (
+    ComposeRenderError,
+    DockerComposeRenderer,
+    RenderedComposeConfig,
+)
 from archdrift.adapters.otel import (
     OtelAdapter,
     OtelAdapterError,
@@ -34,4 +39,7 @@ __all__ = [
     "OtelAdapter",
     "OtelAdapterError",
     "OtelSpanKind",
+    "ComposeRenderError",
+    "DockerComposeRenderer",
+    "RenderedComposeConfig",
 ]

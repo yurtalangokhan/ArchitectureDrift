@@ -5,28 +5,13 @@ from pathlib import Path
 
 import yaml
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-NON_RUNTIME_DIR = (
-    PROJECT_ROOT
-    / "evidence"
-    / "non-runtime"
-    / "astronomy-shop"
-)
+NON_RUNTIME_DIR = PROJECT_ROOT / "evidence" / "non-runtime" / "astronomy-shop"
 
-RUNTIME_DIR = (
-    PROJECT_ROOT
-    / "evidence"
-    / "runtime"
-    / "astronomy-shop"
-)
+RUNTIME_DIR = PROJECT_ROOT / "evidence" / "runtime" / "astronomy-shop"
 
-CASE_DIR = (
-    PROJECT_ROOT
-    / "cases"
-    / "astronomy-shop"
-)
+CASE_DIR = PROJECT_ROOT / "cases" / "astronomy-shop"
 
 
 SERVICES = {
@@ -59,6 +44,8 @@ BASELINE_CALLS = (
     ("checkout", "currency", "grpc"),
     ("recommendation", "product-catalog", "grpc"),
     ("shipping", "quote", "http"),
+    ("frontend", "currency", "grpc"),
+    ("frontend", "shipping", "http"),
 )
 
 
@@ -195,10 +182,7 @@ def write_json(
 
 
 def generate_baseline_compose() -> None:
-    services: dict[str, object] = {
-        service: {}
-        for service in SERVICES
-    }
+    services: dict[str, object] = {service: {} for service in SERVICES}
 
     environment_by_source: dict[
         str,
@@ -216,20 +200,15 @@ def generate_baseline_compose() -> None:
         environment_by_source.setdefault(
             source,
             {},
-        )[
-            f"ARCHDRIFT_TARGET_{index:02d}"
-        ] = f"http://{target}:8080"
+        )[f"ARCHDRIFT_TARGET_{index:02d}"] = f"http://{target}:8080"
 
-    for source, environment in (
-        environment_by_source.items()
-    ):
+    for source, environment in environment_by_source.items():
         services[source] = {
             "environment": environment,
         }
 
     write_yaml(
-        NON_RUNTIME_DIR
-        / "baseline-compose.yaml",
+        NON_RUNTIME_DIR / "baseline-compose.yaml",
         {
             "services": services,
         },
@@ -242,15 +221,12 @@ def generate_non_runtime_overlays() -> None:
         target,
     ) in NON_RUNTIME_MUTATIONS.items():
         write_yaml(
-            NON_RUNTIME_DIR
-            / f"{mutation_id}-overlay.yaml",
+            NON_RUNTIME_DIR / f"{mutation_id}-overlay.yaml",
             {
                 "services": {
                     source: {
                         "environment": {
-                            "ARCHDRIFT_MUTATION_TARGET": (
-                                f"http://{target}:8080"
-                            )
+                            "ARCHDRIFT_MUTATION_TARGET": (f"http://{target}:8080")
                         }
                     },
                     target: {},
@@ -290,9 +266,7 @@ def generate_baseline_otlp() -> None:
             source,
             spans,
         )
-        for source, spans in sorted(
-            spans_by_source.items()
-        )
+        for source, spans in sorted(spans_by_source.items())
     ]
 
     # Keep Kafka visible as a reconstructed node even though baseline
@@ -313,8 +287,7 @@ def generate_baseline_otlp() -> None:
     )
 
     write_json(
-        RUNTIME_DIR
-        / "baseline-otel.json",
+        RUNTIME_DIR / "baseline-otel.json",
         {
             "resourceSpans": resource_spans,
         },
@@ -329,14 +302,11 @@ def generate_runtime_call_mutations() -> None:
             target,
         ),
     ) in enumerate(
-        sorted(
-            RUNTIME_CALL_MUTATIONS.items()
-        ),
+        sorted(RUNTIME_CALL_MUTATIONS.items()),
         start=100,
     ):
         write_json(
-            RUNTIME_DIR
-            / f"{mutation_id}-otel.json",
+            RUNTIME_DIR / f"{mutation_id}-otel.json",
             {
                 "resourceSpans": [
                     resource_span(
@@ -357,8 +327,7 @@ def generate_runtime_call_mutations() -> None:
 
 def generate_runtime_messaging_mutations() -> None:
     write_json(
-        RUNTIME_DIR
-        / "AS-M05-otel.json",
+        RUNTIME_DIR / "AS-M05-otel.json",
         {
             "resourceSpans": [
                 resource_span(
@@ -391,8 +360,7 @@ def generate_runtime_messaging_mutations() -> None:
     )
 
     write_json(
-        RUNTIME_DIR
-        / "AS-M06-otel.json",
+        RUNTIME_DIR / "AS-M06-otel.json",
         {
             "resourceSpans": [
                 resource_span(
@@ -428,19 +396,14 @@ def generate_runtime_messaging_mutations() -> None:
 def case_document(
     mutation_id: str,
 ) -> dict[str, object]:
-    compose_files = [
-        "evidence/non-runtime/astronomy-shop/baseline-compose.yaml"
-    ]
+    compose_files = ["evidence/non-runtime/astronomy-shop/baseline-compose.yaml"]
 
     if mutation_id in NON_RUNTIME_MUTATIONS:
         compose_files.append(
-            "evidence/non-runtime/astronomy-shop/"
-            f"{mutation_id}-overlay.yaml"
+            "evidence/non-runtime/astronomy-shop/" f"{mutation_id}-overlay.yaml"
         )
 
-    otlp_files = [
-        "evidence/runtime/astronomy-shop/baseline-otel.json"
-    ]
+    otlp_files = ["evidence/runtime/astronomy-shop/baseline-otel.json"]
 
     if mutation_id in {
         "AS-M01",
@@ -448,36 +411,22 @@ def case_document(
         "AS-M05",
         "AS-M06",
     }:
-        otlp_files.append(
-            "evidence/runtime/astronomy-shop/"
-            f"{mutation_id}-otel.json"
-        )
+        otlp_files.append("evidence/runtime/astronomy-shop/" f"{mutation_id}-otel.json")
 
     return {
         "schema_version": "1.0",
-        "case_id": (
-            f"astronomy-shop-{mutation_id}"
-        ),
+        "case_id": (f"astronomy-shop-{mutation_id}"),
         "system_id": "astronomy-shop",
         "variant": mutation_id,
-        "baseline_graph": (
-            "graphs/baseline/astronomy-shop/baseline.yaml"
-        ),
-        "contract_document": (
-            "contracts/astronomy-shop.yaml"
-        ),
-        "mutation_oracle": (
-            "mutations/astronomy-shop/"
-            f"{mutation_id}.yaml"
-        ),
+        "baseline_graph": ("graphs/baseline/astronomy-shop/baseline.yaml"),
+        "contract_document": ("contracts/astronomy-shop.yaml"),
+        "mutation_oracle": ("mutations/astronomy-shop/" f"{mutation_id}.yaml"),
         "components": [
             {
                 "id": component_id,
                 "type": component_type,
             }
-            for component_id, component_type in (
-                SERVICES.items()
-            )
+            for component_id, component_type in (SERVICES.items())
         ],
         "non_runtime": {
             "compose_files": compose_files,
@@ -498,11 +447,8 @@ def generate_cases() -> None:
         "AS-M06",
     ):
         write_yaml(
-            CASE_DIR
-            / f"{mutation_id}.yaml",
-            case_document(
-                mutation_id
-            ),
+            CASE_DIR / f"{mutation_id}.yaml",
+            case_document(mutation_id),
         )
 
 

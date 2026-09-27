@@ -47,6 +47,14 @@ from archdrift.analysis.normalize import (
     canonicalize_observation,
     canonicalize_relation_observation,
 )
+from archdrift.analysis.scope import (
+    EvidenceScope,
+    EvidenceScopeError,
+    ExcludedObservation,
+    ScopeExclusionReason,
+    ScopedObservationSet,
+    apply_evidence_scope,
+)
 
 __all__ = [
     # Graph delta
@@ -93,4 +101,11 @@ __all__ = [
     "compute_set_detection_metrics",
     "evaluate_contract_violation_detection",
     "evaluate_structural_detection",
+    # Scope
+    "EvidenceScope",
+    "EvidenceScopeError",
+    "ExcludedObservation",
+    "ScopeExclusionReason",
+    "ScopedObservationSet",
+    "apply_evidence_scope",
 ]

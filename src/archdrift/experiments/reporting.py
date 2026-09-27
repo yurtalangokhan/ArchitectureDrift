@@ -451,13 +451,13 @@ def _write_markdown(
         )
 
         lines.append(
-            (
+            
                 f"| {case.system_id} "
                 f"| {case.mutation_id} "
                 f"| {'Yes' if non_runtime.false_negative == 0 else 'No'} "
                 f"| {'Yes' if runtime.false_negative == 0 else 'No'} "
                 f"| {'Yes' if fused.false_negative == 0 else 'No'} |"
-            )
+            
         )
 
     lines.extend(

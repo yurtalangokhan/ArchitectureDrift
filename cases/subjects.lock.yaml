@@ -1,0 +1,14 @@
+schema_version: '1.0'
+subjects:
+- id: astronomy-shop
+  repository: https://github.com/open-telemetry/opentelemetry-demo.git
+  requested_ref: HEAD
+  commit: 6a89faba15c8097c4bd82bcc15d906ac70baccd9
+- id: eshop
+  repository: https://github.com/dotnet/eShop.git
+  requested_ref: HEAD
+  commit: b4a40872005d4bb29e5b1fa1ff7e244143d39215
+- id: teastore
+  repository: https://github.com/DescartesResearch/TeaStore.git
+  requested_ref: HEAD
+  commit: 34b37f7e7be433ce72d5f9455e66922a13116749

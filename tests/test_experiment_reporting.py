@@ -7,7 +7,6 @@ from archdrift.experiments import (
     write_suite_reports,
 )
 
-
 PROJECT_ROOT = (
     Path(__file__).resolve().parents[1]
 )

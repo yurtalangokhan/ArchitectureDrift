@@ -10,15 +10,13 @@ from archdrift.model import (
     ArchitectureGraph,
     ArchitectureNode,
     ArchitectureRelation,
+    ContractType,
     ExpectedGraphDelta,
     GraphMetadata,
     GraphRole,
     NodeType,
     ReconstructionMode,
     RelationType,
-    ContractType,
-    GraphMetadata,
-    GraphRole,
 )
 
 # =============================================================================
