@@ -1,3 +1,8 @@
+from archdrift.analysis.baseline import (
+    BaselineAnalysisError,
+    BaselineReconstructionAnalysis,
+    analyze_baseline_reconstruction,
+)
 from archdrift.analysis.conformance import (
     ConformanceError,
     ConformanceEvaluationError,
@@ -51,9 +56,12 @@ from archdrift.analysis.scope import (
     EvidenceScope,
     EvidenceScopeError,
     ExcludedObservation,
-    ScopeExclusionReason,
     ScopedObservationSet,
+    ScopeExclusionReason,
     apply_evidence_scope,
+)
+from archdrift.analysis.static_observation import (
+    static_interactions_to_observations,
 )
 
 __all__ = [
@@ -108,4 +116,10 @@ __all__ = [
     "ScopeExclusionReason",
     "ScopedObservationSet",
     "apply_evidence_scope",
+    # Baseline
+    "BaselineAnalysisError",
+    "BaselineReconstructionAnalysis",
+    "analyze_baseline_reconstruction",
+    # Static observation
+    "static_interactions_to_observations",
 ]

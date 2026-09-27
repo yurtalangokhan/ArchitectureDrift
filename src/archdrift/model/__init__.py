@@ -60,6 +60,15 @@ from archdrift.model.observation import (
     NormalizedRelationObservation,
     ObservationKind,
 )
+from archdrift.model.source_static import (
+    EndpointBinding,
+    ResolvedStaticInteraction,
+    SourcePathRule,
+    SourceStaticFinding,
+    StaticResolution,
+    StaticResolutionSet,
+    StaticResolutionStatus,
+)
 
 __all__ = [
     # Graph
@@ -119,4 +128,11 @@ __all__ = [
     "NormalizedObservation",
     "NormalizedRelationObservation",
     "ObservationKind",
+
+    "EndpointBinding",
+    "ResolvedStaticInteraction",
+    "SourceStaticFinding",
+    "StaticResolution",
+    "StaticResolutionSet",
+    "StaticResolutionStatus",
 ]

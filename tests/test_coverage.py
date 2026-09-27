@@ -1,3 +1,6 @@
+from archdrift.analysis.coverage import (
+    evaluate_baseline_coverage,
+)
 from archdrift.model import (
     ArchitectureGraph,
     ArchitectureNode,
@@ -7,10 +10,6 @@ from archdrift.model import (
     NodeType,
     ReconstructionMode,
     RelationType,
-)
-from archdrift.analysis.coverage import (
-    BaselineCoverageMetrics,
-    evaluate_baseline_coverage,
 )
 
 

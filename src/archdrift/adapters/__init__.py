@@ -25,6 +25,14 @@ from archdrift.adapters.repository import (
     RepositoryAdapter,
     RepositoryServiceSpec,
 )
+from archdrift.adapters.semgrep import (
+    SemgrepAdapterError,
+    SemgrepExecutionError,
+    SemgrepResultAdapter,
+    SemgrepResultError,
+    SemgrepRunner,
+    StaticRuleSemantics,
+)
 
 __all__ = [
     "AdapterPathError",
@@ -42,4 +50,10 @@ __all__ = [
     "ComposeRenderError",
     "DockerComposeRenderer",
     "RenderedComposeConfig",
+    "SemgrepAdapterError",
+    "SemgrepExecutionError",
+    "SemgrepResultAdapter",
+    "SemgrepResultError",
+    "SemgrepRunner",
+    "StaticRuleSemantics",
 ]

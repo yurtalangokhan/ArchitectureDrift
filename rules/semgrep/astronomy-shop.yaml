@@ -1,0 +1,32 @@
+rules:
+  - id: archdrift.typescript.fetch
+    languages:
+      - typescript
+      - javascript
+    severity: INFO
+    message: "ARCHDRIFT_TARGET=$TARGET"
+
+    paths:
+      include:
+        - "**/src/frontend/gateways/**/*.ts"
+        - "**/src/frontend/gateways/**/*.js"
+
+    pattern: fetch($TARGET, ...)
+
+  - id: archdrift.typescript.grpc-client
+    languages:
+      - typescript
+      - javascript
+    severity: INFO
+    message: "ARCHDRIFT_TARGET=$TARGET"
+
+    paths:
+      include:
+        - "**/src/frontend/gateways/rpc/**/*.ts"
+        - "**/src/frontend/gateways/rpc/**/*.js"
+
+    patterns:
+      - pattern: new $CLIENT($TARGET, ChannelCredentials.createInsecure())
+      - metavariable-regex:
+          metavariable: $CLIENT
+          regex: '^[A-Za-z_$][A-Za-z0-9_$]*ServiceClient$'
