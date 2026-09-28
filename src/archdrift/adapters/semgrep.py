@@ -48,14 +48,32 @@ STATIC_RULES: dict[
 ] = {
     "archdrift.typescript.fetch": (
         StaticRuleSemantics(
-            interaction=(InteractionType.SERVICE_CALL),
+            interaction=InteractionType.SERVICE_CALL,
             protocol="http",
         )
     ),
     "archdrift.typescript.grpc-client": (
         StaticRuleSemantics(
-            interaction=(InteractionType.SERVICE_CALL),
+            interaction=InteractionType.SERVICE_CALL,
             protocol="grpc",
+        )
+    ),
+    "archdrift.go.grpc-env-client": (
+        StaticRuleSemantics(
+            interaction=InteractionType.SERVICE_CALL,
+            protocol="grpc",
+        )
+    ),
+    "archdrift.python.grpc-env-client": (
+        StaticRuleSemantics(
+            interaction=InteractionType.SERVICE_CALL,
+            protocol="grpc",
+        )
+    ),
+    "archdrift.rust.http-env-client": (
+        StaticRuleSemantics(
+            interaction=InteractionType.SERVICE_CALL,
+            protocol="http",
         )
     ),
 }
@@ -93,7 +111,6 @@ def _canonical_rule_id(
     raise SemgrepResultError(
         "Semgrep rule id is ambiguous after normalization: " f"{raw_rule_id!r}"
     )
-
 
 
 class _SemgrepPosition(BaseModel):
@@ -236,7 +253,10 @@ class SemgrepResultAdapter:
                 ),
             )
         )
+
+
 _TARGET_MESSAGE_PREFIX = "ARCHDRIFT_TARGET="
+
 
 def _extract_target_expression(
     message: str,
@@ -252,28 +272,22 @@ def _extract_target_expression(
 
     normalized = message.strip()
 
-    if not normalized.startswith(
-        _TARGET_MESSAGE_PREFIX
-    ):
+    if not normalized.startswith(_TARGET_MESSAGE_PREFIX):
         raise SemgrepResultError(
             "ArchitectureDrift Semgrep result does not contain "
             "the expected target marker: "
             f"{message!r}"
         )
 
-    target_expression = normalized[
-        len(
-            _TARGET_MESSAGE_PREFIX
-        ) :
-    ].strip()
+    target_expression = normalized[len(_TARGET_MESSAGE_PREFIX) :].strip()
 
     if not target_expression:
         raise SemgrepResultError(
-            "ArchitectureDrift Semgrep result contains "
-            "an empty target expression."
+            "ArchitectureDrift Semgrep result contains " "an empty target expression."
         )
 
     return target_expression
+
 
 class SemgrepRunner:
     """

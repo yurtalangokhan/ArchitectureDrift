@@ -18,50 +18,29 @@ def finding(
     target: str,
 ) -> SourceStaticFinding:
     return SourceStaticFinding(
-        rule_id=(
-            "archdrift.typescript.grpc-client"
-        ),
+        rule_id=("archdrift.typescript.grpc-client"),
         path=path,
         line=9,
-        interaction=(
-            InteractionType.SERVICE_CALL
-        ),
+        interaction=(InteractionType.SERVICE_CALL),
         target_expression=target,
         protocol="grpc",
     )
 
 
 def test_extract_environment_key_from_identifier() -> None:
-    assert (
-        extract_environment_key(
-            "CURRENCY_ADDR"
-        )
-        == "CURRENCY_ADDR"
-    )
+    assert extract_environment_key("CURRENCY_ADDR") == "CURRENCY_ADDR"
 
 
 def test_extract_environment_key_from_template_literal() -> None:
-    assert (
-        extract_environment_key(
-            "`${SHIPPING_ADDR}/get-quote`"
-        )
-        == "SHIPPING_ADDR"
-    )
+    assert extract_environment_key("`${SHIPPING_ADDR}/get-quote`") == "SHIPPING_ADDR"
 
 
 def test_extract_environment_key_rejects_multiple_variables() -> None:
-    assert (
-        extract_environment_key(
-            "`${HOST}:${PORT}`"
-        )
-        is None
-    )
+    assert extract_environment_key("`${HOST}:${PORT}`") is None
 
 
 def test_static_target_resolver_resolves_service_call() -> None:
-    resolver = (
-        StaticTargetResolver()
-    )
+    resolver = StaticTargetResolver()
 
     result = resolver.resolve(
         findings=(
@@ -71,80 +50,46 @@ def test_static_target_resolver_resolves_service_call() -> None:
                     "src/frontend/gateways/"
                     "rpc/Currency.gateway.ts"
                 ),
-                target=(
-                    "CURRENCY_ADDR"
-                ),
+                target=("CURRENCY_ADDR"),
             ),
         ),
         source_rules=(
             SourcePathRule(
-                path_prefix=(
-                    "src/frontend"
-                ),
-                service_id=(
-                    "frontend"
-                ),
+                path_prefix=("src/frontend"),
+                service_id=("frontend"),
             ),
         ),
         bindings=(
             EndpointBinding(
-                source_service_id=(
-                    "frontend"
-                ),
-                environment_key=(
-                    "CURRENCY_ADDR"
-                ),
-                target_service_id=(
-                    "currency"
-                ),
-                target_type=(
-                    NodeType.SERVICE
-                ),
-                raw_value=(
-                    "currency:8080"
-                ),
+                source_service_id=("frontend"),
+                environment_key=("CURRENCY_ADDR"),
+                target_service_id=("currency"),
+                target_type=(NodeType.SERVICE),
+                raw_value=("currency:8080"),
             ),
         ),
     )
 
-    assert (
-        result.resolved_count
-        == 1
-    )
+    assert result.resolved_count == 1
 
-    assert (
-        result.unresolved_count
-        == 0
-    )
+    assert result.unresolved_count == 0
 
-    resolution = (
-        result.results[0]
-    )
+    resolution = result.results[0]
 
-    assert (
-        resolution.status
-        is StaticResolutionStatus.RESOLVED
-    )
+    assert resolution.status is StaticResolutionStatus.RESOLVED
 
-    assert (
-        resolution.resolved
-        is not None
-    )
+    assert resolution.resolved is not None
 
-    assert (
-        resolution.resolved
-        .source_service_id
-        == "frontend"
-    )
+    assert resolution.resolved.source_service_id == "frontend"
 
-    assert (
-        resolution.resolved
-        .environment_key
-        == "CURRENCY_ADDR"
-    )
+    assert resolution.resolved.environment_key == "CURRENCY_ADDR"
 
-    assert (
-        resolution.resolved
-        .target_service_id
-        == "currency"
-    )
+    assert resolution.resolved.target_service_id == "currency"
+
+
+def test_extract_environment_key_from_double_quoted_identifier() -> None:
+    assert extract_environment_key('"PRODUCT_CATALOG_ADDR"') == "PRODUCT_CATALOG_ADDR"
+
+
+def test_extract_environment_key_from_single_quoted_identifier() -> None:
+    assert extract_environment_key("'PRODUCT_CATALOG_ADDR'") == "PRODUCT_CATALOG_ADDR"

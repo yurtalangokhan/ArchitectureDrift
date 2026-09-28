@@ -17,7 +17,6 @@ from archdrift.model import (
     StaticResolutionStatus,
 )
 
-
 ASTRONOMY_NODE_TYPES = {
     "ad": NodeType.SERVICE,
     "cart": NodeType.SERVICE,
@@ -35,9 +34,7 @@ ASTRONOMY_NODE_TYPES = {
 
 
 def main() -> int:
-    root = (
-        Path.cwd().resolve()
-    )
+    root = Path.cwd().resolve()
 
     semgrep_file = (
         root
@@ -58,79 +55,53 @@ def main() -> int:
         / "compose.resolved.json"
     )
 
-    findings = (
-        SemgrepResultAdapter()
-        .collect(
-            semgrep_file
-        )
+    findings = SemgrepResultAdapter().collect(semgrep_file)
+
+    bindings = ComposeEndpointBindingAdapter().collect(
+        result_file=(compose_file),
+        node_types=(ASTRONOMY_NODE_TYPES),
     )
 
-    bindings = (
-        ComposeEndpointBindingAdapter()
-        .collect(
-            result_file=(
-                compose_file
+    resolution_set = StaticTargetResolver().resolve(
+        findings=findings,
+        source_rules=(
+            SourcePathRule(
+                path_prefix="src/frontend",
+                service_id="frontend",
             ),
-            node_types=(
-                ASTRONOMY_NODE_TYPES
+            SourcePathRule(
+                path_prefix="src/checkout",
+                service_id="checkout",
             ),
-        )
-    )
-
-    resolution_set = (
-        StaticTargetResolver()
-        .resolve(
-            findings=findings,
-            source_rules=(
-                SourcePathRule(
-                    path_prefix=(
-                        "src/frontend"
-                    ),
-                    service_id=(
-                        "frontend"
-                    ),
-                ),
+            SourcePathRule(
+                path_prefix="src/recommendation",
+                service_id="recommendation",
             ),
-            bindings=bindings,
-        )
+            SourcePathRule(
+                path_prefix="src/shipping",
+                service_id="shipping",
+            ),
+        ),
+        bindings=bindings,
     )
 
-    print(
-        "Astronomy Shop source-static target resolution"
-    )
+    print("Astronomy Shop source-static target resolution")
 
-    print(
-        f"Findings:   {len(findings)}"
-    )
+    print(f"Findings:   {len(findings)}")
 
-    print(
-        f"Bindings:   {len(bindings)}"
-    )
+    print(f"Bindings:   {len(bindings)}")
 
-    print(
-        f"Resolved:   {resolution_set.resolved_count}"
-    )
+    print(f"Resolved:   {resolution_set.resolved_count}")
 
-    print(
-        f"Unresolved: {resolution_set.unresolved_count}"
-    )
+    print(f"Unresolved: {resolution_set.unresolved_count}")
 
     print()
 
-    for result in (
-        resolution_set.results
-    ):
-        if (
-            result.status
-            is StaticResolutionStatus.RESOLVED
-        ):
-            resolved = (
-                result.resolved
-            )
+    for result in resolution_set.results:
+        if result.status is StaticResolutionStatus.RESOLVED:
+            resolved = result.resolved
 
-            assert (
-                resolved is not None
-            )
+            assert resolved is not None
 
             print(
                 "  "
@@ -156,6 +127,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(
-        main()
-    )
+    raise SystemExit(main())

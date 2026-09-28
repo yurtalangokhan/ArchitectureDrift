@@ -30,3 +30,64 @@ rules:
       - metavariable-regex:
           metavariable: $CLIENT
           regex: '^[A-Za-z_$][A-Za-z0-9_$]*ServiceClient$'
+
+  - id: archdrift.go.grpc-env-client
+    languages:
+      - go
+    severity: INFO
+
+    message: "ARCHDRIFT_TARGET=$ENV_KEY"
+
+    paths:
+      include:
+        - "**/src/checkout/**/*.go"
+      exclude:
+        - "**/src/checkout/genproto/**"
+
+    patterns:
+      - pattern-either:
+          - pattern: |
+              mustMapEnv(&$ADDR, $ENV_KEY)
+              ...
+              $CONN := mustCreateClient($ADDR)
+
+          - pattern: |
+              mustMapEnv(&$ADDR, $ENV_KEY)
+              ...
+              $CONN = mustCreateClient($ADDR)
+
+      - metavariable-regex:
+          metavariable: $ENV_KEY
+          regex: '^"[A-Z][A-Z0-9_]*_ADDR"$'
+  
+  - id: archdrift.python.grpc-env-client
+    languages:
+      - python
+    severity: INFO
+    message: "ARCHDRIFT_TARGET=$ENV_KEY"
+
+    paths:
+      include:
+        - "**/src/recommendation/**/*.py"
+      exclude:
+        - "**/src/recommendation/demo_pb2.py"
+        - "**/src/recommendation/demo_pb2_grpc.py"
+
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $ADDR = os.getenv($ENV_KEY)
+              ...
+              grpc.insecure_channel($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR = os.environ.get($ENV_KEY)
+              ...
+              grpc.insecure_channel($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR = os.environ[$ENV_KEY]
+              ...
+              grpc.insecure_channel($ADDR, ...)

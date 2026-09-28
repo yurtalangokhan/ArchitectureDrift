@@ -16,6 +16,9 @@ _ENV_IDENTIFIER = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 _TEMPLATE_ENV = re.compile(r"\$\{([A-Z][A-Z0-9_]*)\}")
 
+_QUOTED_ENV_IDENTIFIER = re.compile(
+    r"""^["']([A-Z][A-Z0-9_]*)["']$"""
+)
 
 def _normalize_path(
     path: str,
@@ -85,25 +88,40 @@ def extract_environment_key(
     expression: str,
 ) -> str | None:
     """
-    Resolve a source-static endpoint expression to exactly one environment
-    variable.
+    Resolve a source-static endpoint expression to exactly one
+    environment variable.
 
-    Supported high-confidence forms:
+    Supported examples:
 
         CURRENCY_ADDR
+        "CURRENCY_ADDR"
+        'CURRENCY_ADDR'
         `${SHIPPING_ADDR}/get-quote`
-
-    Expressions containing zero or multiple endpoint variables are left
-    unresolved.
     """
 
     normalized = expression.strip()
 
-    if _ENV_IDENTIFIER.fullmatch(normalized):
+    if _ENV_IDENTIFIER.fullmatch(
+        normalized
+    ):
         return normalized
 
+    quoted = (
+        _QUOTED_ENV_IDENTIFIER.fullmatch(
+            normalized
+        )
+    )
+
+    if quoted is not None:
+        return quoted.group(1)
+
     matches: tuple[str, ...] = tuple(
-        dict.fromkeys(match.group(1) for match in _TEMPLATE_ENV.finditer(normalized))
+        dict.fromkeys(
+            match.group(1)
+            for match in _TEMPLATE_ENV.finditer(
+                normalized
+            )
+        )
     )
 
     if len(matches) == 1:

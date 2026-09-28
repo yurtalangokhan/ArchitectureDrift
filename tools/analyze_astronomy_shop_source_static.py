@@ -57,9 +57,7 @@ def load_baseline(
         )
     )
 
-    return ArchitectureGraph.model_validate(
-        document
-    )
+    return ArchitectureGraph.model_validate(document)
 
 
 def percentage(
@@ -74,9 +72,7 @@ def percentage(
 def relation_document(
     relation: tuple,
 ) -> list[str]:
-    source, relation_type, target = (
-        relation
-    )
+    source, relation_type, target = relation
 
     return [
         source,
@@ -86,9 +82,7 @@ def relation_document(
 
 
 def main() -> int:
-    root = (
-        Path.cwd().resolve()
-    )
+    root = Path.cwd().resolve()
 
     semgrep_file = (
         root
@@ -101,97 +95,57 @@ def main() -> int:
     )
 
     compose_file = (
-        root
-        / "evidence"
-        / "real"
-        / "non-runtime"
-        / SYSTEM_ID
-        / "compose.resolved.json"
+        root / "evidence" / "real" / "non-runtime" / SYSTEM_ID / "compose.resolved.json"
     )
 
-    baseline_file = (
-        root
-        / "graphs"
-        / "baseline"
-        / SYSTEM_ID
-        / "baseline.yaml"
+    baseline_file = root / "graphs" / "baseline" / SYSTEM_ID / "baseline.yaml"
+
+    findings = SemgrepResultAdapter().collect(semgrep_file)
+
+    bindings = ComposeEndpointBindingAdapter().collect(
+        result_file=compose_file,
+        node_types=(ASTRONOMY_NODE_TYPES),
     )
 
-    findings = (
-        SemgrepResultAdapter()
-        .collect(
-            semgrep_file
-        )
-    )
-
-    bindings = (
-        ComposeEndpointBindingAdapter()
-        .collect(
-            result_file=compose_file,
-            node_types=(
-                ASTRONOMY_NODE_TYPES
+    resolution = StaticTargetResolver().resolve(
+        findings=findings,
+        source_rules=(
+            SourcePathRule(
+                path_prefix="src/frontend",
+                service_id="frontend",
             ),
-        )
-    )
-
-    resolution = (
-        StaticTargetResolver()
-        .resolve(
-            findings=findings,
-            source_rules=(
-                SourcePathRule(
-                    path_prefix=(
-                        "src/frontend"
-                    ),
-                    service_id=(
-                        "frontend"
-                    ),
-                ),
+            SourcePathRule(
+                path_prefix="src/checkout",
+                service_id="checkout",
             ),
-            bindings=bindings,
-        )
-    )
-
-    observations = (
-        static_interactions_to_observations(
-            resolution.resolved
-        )
-    )
-
-    baseline = load_baseline(
-        baseline_file
-    )
-
-    analysis = (
-        analyze_baseline_reconstruction(
-            baseline=baseline,
-            observations=observations,
-            scope=EvidenceScope(
-                node_ids=frozenset(
-                    ASTRONOMY_NODE_TYPES
-                )
+            SourcePathRule(
+                path_prefix="src/recommendation",
+                service_id="recommendation",
             ),
-            revision=(
-                "real-source-static"
+            SourcePathRule(
+                path_prefix="src/shipping",
+                service_id="shipping",
             ),
-        )
+        ),
+        bindings=bindings,
     )
 
-    graph = (
-        analysis.reconstruction.graph
+    observations = static_interactions_to_observations(resolution.resolved)
+
+    baseline = load_baseline(baseline_file)
+
+    analysis = analyze_baseline_reconstruction(
+        baseline=baseline,
+        observations=observations,
+        scope=EvidenceScope(node_ids=frozenset(ASTRONOMY_NODE_TYPES)),
+        revision=("real-source-static"),
     )
 
-    coverage = (
-        analysis.coverage
-    )
+    graph = analysis.reconstruction.graph
 
-    output_file = (
-        root
-        / "results"
-        / "real-baseline"
-        / SYSTEM_ID
-        / "source-static.json"
-    )
+    coverage = analysis.coverage
+
+    output_file = root / "results" / "real-baseline" / SYSTEM_ID / "source-static.json"
 
     output_file.parent.mkdir(
         parents=True,
@@ -201,32 +155,16 @@ def main() -> int:
     document = {
         "schema_version": "1.0",
         "system_id": SYSTEM_ID,
-        "evidence_source": (
-            "SOURCE_STATIC"
-        ),
-        "findings": len(
-            findings
-        ),
-        "resolved_findings": (
-            resolution.resolved_count
-        ),
-        "unresolved_findings": (
-            resolution.unresolved_count
-        ),
+        "evidence_source": ("SOURCE_STATIC"),
+        "findings": len(findings),
+        "resolved_findings": (resolution.resolved_count),
+        "unresolved_findings": (resolution.unresolved_count),
         "reconstruction": {
-            "node_count": len(
-                graph.node_ids
-            ),
-            "relation_count": len(
-                graph.relation_identities
-            ),
-            "nodes": sorted(
-                graph.node_ids
-            ),
+            "node_count": len(graph.node_ids),
+            "relation_count": len(graph.relation_identities),
+            "nodes": sorted(graph.node_ids),
             "relations": [
-                relation_document(
-                    relation
-                )
+                relation_document(relation)
                 for relation in sorted(
                     graph.relation_identities,
                     key=lambda item: (
@@ -238,37 +176,20 @@ def main() -> int:
             ],
         },
         "coverage": {
-            "baseline_node_count": (
-                coverage.baseline_node_count
-            ),
-            "observed_baseline_node_count": (
-                coverage.observed_baseline_node_count
-            ),
-            "node_coverage": (
-                coverage.node_coverage
-            ),
-            "baseline_relation_count": (
-                coverage.baseline_relation_count
-            ),
+            "baseline_node_count": (coverage.baseline_node_count),
+            "observed_baseline_node_count": (coverage.observed_baseline_node_count),
+            "node_coverage": (coverage.node_coverage),
+            "baseline_relation_count": (coverage.baseline_relation_count),
             "observed_baseline_relation_count": (
                 coverage.observed_baseline_relation_count
             ),
-            "relation_coverage": (
-                coverage.relation_coverage
-            ),
-            "unexpected_nodes": sorted(
-                coverage.unexpected_node_ids
-            ),
-            "not_observed_nodes": sorted(
-                coverage.not_observed_node_ids
-            ),
+            "relation_coverage": (coverage.relation_coverage),
+            "unexpected_nodes": sorted(coverage.unexpected_node_ids),
+            "not_observed_nodes": sorted(coverage.not_observed_node_ids),
             "unexpected_relations": [
-                relation_document(
-                    relation
-                )
+                relation_document(relation)
                 for relation in sorted(
-                    coverage
-                    .unexpected_relation_identities,
+                    coverage.unexpected_relation_identities,
                     key=lambda item: (
                         item[0],
                         item[1].value,
@@ -277,12 +198,9 @@ def main() -> int:
                 )
             ],
             "not_observed_relations": [
-                relation_document(
-                    relation
-                )
+                relation_document(relation)
                 for relation in sorted(
-                    coverage
-                    .not_observed_relation_identities,
+                    coverage.not_observed_relation_identities,
                     key=lambda item: (
                         item[0],
                         item[1].value,
@@ -303,37 +221,23 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    print(
-        "Astronomy Shop source-static baseline analysis"
-    )
+    print("Astronomy Shop source-static baseline analysis")
 
-    print(
-        f"Findings:   {len(findings)}"
-    )
+    print(f"Findings:   {len(findings)}")
 
-    print(
-        f"Resolved:   {resolution.resolved_count}"
-    )
+    print(f"Resolved:   {resolution.resolved_count}")
 
-    print(
-        f"Unresolved: {resolution.unresolved_count}"
-    )
+    print(f"Unresolved: {resolution.unresolved_count}")
 
     print()
 
-    print(
-        f"Canonical nodes:     {len(graph.node_ids)}"
-    )
+    print(f"Canonical nodes:     {len(graph.node_ids)}")
 
-    print(
-        f"Canonical relations: {len(graph.relation_identities)}"
-    )
+    print(f"Canonical relations: {len(graph.relation_identities)}")
 
     print()
 
-    print(
-        "Baseline coverage"
-    )
+    print("Baseline coverage")
 
     print(
         "  Nodes:     "
@@ -351,26 +255,18 @@ def main() -> int:
 
     print()
 
-    print(
-        f"Unexpected relations: "
-        f"{len(coverage.unexpected_relation_identities)}"
-    )
+    print(f"Unexpected relations: " f"{len(coverage.unexpected_relation_identities)}")
 
     print(
-        f"Not-observed relations: "
-        f"{len(coverage.not_observed_relation_identities)}"
+        f"Not-observed relations: " f"{len(coverage.not_observed_relation_identities)}"
     )
 
     print()
 
-    print(
-        f"Result: {output_file}"
-    )
+    print(f"Result: {output_file}")
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(
-        main()
-    )
+    raise SystemExit(main())
