@@ -1,0 +1,33 @@
+rules:
+  - id: archdrift.python.grpc-env-client
+
+    languages:
+      - python
+
+    severity: INFO
+
+    message: "ARCHDRIFT_TARGET=$ENV_KEY"
+
+    metadata:
+      archdrift:
+        interaction: SERVICE_CALL
+        protocol: grpc
+
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $ADDR = os.getenv($ENV_KEY)
+              ...
+              grpc.insecure_channel($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR = os.environ.get($ENV_KEY)
+              ...
+              grpc.insecure_channel($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR = os.environ[$ENV_KEY]
+              ...
+              grpc.insecure_channel($ADDR, ...)

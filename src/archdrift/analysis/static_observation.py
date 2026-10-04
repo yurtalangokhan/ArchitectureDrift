@@ -30,21 +30,24 @@ def static_interactions_to_observations(
     This function only materializes observations and preserves provenance.
     """
 
-    observations: list[
-        NormalizedRelationObservation
-    ] = []
+    observations: list[NormalizedRelationObservation] = []
 
     for interaction in interactions:
         finding = interaction.finding
 
+        locator_parts = [
+            f"line:{finding.line}",
+            f"rule:{finding.rule_id}",
+            ("resolution:" f"{interaction.resolution_basis.value}"),
+        ]
+
+        if interaction.environment_key is not None:
+            locator_parts.append("env:" f"{interaction.environment_key}")
+
         evidence = EvidenceRecord(
             type=EvidenceType.SOURCE_CODE,
             artifact=finding.path,
-            locator=(
-                f"line:{finding.line};"
-                f"rule:{finding.rule_id};"
-                f"env:{interaction.environment_key}"
-            ),
+            locator=";".join(locator_parts),
         )
 
         observations.append(
@@ -59,12 +62,8 @@ def static_interactions_to_observations(
                 ),
                 interaction=finding.interaction,
                 protocol=finding.protocol,
-                evidence=(
-                    evidence,
-                ),
+                evidence=(evidence,),
             )
         )
 
-    return tuple(
-        observations
-    )
+    return tuple(observations)

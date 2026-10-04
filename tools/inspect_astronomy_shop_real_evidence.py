@@ -16,7 +16,6 @@ from archdrift.model import (
     NormalizedRelationObservation,
 )
 
-
 ASTRONOMY_NODE_TYPES = {
     "ad": NodeType.SERVICE,
     "cart": NodeType.SERVICE,

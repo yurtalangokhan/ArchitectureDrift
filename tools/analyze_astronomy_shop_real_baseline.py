@@ -21,7 +21,6 @@ from archdrift.model.graph import (
     NodeType,
 )
 
-
 SYSTEM_ID = "astronomy-shop"
 
 ASTRONOMY_NODE_TYPES = {

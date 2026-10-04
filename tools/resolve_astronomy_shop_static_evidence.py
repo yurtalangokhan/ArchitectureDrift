@@ -64,6 +64,7 @@ def main() -> int:
 
     resolution_set = StaticTargetResolver().resolve(
         findings=findings,
+        node_types=ASTRONOMY_NODE_TYPES,
         source_rules=(
             SourcePathRule(
                 path_prefix="src/frontend",

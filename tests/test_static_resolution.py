@@ -9,6 +9,7 @@ from archdrift.model import (
     SourcePathRule,
     SourceStaticFinding,
     StaticResolutionStatus,
+    StaticTargetResolutionBasis,
 )
 
 
@@ -53,6 +54,10 @@ def test_static_target_resolver_resolves_service_call() -> None:
                 target=("CURRENCY_ADDR"),
             ),
         ),
+        node_types={
+            "frontend": NodeType.SERVICE,
+            "currency": NodeType.SERVICE,
+        },
         source_rules=(
             SourcePathRule(
                 path_prefix=("src/frontend"),
@@ -93,3 +98,72 @@ def test_extract_environment_key_from_double_quoted_identifier() -> None:
 
 def test_extract_environment_key_from_single_quoted_identifier() -> None:
     assert extract_environment_key("'PRODUCT_CATALOG_ADDR'") == "PRODUCT_CATALOG_ADDR"
+
+def test_static_target_resolver_resolves_direct_service_uri() -> None:
+    resolver = StaticTargetResolver()
+
+    result = resolver.resolve(
+        findings=(
+            SourceStaticFinding(
+                rule_id=(
+                    "archdrift.dotnet."
+                    "http-client-base-address"
+                ),
+                path=(
+                    "src/WebApp/"
+                    "Extensions/Extensions.cs"
+                ),
+                line=10,
+                interaction=(
+                    InteractionType
+                    .SERVICE_CALL
+                ),
+                target_expression=(
+                    '"https+http://catalog-api"'
+                ),
+                protocol="http",
+            ),
+        ),
+        source_rules=(
+            SourcePathRule(
+                path_prefix=(
+                    "src/WebApp"
+                ),
+                service_id="webapp",
+            ),
+        ),
+        bindings=(),
+        node_types={
+            "webapp": (
+                NodeType.SERVICE
+            ),
+            "catalog-api": (
+                NodeType.SERVICE
+            ),
+        },
+    )
+
+    assert (
+        result.resolved_count
+        == 1
+    )
+
+    resolved = (
+        result.resolved[0]
+    )
+
+    assert (
+        resolved.target_service_id
+        == "catalog-api"
+    )
+
+    assert (
+        resolved.environment_key
+        is None
+    )
+
+    assert (
+        resolved.resolution_basis
+        is StaticTargetResolutionBasis
+        .DIRECT_SERVICE_URI
+    )

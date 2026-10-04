@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 PROJECT_ROOT = (
     Path(__file__).resolve().parents[1]
 )
@@ -336,11 +335,11 @@ def case_document(
         in NON_RUNTIME_MUTATIONS
     ):
         compose_files.append(
-            (
+            
                 "evidence/non-runtime/"
                 "teastore/"
                 f"{mutation_id}-overlay.yaml"
-            )
+            
         )
 
     otlp_files = [
@@ -355,11 +354,11 @@ def case_document(
         in RUNTIME_CALL_MUTATIONS
     ):
         otlp_files.append(
-            (
+            
                 "evidence/runtime/"
                 "teastore/"
                 f"{mutation_id}-otel.json"
-            )
+            
         )
 
     return {

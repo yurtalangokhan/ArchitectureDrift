@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
@@ -115,7 +114,7 @@ def create_files() -> None:
 
 
 def main() -> None:
-    print(f"Creating ArchitectureDrift project structure under:")
+    print("Creating ArchitectureDrift project structure under:")
     print(PROJECT_ROOT)
     print()
 

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import re
 
+from archdrift.model.graph import (
+    NodeType,
+)
 from archdrift.model.source_static import (
     EndpointBinding,
     ResolvedStaticInteraction,
@@ -10,15 +13,42 @@ from archdrift.model.source_static import (
     StaticResolution,
     StaticResolutionSet,
     StaticResolutionStatus,
+    StaticTargetResolutionBasis,
 )
 
 _ENV_IDENTIFIER = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 _TEMPLATE_ENV = re.compile(r"\$\{([A-Z][A-Z0-9_]*)\}")
 
-_QUOTED_ENV_IDENTIFIER = re.compile(
-    r"""^["']([A-Z][A-Z0-9_]*)["']$"""
-)
+_QUOTED_ENV_IDENTIFIER = re.compile(r"""^["']([A-Z][A-Z0-9_]*)["']$""")
+
+_DIRECT_SERVICE_URI = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://" r"([^/:?#]+)")
+
+
+def extract_direct_service_id(
+    expression: str,
+) -> str | None:
+    normalized = expression.strip()
+
+    if (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0] in {'"', "'"}
+    ):
+        normalized = normalized[1:-1]
+
+    match = _DIRECT_SERVICE_URI.match(normalized)
+
+    if match is None:
+        return None
+
+    service_id = match.group(1).strip()
+
+    if not service_id:
+        return None
+
+    return service_id
+
 
 def _normalize_path(
     path: str,
@@ -101,27 +131,16 @@ def extract_environment_key(
 
     normalized = expression.strip()
 
-    if _ENV_IDENTIFIER.fullmatch(
-        normalized
-    ):
+    if _ENV_IDENTIFIER.fullmatch(normalized):
         return normalized
 
-    quoted = (
-        _QUOTED_ENV_IDENTIFIER.fullmatch(
-            normalized
-        )
-    )
+    quoted = _QUOTED_ENV_IDENTIFIER.fullmatch(normalized)
 
     if quoted is not None:
         return quoted.group(1)
 
     matches: tuple[str, ...] = tuple(
-        dict.fromkeys(
-            match.group(1)
-            for match in _TEMPLATE_ENV.finditer(
-                normalized
-            )
-        )
+        dict.fromkeys(match.group(1) for match in _TEMPLATE_ENV.finditer(normalized))
     )
 
     if len(matches) == 1:
@@ -150,6 +169,10 @@ class StaticTargetResolver:
         bindings: tuple[
             EndpointBinding,
             ...,
+        ],
+        node_types: dict[
+            str,
+            NodeType,
         ],
     ) -> StaticResolutionSet:
         binding_index: dict[
@@ -195,60 +218,87 @@ class StaticTargetResolver:
 
             environment_key = extract_environment_key(finding.target_expression)
 
-            if environment_key is None:
+            if environment_key is not None:
+                candidates = binding_index.get(
+                    (
+                        source_rule.service_id,
+                        environment_key,
+                    ),
+                    [],
+                )
+
+                if len(candidates) != 1:
+                    results.append(
+                        StaticResolution(
+                            finding=finding,
+                            status=(StaticResolutionStatus.ENDPOINT_BINDING_NOT_FOUND),
+                            reason=(
+                                "No unique resolved endpoint "
+                                "binding exists for "
+                                f"{source_rule.service_id!r} / "
+                                f"{environment_key!r}."
+                            ),
+                        )
+                    )
+
+                    continue
+
+                binding = candidates[0]
+
+                resolved = ResolvedStaticInteraction(
+                    finding=finding,
+                    source_service_id=(source_rule.service_id),
+                    source_type=(source_rule.service_type),
+                    resolution_basis=(
+                        StaticTargetResolutionBasis.CONFIGURATION_BINDING
+                    ),
+                    environment_key=(environment_key),
+                    target_service_id=(binding.target_service_id),
+                    target_type=(binding.target_type),
+                )
+
                 results.append(
                     StaticResolution(
                         finding=finding,
-                        status=(StaticResolutionStatus.TARGET_EXPRESSION_NOT_RESOLVED),
-                        reason=(
-                            "Target expression does not resolve "
-                            "to exactly one supported environment key."
-                        ),
+                        status=(StaticResolutionStatus.RESOLVED),
+                        resolved=resolved,
                     )
                 )
 
                 continue
 
-            candidates = binding_index.get(
-                (
-                    source_rule.service_id,
-                    environment_key,
-                ),
-                [],
-            )
+            direct_service_id = extract_direct_service_id(finding.target_expression)
 
-            if len(candidates) != 1:
+            if direct_service_id is not None and direct_service_id in node_types:
+                resolved = ResolvedStaticInteraction(
+                    finding=finding,
+                    source_service_id=(source_rule.service_id),
+                    source_type=(source_rule.service_type),
+                    resolution_basis=(StaticTargetResolutionBasis.DIRECT_SERVICE_URI),
+                    target_service_id=(direct_service_id),
+                    target_type=(node_types[direct_service_id]),
+                )
+
                 results.append(
                     StaticResolution(
                         finding=finding,
-                        status=(StaticResolutionStatus.ENDPOINT_BINDING_NOT_FOUND),
-                        reason=(
-                            "No unique resolved endpoint binding exists "
-                            f"for {source_rule.service_id!r} / "
-                            f"{environment_key!r}."
-                        ),
+                        status=(StaticResolutionStatus.RESOLVED),
+                        resolved=resolved,
                     )
                 )
 
                 continue
-
-            binding = candidates[0]
-
-            resolved = ResolvedStaticInteraction(
-                finding=finding,
-                source_service_id=(source_rule.service_id),
-                source_type=(source_rule.service_type),
-                environment_key=(environment_key),
-                target_service_id=(binding.target_service_id),
-                target_type=(binding.target_type),
-            )
 
             results.append(
                 StaticResolution(
                     finding=finding,
-                    status=(StaticResolutionStatus.RESOLVED),
-                    resolved=resolved,
+                    status=(StaticResolutionStatus.TARGET_EXPRESSION_NOT_RESOLVED),
+                    reason=(
+                        "Target expression does not "
+                        "resolve to a supported "
+                        "environment binding or a "
+                        "canonical direct service URI."
+                    ),
                 )
             )
-
         return StaticResolutionSet(results=tuple(results))

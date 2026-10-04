@@ -1,0 +1,33 @@
+rules:
+  - id: archdrift.go.grpc-env-client
+
+    languages:
+      - go
+
+    severity: INFO
+
+    message: "ARCHDRIFT_TARGET=$ENV_KEY"
+
+    metadata:
+      archdrift:
+        interaction: SERVICE_CALL
+        protocol: grpc
+
+    pattern-either:
+      - patterns:
+          - pattern: |
+              $ADDR := os.Getenv($ENV_KEY)
+              ...
+              grpc.NewClient($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR := os.Getenv($ENV_KEY)
+              ...
+              grpc.Dial($ADDR, ...)
+
+      - patterns:
+          - pattern: |
+              $ADDR = os.Getenv($ENV_KEY)
+              ...
+              grpc.NewClient($ADDR, ...)

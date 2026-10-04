@@ -31,86 +31,25 @@ class SemgrepResultError(SemgrepAdapterError):
     """Raised when Semgrep JSON violates the expected result contract."""
 
 
-class StaticRuleSemantics(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        frozen=True,
-    )
-
-    interaction: InteractionType
-
-    protocol: str | None = None
-
-
-STATIC_RULES: dict[
-    str,
-    StaticRuleSemantics,
-] = {
-    "archdrift.typescript.fetch": (
-        StaticRuleSemantics(
-            interaction=InteractionType.SERVICE_CALL,
-            protocol="http",
-        )
-    ),
-    "archdrift.typescript.grpc-client": (
-        StaticRuleSemantics(
-            interaction=InteractionType.SERVICE_CALL,
-            protocol="grpc",
-        )
-    ),
-    "archdrift.go.grpc-env-client": (
-        StaticRuleSemantics(
-            interaction=InteractionType.SERVICE_CALL,
-            protocol="grpc",
-        )
-    ),
-    "archdrift.python.grpc-env-client": (
-        StaticRuleSemantics(
-            interaction=InteractionType.SERVICE_CALL,
-            protocol="grpc",
-        )
-    ),
-    "archdrift.rust.http-env-client": (
-        StaticRuleSemantics(
-            interaction=InteractionType.SERVICE_CALL,
-            protocol="http",
-        )
-    ),
-}
+_RULE_ID_PREFIX = "archdrift."
 
 
 def _canonical_rule_id(
     raw_rule_id: str,
 ) -> str:
-    """
-    Normalize a Semgrep-emitted rule id to the stable
-    ArchitectureDrift rule id.
+    index = raw_rule_id.rfind(_RULE_ID_PREFIX)
 
-    Semgrep may prefix local rule ids with the configuration
-    file path. That prefix is execution metadata and must not
-    become part of ArchitectureDrift's rule identity.
-    """
-
-    if raw_rule_id in STATIC_RULES:
-        return raw_rule_id
-
-    matches = tuple(
-        rule_id for rule_id in STATIC_RULES if raw_rule_id.endswith(f".{rule_id}")
-    )
-
-    if len(matches) == 1:
-        return matches[0]
-
-    if not matches:
+    if index < 0:
         raise SemgrepResultError(
-            "Semgrep result contains an unknown "
-            "ArchitectureDrift rule id: "
-            f"{raw_rule_id!r}"
+            "Semgrep result is not an ArchitectureDrift rule: " f"{raw_rule_id!r}"
         )
 
-    raise SemgrepResultError(
-        "Semgrep rule id is ambiguous after normalization: " f"{raw_rule_id!r}"
-    )
+    rule_id = raw_rule_id[index:]
+
+    if not rule_id:
+        raise SemgrepResultError("ArchitectureDrift Semgrep rule id is empty.")
+
+    return rule_id
 
 
 class _SemgrepPosition(BaseModel):
@@ -133,12 +72,33 @@ class _SemgrepMetavariable(BaseModel):
     abstract_content: str
 
 
+class _ArchDriftRuleMetadata(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    interaction: InteractionType
+    protocol: str | None = None
+
+
+class _SemgrepRuleMetadata(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+        frozen=True,
+    )
+
+    archdrift: _ArchDriftRuleMetadata
+
+
 class _SemgrepExtra(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         frozen=True,
     )
+
     message: str
+    metadata: _SemgrepRuleMetadata
 
 
 class _SemgrepResult(BaseModel):
@@ -214,7 +174,7 @@ class SemgrepResultAdapter:
         for result in parsed.results:
             rule_id = _canonical_rule_id(result.check_id)
 
-            semantics = STATIC_RULES[rule_id]
+            semantics = result.extra.metadata.archdrift
 
             target_expression = _extract_target_expression(result.extra.message)
             normalized_path = Path(result.path).as_posix()

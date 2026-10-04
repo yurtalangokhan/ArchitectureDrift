@@ -68,6 +68,14 @@ from archdrift.model.source_static import (
     StaticResolution,
     StaticResolutionSet,
     StaticResolutionStatus,
+    StaticTargetResolutionBasis,
+)
+from archdrift.model.static_profile import (
+    AspireEvidenceProfile,
+    ComposeEvidenceProfile,
+    NonRuntimeEvidenceProfile,
+    StaticEvidenceProfile,
+    StaticSourceRoot,
 )
 
 __all__ = [
@@ -121,18 +129,24 @@ __all__ = [
     "RemoveNodeOperation",
     "RemoveRelationOperation",
     "load_mutation_oracle",
-  
+    # Observations
     "InteractionType",
     "NormalizedEndpoint",
     "NormalizedNodeObservation",
     "NormalizedObservation",
     "NormalizedRelationObservation",
     "ObservationKind",
-
+    # Source-static
     "EndpointBinding",
     "ResolvedStaticInteraction",
     "SourceStaticFinding",
     "StaticResolution",
     "StaticResolutionSet",
     "StaticResolutionStatus",
+    "StaticEvidenceProfile",
+    "StaticSourceRoot",
+    "StaticTargetResolutionBasis",
+    "AspireEvidenceProfile",
+    "ComposeEvidenceProfile",
+    "NonRuntimeEvidenceProfile",
 ]

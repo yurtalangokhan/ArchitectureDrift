@@ -37,6 +37,12 @@ def test_semgrep_result_adapter_extracts_target_expression(
                         "extra": {
                             "message": ("ARCHDRIFT_TARGET=" "CURRENCY_ADDR"),
                             "severity": "INFO",
+                            "metadata": {
+                                "archdrift": {
+                                    "interaction": ("SERVICE_CALL"),
+                                    "protocol": "grpc",
+                                }
+                            },
                         },
                     }
                 ]
@@ -64,7 +70,7 @@ def test_semgrep_result_adapter_extracts_target_expression(
     assert finding.protocol == "grpc"
 
 
-def test_semgrep_result_adapter_rejects_unknown_rule(
+def test_semgrep_result_adapter_rejects_non_archdrift_rule(
     tmp_path: Path,
 ) -> None:
     result_file = tmp_path / "semgrep.json"
@@ -74,12 +80,20 @@ def test_semgrep_result_adapter_rejects_unknown_rule(
             {
                 "results": [
                     {
-                        "check_id": "unknown.rule",
+                        "check_id": "foreign.rule",
                         "path": "source.ts",
                         "start": {
                             "line": 1,
                         },
-                        "extra": {"message": ("ARCHDRIFT_TARGET=" "CURRENCY_ADDR")},
+                        "extra": {
+                            "message": "ARCHDRIFT_TARGET=CURRENCY_ADDR",
+                            "metadata": {
+                                "archdrift": {
+                                    "interaction": "SERVICE_CALL",
+                                    "protocol": "grpc",
+                                }
+                            },
+                        },
                     }
                 ]
             }
@@ -89,7 +103,7 @@ def test_semgrep_result_adapter_rejects_unknown_rule(
 
     with pytest.raises(
         SemgrepResultError,
-        match="unknown",
+        match="not an ArchitectureDrift rule",
     ):
         (SemgrepResultAdapter().collect(result_file))
 
@@ -109,7 +123,15 @@ def test_semgrep_result_adapter_rejects_empty_target_expression(
                         "start": {
                             "line": 31,
                         },
-                        "extra": {"message": ("ARCHDRIFT_TARGET=")},
+                        "extra": {
+                            "message": ("ARCHDRIFT_TARGET="),
+                            "metadata": {
+                                "archdrift": {
+                                    "interaction": ("SERVICE_CALL"),
+                                    "protocol": "http",
+                                }
+                            },
+                        },
                     }
                 ]
             }
@@ -149,6 +171,12 @@ def test_semgrep_result_adapter_normalizes_prefixed_rule_id_and_extracts_target(
                         "extra": {
                             "message": ("ARCHDRIFT_TARGET=" "CURRENCY_ADDR"),
                             "severity": "INFO",
+                            "metadata": {
+                                "archdrift": {
+                                    "interaction": ("SERVICE_CALL"),
+                                    "protocol": "grpc",
+                                }
+                            },
                         },
                     }
                 ]
@@ -187,7 +215,15 @@ def test_semgrep_result_adapter_rejects_missing_target_marker(
                         "start": {
                             "line": 31,
                         },
-                        "extra": {"message": ("invalid message")},
+                        "extra": {
+                            "message": ("invalid message"),
+                            "metadata": {
+                                "archdrift": {
+                                    "interaction": ("SERVICE_CALL"),
+                                    "protocol": "http",
+                                }
+                            },
+                        },
                     }
                 ]
             }

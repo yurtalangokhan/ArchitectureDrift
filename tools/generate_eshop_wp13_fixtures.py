@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 PROJECT_ROOT = Path(
     __file__
 ).resolve().parents[1]
@@ -469,10 +468,10 @@ def case_document(
 
     if mutation_id in NON_RUNTIME_MUTATIONS:
         aspire_files.append(
-            (
+            
                 "evidence/non-runtime/eshop/"
                 f"{mutation_id}-apphost.cs"
-            )
+            
         )
 
     otlp_files = [
@@ -488,10 +487,10 @@ def case_document(
         "ES-M05",
     }:
         otlp_files.append(
-            (
+            
                 "evidence/runtime/eshop/"
                 f"{mutation_id}-otel.json"
-            )
+            
         )
 
     return {

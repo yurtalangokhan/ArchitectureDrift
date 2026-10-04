@@ -12,6 +12,26 @@ subjects:
           - compose.yaml
           - compose.full.yaml
 
+      source_static:
+        source_roots:
+          - service_id: frontend
+            path: src/frontend/gateways
+            rule_packs:
+              - typescript-network
+
+          - service_id: checkout
+            path: src/checkout
+            rule_packs:
+              - go-grpc
+
+          - service_id: recommendation
+            path: src/recommendation
+            rule_packs:
+              - python-grpc
+            exclude:
+              - demo_pb2.py
+              - demo_pb2_grpc.py
+
     scope:
       nodes:
         - ad
@@ -48,6 +68,18 @@ subjects:
       aspire:
         files:
           - src/eShop.AppHost/Program.cs
+
+      source_static:
+        source_roots:
+          - service_id: webapp
+            path: src/WebApp
+            rule_packs:
+              - dotnet-http
+
+          - service_id: webhooksclient
+            path: src/WebhookClient
+            rule_packs:
+              - dotnet-http
 
     scope:
       nodes:
@@ -86,6 +118,8 @@ subjects:
         project_directory: examples/docker
         files:
           - examples/docker/docker-compose_default.yaml
+      source_static:
+        source_roots: []
 
     scope:
       nodes:

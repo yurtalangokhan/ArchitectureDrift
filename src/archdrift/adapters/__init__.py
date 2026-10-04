@@ -31,7 +31,6 @@ from archdrift.adapters.semgrep import (
     SemgrepResultAdapter,
     SemgrepResultError,
     SemgrepRunner,
-    StaticRuleSemantics,
 )
 
 __all__ = [
@@ -55,5 +54,4 @@ __all__ = [
     "SemgrepResultAdapter",
     "SemgrepResultError",
     "SemgrepRunner",
-    "StaticRuleSemantics",
 ]

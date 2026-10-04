@@ -1,0 +1,25 @@
+rules:
+  - id: archdrift.dotnet.http-client-base-address
+
+    languages:
+      - csharp
+
+    severity: INFO
+
+    message: "ARCHDRIFT_TARGET=$TARGET"
+
+    metadata:
+      archdrift:
+        interaction: SERVICE_CALL
+        protocol: http
+
+    pattern-either:
+      - pattern: |
+          $SERVICES.AddHttpClient<$CLIENT>(
+              $O => $O.BaseAddress = new($TARGET)
+          )
+
+      - pattern: |
+          $SERVICES.AddHttpClient<$CLIENT>(
+              $O => $O.BaseAddress = new Uri($TARGET)
+          )

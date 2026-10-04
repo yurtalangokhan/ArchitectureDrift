@@ -57,27 +57,25 @@ class SourceStaticFinding(BaseModel):
         normalized = value.strip()
 
         if not normalized:
-            raise ValueError(
-                "Source-static finding values must not be empty."
-            )
+            raise ValueError("Source-static finding values must not be empty.")
 
         return normalized
+
+
+class StaticTargetResolutionBasis(StrEnum):
+    CONFIGURATION_BINDING = "CONFIGURATION_BINDING"
+
+    DIRECT_SERVICE_URI = "DIRECT_SERVICE_URI"
 
 
 class StaticResolutionStatus(StrEnum):
     RESOLVED = "RESOLVED"
 
-    SOURCE_NOT_RESOLVED = (
-        "SOURCE_NOT_RESOLVED"
-    )
+    SOURCE_NOT_RESOLVED = "SOURCE_NOT_RESOLVED"
 
-    TARGET_EXPRESSION_NOT_RESOLVED = (
-        "TARGET_EXPRESSION_NOT_RESOLVED"
-    )
+    TARGET_EXPRESSION_NOT_RESOLVED = "TARGET_EXPRESSION_NOT_RESOLVED"
 
-    ENDPOINT_BINDING_NOT_FOUND = (
-        "ENDPOINT_BINDING_NOT_FOUND"
-    )
+    ENDPOINT_BINDING_NOT_FOUND = "ENDPOINT_BINDING_NOT_FOUND"
 
 
 class SourcePathRule(BaseModel):
@@ -94,9 +92,7 @@ class SourcePathRule(BaseModel):
 
     service_id: str
 
-    service_type: NodeType = (
-        NodeType.SERVICE
-    )
+    service_type: NodeType = NodeType.SERVICE
 
     @field_validator(
         "path_prefix",
@@ -110,9 +106,7 @@ class SourcePathRule(BaseModel):
         normalized = value.strip()
 
         if not normalized:
-            raise ValueError(
-                "Source path rule values must not be empty."
-            )
+            raise ValueError("Source path rule values must not be empty.")
 
         return normalized
 
@@ -141,7 +135,7 @@ class EndpointBinding(BaseModel):
 
 class ResolvedStaticInteraction(BaseModel):
     """
-    High-confidence static interaction after path and endpoint resolution.
+    High-confidence static interaction after source and target resolution.
     """
 
     model_config = ConfigDict(
@@ -155,11 +149,13 @@ class ResolvedStaticInteraction(BaseModel):
 
     source_type: NodeType
 
-    environment_key: str
+    resolution_basis: StaticTargetResolutionBasis
 
     target_service_id: str
 
     target_type: NodeType
+
+    environment_key: str | None = None
 
 
 class StaticResolution(BaseModel):
@@ -176,10 +172,7 @@ class StaticResolution(BaseModel):
 
     status: StaticResolutionStatus
 
-    resolved: (
-        ResolvedStaticInteraction
-        | None
-    ) = None
+    resolved: ResolvedStaticInteraction | None = None
 
     reason: str | None = None
 
@@ -207,24 +200,17 @@ class StaticResolutionSet(BaseModel):
         ...,
     ]:
         return tuple(
-            result.resolved
-            for result in self.results
-            if result.resolved is not None
+            result.resolved for result in self.results if result.resolved is not None
         )
 
     @property
     def resolved_count(
         self,
     ) -> int:
-        return len(
-            self.resolved
-        )
+        return len(self.resolved)
 
     @property
     def unresolved_count(
         self,
     ) -> int:
-        return (
-            len(self.results)
-            - self.resolved_count
-        )
+        return len(self.results) - self.resolved_count
