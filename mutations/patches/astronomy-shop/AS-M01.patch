@@ -1,0 +1,87 @@
+diff --git a/src/checkout/main.go b/src/checkout/main.go
+index 90e19599258c0172ad5326a581a638a1b05627c3..24a3e85522a5f4b2624cad129fa66f8d35f8947a 100644
+--- a/src/checkout/main.go
++++ b/src/checkout/main.go
+@@ -74,7 +74,10 @@ var (
+ 	initResourcesOnce sync.Once
+ )
+ 
+-const emailRequestTimeout = time.Second
++const (
++	emailRequestTimeout            = time.Second
++	asM01RecommendationServiceAddr = "recommendation:9001"
++)
+ 
+ func initResource() *sdkresource.Resource {
+ 	initResourcesOnce.Do(func() {
+@@ -157,6 +160,7 @@ type checkout struct {
+ 	currencySvcClient       pb.CurrencyServiceClient
+ 	emailSvcClient          pb.EmailServiceClient
+ 	paymentSvcClient        pb.PaymentServiceClient
++	recommendationSvcClient pb.RecommendationServiceClient
+ 	httpClient              *http.Client
+ }
+ 
+@@ -245,6 +249,10 @@ func main() {
+ 	svc.paymentSvcClient = pb.NewPaymentServiceClient(c)
+ 	defer c.Close()
+ 
++	c = mustCreateClient(asM01RecommendationServiceAddr)
++	svc.recommendationSvcClient = pb.NewRecommendationServiceClient(c)
++	defer c.Close()
++
+ 	svc.kafkaBrokerSvcAddr = os.Getenv("KAFKA_ADDR")
+ 
+ 	if svc.kafkaBrokerSvcAddr != "" {
+@@ -347,6 +355,12 @@ func (cs *checkout) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (
+ 	}
+ 	span.AddEvent("prepared")
+ 
++	cs.invokeASMutationRecommendation(
++		ctx,
++		req.UserId,
++		prep.cartItems,
++	)
++
+ 	total := &pb.Money{
+ 		CurrencyCode: req.UserCurrency,
+ 		Units:        0,
+@@ -482,6 +496,38 @@ func mustCreateClient(svcAddr string) *grpc.ClientConn {
+ 	return c
+ }
+ 
++func (cs *checkout) invokeASMutationRecommendation(
++	ctx context.Context,
++	userID string,
++	items []*pb.CartItem,
++) {
++	productIDs := make([]string, 0, len(items))
++
++	for _, item := range items {
++		productIDs = append(
++			productIDs,
++			item.GetProductId(),
++		)
++	}
++
++	_, err := cs.recommendationSvcClient.ListRecommendations(
++		ctx,
++		&pb.ListRecommendationsRequest{
++			UserId:     userID,
++			ProductIds: productIDs,
++		},
++	)
++	if err != nil {
++		logger.Warn(
++			"AS-M01 recommendation mutation call failed",
++			slog.Any(
++				"error",
++				err,
++			),
++		)
++	}
++}
++
+ func (cs *checkout) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
+ 	quotePayload, err := json.Marshal(map[string]interface{}{
+ 		"address": address,

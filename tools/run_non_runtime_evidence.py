@@ -11,29 +11,21 @@ from archdrift.experiments.static_profile import (
     load_non_runtime_evidence_profile,
 )
 
+from archdrift.analysis.non_runtime import (
+    analyze_non_runtime_complementarity,
+)
+
 
 def _graph_summary(
     view,
 ) -> dict[str, object]:
-    graph = (
-        view
-        .reconstruction
-        .graph
-    )
+    graph = view.reconstruction.graph
 
     return {
-        "included_observations": (
-            view.scoped.included_count
-        ),
-        "excluded_observations": (
-            view.scoped.excluded_count
-        ),
-        "nodes": len(
-            graph.node_ids
-        ),
-        "relations": len(
-            graph.relation_identities
-        ),
+        "included_observations": (view.scoped.included_count),
+        "excluded_observations": (view.scoped.excluded_count),
+        "nodes": len(graph.node_ids),
+        "relations": len(graph.relation_identities),
         "graph": (
             graph.model_dump(
                 mode="json",
@@ -43,11 +35,7 @@ def _graph_summary(
             support.model_dump(
                 mode="json",
             )
-            for support in (
-                view
-                .reconstruction
-                .relation_support
-            )
+            for support in (view.reconstruction.relation_support)
         ],
     }
 
@@ -73,53 +61,28 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    root = (
-        args.project_root
-        .resolve()
+    root = args.project_root.resolve()
+
+    profile = load_non_runtime_evidence_profile(
+        root / "cases" / "real-evidence.yaml",
+        subject_id=args.subject,
     )
 
-    profile = (
-        load_non_runtime_evidence_profile(
-            root
-            / "cases"
-            / "real-evidence.yaml",
-            subject_id=args.subject,
-        )
+    result = NonRuntimeEvidenceRunner().run(
+        project_root=root,
+        profile=profile,
+        rule_pack_root=(root / "rules" / "semgrep" / "packs"),
     )
 
-    result = (
-        NonRuntimeEvidenceRunner()
-        .run(
-            project_root=root,
-            profile=profile,
-            rule_pack_root=(
-                root
-                / "rules"
-                / "semgrep"
-                / "packs"
-            ),
-        )
-    )
+    deployment = result.views.deployment
 
-    deployment = (
-        result.views.deployment
-    )
+    source_static = result.views.source_static
 
-    source_static = (
-        result.views.source_static
-    )
+    combined = result.views.combined
 
-    combined = (
-        result.views.combined
-    )
+    complementarity = analyze_non_runtime_complementarity(result.views)
 
-    output_file = (
-        root
-        / "results"
-        / "real-baseline"
-        / args.subject
-        / "non-runtime.json"
-    )
+    output_file = root / "results" / "real-baseline" / args.subject / "non-runtime.json"
 
     output_file.parent.mkdir(
         parents=True,
@@ -128,40 +91,21 @@ def main() -> int:
 
     document = {
         "schema_version": "1.0",
-        "subject_id": (
-            result.subject_id
-        ),
+        "subject_id": (result.subject_id),
         "source_static": {
-            "findings": len(
-                result.source_static_findings
-            ),
-            "resolved": (
-                result
-                .static_resolution
-                .resolved_count
-            ),
-            "unresolved": (
-                result
-                .static_resolution
-                .unresolved_count
-            ),
+            "findings": len(result.source_static_findings),
+            "resolved": (result.static_resolution.resolved_count),
+            "unresolved": (result.static_resolution.unresolved_count),
         },
+        "complementarity": (
+            complementarity.model_dump(
+                mode="json",
+            )
+        ),
         "views": {
-            "deployment": (
-                _graph_summary(
-                    deployment
-                )
-            ),
-            "source_static": (
-                _graph_summary(
-                    source_static
-                )
-            ),
-            "combined": (
-                _graph_summary(
-                    combined
-                )
-            ),
+            "deployment": (_graph_summary(deployment)),
+            "source_static": (_graph_summary(source_static)),
+            "combined": (_graph_summary(combined)),
         },
     }
 
@@ -175,24 +119,13 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    print(
-        f"Subject: {result.subject_id}"
-    )
+    print(f"Subject: {result.subject_id}")
 
-    print(
-        "Static findings: "
-        f"{len(result.source_static_findings)}"
-    )
+    print("Static findings: " f"{len(result.source_static_findings)}")
 
-    print(
-        "Static resolved: "
-        f"{result.static_resolution.resolved_count}"
-    )
+    print("Static resolved: " f"{result.static_resolution.resolved_count}")
 
-    print(
-        "Static unresolved: "
-        f"{result.static_resolution.unresolved_count}"
-    )
+    print("Static unresolved: " f"{result.static_resolution.unresolved_count}")
 
     print()
 
@@ -216,14 +149,10 @@ def main() -> int:
 
     print()
 
-    print(
-        f"Result: {output_file}"
-    )
+    print(f"Result: {output_file}")
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(
-        main()
-    )
+    raise SystemExit(main())

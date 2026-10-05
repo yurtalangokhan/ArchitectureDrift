@@ -78,6 +78,14 @@ from archdrift.model.static_profile import (
     StaticSourceRoot,
 )
 
+from archdrift.model.mutation_implementation import (
+    MutationImplementation,
+    MutationImplementationError,
+    MutationImplementationLoadError,
+    MutationImplementationManifest,
+    load_mutation_implementation_manifest,
+)
+
 __all__ = [
     # Graph
     "ArchitectureGraph",
@@ -149,4 +157,9 @@ __all__ = [
     "AspireEvidenceProfile",
     "ComposeEvidenceProfile",
     "NonRuntimeEvidenceProfile",
+    "MutationImplementation",
+    "MutationImplementationError",
+    "MutationImplementationLoadError",
+    "MutationImplementationManifest",
+    "load_mutation_implementation_manifest",
 ]

@@ -1,0 +1,86 @@
+schema_version: "1.0"
+
+implementations:
+
+  # Astronomy Shop
+  - mutation_id: AS-M01
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M01.yaml
+    patch: mutations/patches/astronomy-shop/AS-M01.patch
+
+  - mutation_id: AS-M02
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M02.yaml
+    patch: mutations/patches/astronomy-shop/AS-M02.patch
+
+  - mutation_id: AS-M03
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M03.yaml
+    patch: mutations/patches/astronomy-shop/AS-M03.patch
+
+  - mutation_id: AS-M04
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M04.yaml
+    patch: mutations/patches/astronomy-shop/AS-M04.patch
+
+  - mutation_id: AS-M05
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M05.yaml
+    patch: mutations/patches/astronomy-shop/AS-M05.patch
+
+  - mutation_id: AS-M06
+    system_id: astronomy-shop
+    oracle: mutations/astronomy-shop/AS-M06.yaml
+    patch: mutations/patches/astronomy-shop/AS-M06.patch
+
+  # eShop
+  - mutation_id: ES-M01
+    system_id: eshop
+    oracle: mutations/eshop/ES-M01.yaml
+    patch: mutations/patches/eshop/ES-M01.patch
+
+  - mutation_id: ES-M02
+    system_id: eshop
+    oracle: mutations/eshop/ES-M02.yaml
+    patch: mutations/patches/eshop/ES-M02.patch
+
+  - mutation_id: ES-M03
+    system_id: eshop
+    oracle: mutations/eshop/ES-M03.yaml
+    patch: mutations/patches/eshop/ES-M03.patch
+
+  - mutation_id: ES-M04
+    system_id: eshop
+    oracle: mutations/eshop/ES-M04.yaml
+    patch: mutations/patches/eshop/ES-M04.patch
+
+  - mutation_id: ES-M05
+    system_id: eshop
+    oracle: mutations/eshop/ES-M05.yaml
+    patch: mutations/patches/eshop/ES-M05.patch
+
+  # TeaStore
+  - mutation_id: TS-M01
+    system_id: teastore
+    oracle: mutations/teastore/TS-M01.yaml
+    patch: mutations/patches/teastore/TS-M01.patch
+
+  - mutation_id: TS-M02
+    system_id: teastore
+    oracle: mutations/teastore/TS-M02.yaml
+    patch: mutations/patches/teastore/TS-M02.patch
+
+  - mutation_id: TS-M03
+    system_id: teastore
+    oracle: mutations/teastore/TS-M03.yaml
+    patch: mutations/patches/teastore/TS-M03.patch
+
+  - mutation_id: TS-M04
+    system_id: teastore
+    oracle: mutations/teastore/TS-M04.yaml
+    patch: mutations/patches/teastore/TS-M04.patch
+
+  - mutation_id: TS-M05
+    system_id: teastore
+    oracle: mutations/teastore/TS-M05.yaml
+    patch: mutations/patches/teastore/TS-M05.patch
