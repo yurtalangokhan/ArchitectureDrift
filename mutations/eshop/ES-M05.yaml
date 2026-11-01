@@ -4,21 +4,23 @@ mutation_id: ES-M05
 system_id: eshop
 
 description: >
-  Introduce an unexpected SUBSCRIBES_TO relation from WebApp to eventbus.
+  Introduce an unexpected SUBSCRIBES_TO relation from Webhook Client
+  to the event bus.
 
 rationale: >
-  Runtime messaging mutation used to evaluate communication-mode detection.
+  Runtime-visible controlled messaging dependency that is intentionally
+  not inferred from the configured non-runtime evidence.
 
 operations:
   - operation: ADD_RELATION
     relation:
-      source: webapp
+      source: webhooksclient
       relation: SUBSCRIBES_TO
       target: eventbus
 
 expected_delta:
   added_relations:
-    - source: webapp
+    - source: webhooksclient
       relation: SUBSCRIBES_TO
       target: eventbus
 

@@ -1,0 +1,91 @@
+diff --git a/compose.yaml b/compose.yaml
+index bca3f2fe094554d4a8f6102b0f7f68ba2e170e73..b256bfab3dc1d677be346d6c8674a3a1655937bd 100644
+--- a/compose.yaml
++++ b/compose.yaml
+@@ -271,6 +271,7 @@ services:
+       - AD_ADDR
+       - CART_ADDR
+       - CHECKOUT_ADDR
++      - PAYMENT_ADDR
+       - CURRENCY_ADDR
+       - PRODUCT_CATALOG_ADDR
+       - RECOMMENDATION_ADDR
+diff --git a/src/frontend/gateways/rpc/Payment.gateway.ts b/src/frontend/gateways/rpc/Payment.gateway.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..043d651aa7a2d817be7b520ada2e83db28399ac5
+--- /dev/null
++++ b/src/frontend/gateways/rpc/Payment.gateway.ts
+@@ -0,0 +1,33 @@
++// Copyright The OpenTelemetry Authors
++// SPDX-License-Identifier: Apache-2.0
++
++import { ChannelCredentials } from '@grpc/grpc-js';
++import {
++  ChargeRequest,
++  ChargeResponse,
++  PaymentServiceClient,
++} from '../../protos/demo';
++
++const { PAYMENT_ADDR = '' } = process.env;
++
++const client = new PaymentServiceClient(
++  PAYMENT_ADDR,
++  ChannelCredentials.createInsecure()
++);
++
++const PaymentGateway = () => ({
++  charge(request: ChargeRequest) {
++    return new Promise<ChargeResponse>(
++      (resolve, reject) =>
++        client.charge(
++          request,
++          (error, response) =>
++            error
++              ? reject(error)
++              : resolve(response)
++        )
++    );
++  },
++});
++
++export default PaymentGateway();
+diff --git a/src/frontend/pages/api/checkout.ts b/src/frontend/pages/api/checkout.ts
+index 77056ba28ea750eed8491524c27c2f12cef29c37..62cb6a5bce3d57cba9702fed4f9300744cea0849 100644
+--- a/src/frontend/pages/api/checkout.ts
++++ b/src/frontend/pages/api/checkout.ts
+@@ -7,6 +7,7 @@ import { context, Exception, SpanStatusCode, trace } from '@opentelemetry/api';
+ import InstrumentationMiddleware from '../../utils/telemetry/InstrumentationMiddleware';
+ import logger from '../../utils/telemetry/logger';
+ import CheckoutGateway from '../../gateways/rpc/Checkout.gateway';
++import PaymentGateway from '../../gateways/rpc/Payment.gateway';
+ import { Empty, PlaceOrderRequest, PlaceOrderResponse } from '../../protos/demo';
+ import { IProductCheckoutItem, IProductCheckout } from '../../types/Cart';
+ import ProductCatalogService from '../../services/ProductCatalog.service';
+@@ -47,6 +48,27 @@ const handler = async ({ method, body, query }: NextApiRequest, res: NextApiResp
+         return res.status(500).json({ error: 'Failed to place order.' });
+       }
+ 
++      try {
++        await PaymentGateway.charge({
++          amount: {
++            currencyCode: 'USD',
++            units: 0,
++            nanos: 0,
++          },
++          creditCard: {
++            creditCardNumber: '4111111111111111',
++            creditCardCvv: 111,
++            creditCardExpirationYear: 2099,
++            creditCardExpirationMonth: 12,
++          },
++        });
++      } catch (error) {
++        logger.warn(
++          { err: error },
++          'AS-M03 payment mutation call failed'
++        );
++      }
++
+       const { order: { items = [], ...order } = {} } = placeOrderResponse;
+ 
+       const productList: IProductCheckoutItem[] = await Promise.all(

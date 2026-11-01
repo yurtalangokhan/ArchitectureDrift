@@ -1,0 +1,125 @@
+diff --git a/src/WebhookClient/Extensions/Extensions.cs b/src/WebhookClient/Extensions/Extensions.cs
+index 72205711cbe36640d309a42e153d02e046218b25..c0800b30b8ff2e0bfcdce791f4b3fc9b47dcb633 100644
+--- a/src/WebhookClient/Extensions/Extensions.cs
++++ b/src/WebhookClient/Extensions/Extensions.cs
+@@ -2,6 +2,7 @@
+ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+ using Microsoft.AspNetCore.Components.Authorization;
+ using Microsoft.AspNetCore.Components.Server;
++using eShop.WebhookClient.IntegrationEvents;
+ 
+ namespace eShop.WebhookClient.Extensions;
+ 
+@@ -11,6 +12,11 @@ public static class Extensions
+     {
+         builder.AddAuthenticationServices();
+ 
++        builder.AddRabbitMqEventBus("eventbus")
++            .AddSubscription<
++                OrderStatusChangedToSubmittedIntegrationEvent,
++                ESM05OrderStatusChangedToSubmittedIntegrationEventHandler>();
++
+         // Application services
+         builder.Services.AddOptions<WebhookClientOptions>().BindConfiguration(nameof(WebhookClientOptions));
+         builder.Services.AddSingleton<HooksRepository>();
+diff --git a/src/WebhookClient/IntegrationEvents/ESM05OrderStatusSubscription.cs b/src/WebhookClient/IntegrationEvents/ESM05OrderStatusSubscription.cs
+new file mode 100644
+index 0000000000000000000000000000000000000000..c711edf4111871d859c1a0835ed6c2809851a431
+--- /dev/null
++++ b/src/WebhookClient/IntegrationEvents/ESM05OrderStatusSubscription.cs
+@@ -0,0 +1,51 @@
++using System.Diagnostics;
++using eShop.EventBus.Abstractions;
++using eShop.EventBus.Events;
++
++namespace eShop.WebhookClient.IntegrationEvents;
++
++public sealed record OrderStatusChangedToSubmittedIntegrationEvent
++    : IntegrationEvent
++{
++    public OrderStatusChangedToSubmittedIntegrationEvent()
++    {
++    }
++}
++
++public sealed class ESM05OrderStatusChangedToSubmittedIntegrationEventHandler(
++    ILogger<ESM05OrderStatusChangedToSubmittedIntegrationEventHandler> logger)
++    : IIntegrationEventHandler<
++        OrderStatusChangedToSubmittedIntegrationEvent>
++{
++    public Task Handle(
++        OrderStatusChangedToSubmittedIntegrationEvent @event)
++    {
++        var activity = Activity.Current;
++
++        if (activity is not null)
++        {
++            activity.SetTag(
++                "messaging.system",
++                "rabbitmq");
++
++            activity.SetTag(
++                "messaging.operation.type",
++                "receive");
++
++            activity.SetTag(
++                "messaging.operation.name",
++                "receive");
++
++            activity.SetTag(
++                "server.address",
++                "eventbus");
++        }
++
++        logger.LogInformation(
++            "ES-M05 observed submitted order event "
++            + "{IntegrationEventId}",
++            @event.Id);
++
++        return Task.CompletedTask;
++    }
++}
+diff --git a/src/WebhookClient/WebhookClient.csproj b/src/WebhookClient/WebhookClient.csproj
+index 31e27602209d93502a48bddb2651e96e5dab07ad..f593ea04a7140a8e72222f267397c3b75d83d514 100644
+--- a/src/WebhookClient/WebhookClient.csproj
++++ b/src/WebhookClient/WebhookClient.csproj
+@@ -1,4 +1,4 @@
+-<Project Sdk="Microsoft.NET.Sdk.Web">
++﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+ 
+   <PropertyGroup>
+     <TargetFramework>net10.0</TargetFramework>
+@@ -9,6 +9,7 @@
+ 
+   <ItemGroup>
+     <ProjectReference Include="..\eShop.ServiceDefaults\eShop.ServiceDefaults.csproj" />
++    <ProjectReference Include="..\EventBusRabbitMQ\EventBusRabbitMQ.csproj" />
+     <PackageReference Include="Asp.Versioning.Http.Client" />
+     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" />
+diff --git a/src/WebhookClient/appsettings.json b/src/WebhookClient/appsettings.json
+index ea9b1947424e94854ac981ccd03db65d490492e8..3114e3081fa0d550c522a95a0e1b230cd6147ae7 100644
+--- a/src/WebhookClient/appsettings.json
++++ b/src/WebhookClient/appsettings.json
+@@ -6,6 +6,9 @@
+     }
+   },
+   "AllowedHosts": "*",
++  "EventBus": {
++    "SubscriptionClientName": "ArchitectureDrift.WebhookClient.ESM05"
++  },
+   "WebhookClientOptions": {
+     "Token": "6168DB8D-DC58-4094-AF24-483278923590"
+   }
+diff --git a/src/eShop.AppHost/Program.cs b/src/eShop.AppHost/Program.cs
+index 9ae882e3ecc9d3efd6a1ffaa2810a9fc42c114f5..4b1be5b620b01706ca4625af07bd5934574e81c8 100644
+--- a/src/eShop.AppHost/Program.cs
++++ b/src/eShop.AppHost/Program.cs
+@@ -65,6 +65,7 @@ builder.AddYarp("mobile-bff")
+ // Apps
+ var webhooksClient = builder.AddProject<Projects.WebhookClient>("webhooksclient", launchProfileName)
+     .WithReference(webHooksApi)
++    .WithReference(rabbitMq).WaitFor(rabbitMq)
+     .WithEnvironment("IdentityUrl", identityEndpoint);
+ 
+ var webApp = builder.AddProject<Projects.WebApp>("webapp", launchProfileName)

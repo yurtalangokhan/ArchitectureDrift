@@ -1,0 +1,91 @@
+diff --git a/src/Basket.API/Grpc/BasketService.cs b/src/Basket.API/Grpc/BasketService.cs
+index 3f1deda6764d1342620e3cb47d5ee04404555c6a..ab103e57108d5d4f34782ab36279f4bda76e718b 100644
+--- a/src/Basket.API/Grpc/BasketService.cs
++++ b/src/Basket.API/Grpc/BasketService.cs
+@@ -1,4 +1,6 @@
+ ﻿using System.Diagnostics.CodeAnalysis;
++using System.Net;
++using System.Net.Sockets;
+ using eShop.Basket.API.Repositories;
+ using eShop.Basket.API.Extensions;
+ using eShop.Basket.API.Model;
+@@ -9,6 +11,69 @@ public class BasketService(
+     IBasketRepository repository,
+     ILogger<BasketService> logger) : Basket.BasketBase
+ {
++    private const int ESM01CatalogPort = 5222;
++
++    private static readonly HttpClient ESM01CatalogClient =
++        CreateESM01CatalogClient();
++
++    private static HttpClient CreateESM01CatalogClient()
++    {
++        var handler = new SocketsHttpHandler
++        {
++            ConnectCallback = static async (
++                _,
++                cancellationToken) =>
++            {
++                var socket = new Socket(
++                    SocketType.Stream,
++                    ProtocolType.Tcp);
++
++                try
++                {
++                    await socket.ConnectAsync(
++                        IPAddress.Loopback,
++                        ESM01CatalogPort,
++                        cancellationToken);
++
++                    return new NetworkStream(
++                        socket,
++                        ownsSocket: true);
++                }
++                catch
++                {
++                    socket.Dispose();
++                    throw;
++                }
++            }
++        };
++
++        return new HttpClient(handler)
++        {
++            BaseAddress = new Uri(
++                "http://catalog-api")
++        };
++    }
++
++    private async Task InvokeESM01CatalogAsync(
++        CancellationToken cancellationToken)
++    {
++        try
++        {
++            using var response =
++                await ESM01CatalogClient.GetAsync(
++                    "/alive",
++                    cancellationToken);
++
++            response.EnsureSuccessStatusCode();
++        }
++        catch (Exception exception)
++        {
++            logger.LogWarning(
++                exception,
++                "ES-M01 catalog mutation call failed");
++        }
++    }
++
+     [AllowAnonymous]
+     public override async Task<CustomerBasketResponse> GetBasket(GetBasketRequest request, ServerCallContext context)
+     {
+@@ -23,6 +88,9 @@ public class BasketService(
+             logger.LogDebug("Begin GetBasketById call from method {Method} for basket id {Id}", context.Method, userId);
+         }
+ 
++        await InvokeESM01CatalogAsync(
++            context.CancellationToken);
++
+         var data = await repository.GetBasketAsync(userId);
+ 
+         if (data is not null)

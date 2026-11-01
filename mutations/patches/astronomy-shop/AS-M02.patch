@@ -1,0 +1,53 @@
+diff --git a/compose.yaml b/compose.yaml
+index bca3f2fe094554d4a8f6102b0f7f68ba2e170e73..cc811cc6afc8809369da12bf3ae00e16f8b77a77 100644
+--- a/compose.yaml
++++ b/compose.yaml
+@@ -484,6 +484,7 @@ services:
+     environment:
+       - IPV6_ENABLED
+       - PAYMENT_PORT
++      - SHIPPING_ADDR=${SHIPPING_ADDR}
+       - FLAGD_HOST
+       - FLAGD_PORT
+       - OTEL_EXPORTER_OTLP_ENDPOINT
+diff --git a/src/payment/index.js b/src/payment/index.js
+index 960d4c49fd1c77c5b45ac905fbe948c67e5cb111..0d54baad9e197d55a0a2b955a35f6d1fdd1deb3e 100644
+--- a/src/payment/index.js
++++ b/src/payment/index.js
+@@ -9,10 +9,36 @@ const { ATTR_ERROR_TYPE } = require('@opentelemetry/semantic-conventions')
+ const charge = require('./charge')
+ const logger = require('./logger')
+ 
++async function invokeASMutationShipping(call) {
++  const metadata = call.metadata.get('x-archdrift-as-m02')
++
++  if (metadata.length === 0 || metadata[0] !== 'true') {
++    return
++  }
++
++  const shippingAddress = process.env.SHIPPING_ADDR
++
++  if (!shippingAddress) {
++    throw new Error('AS-M02 requires SHIPPING_ADDR')
++  }
++
++  await fetch(`http://${shippingAddress}/get-quote`, {
++    method: 'POST',
++    headers: {
++      'content-type': 'application/json'
++    },
++    body: JSON.stringify({
++      address: {},
++      items: []
++    })
++  })
++}
++
+ async function chargeServiceHandler(call, callback) {
+   const span = opentelemetry.trace.getActiveSpan();
+ 
+   try {
++    await invokeASMutationShipping(call)
+     const amount = call.request.amount
+     span?.setAttributes({
+       'demo.payment.amount': (Number(amount.units) + amount.nanos / 1000000000).toFixed(2)

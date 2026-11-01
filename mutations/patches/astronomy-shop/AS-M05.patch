@@ -1,0 +1,172 @@
+diff --git a/src/frontend/package-lock.json b/src/frontend/package-lock.json
+index eb6034fed311f268165a2c4b39bcf6d99507aa3d..59992c42c58444e90d9f250ffae399c27a3e9fa5 100644
+--- a/src/frontend/package-lock.json
++++ b/src/frontend/package-lock.json
+@@ -41,6 +41,7 @@
+         "currency-symbol-map": "5.1.0",
+         "dotenv": "18.0.1",
+         "dotenv-expand": "1000.0.0",
++        "kafkajs": "2.2.4",
+         "next": "16.3.5",
+         "pino": "^10.3.1",
+         "react": "19.3.0",
+@@ -8380,6 +8381,15 @@
+         "node": ">=4.0"
+       }
+     },
++    "node_modules/kafkajs": {
++      "version": "2.2.4",
++      "resolved": "https://registry.npmjs.org/kafkajs/-/kafkajs-2.2.4.tgz",
++      "integrity": "sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=14.0.0"
++      }
++    },
+     "node_modules/keyv": {
+       "version": "4.5.4",
+       "resolved": "https://registry.npmjs.org/keyv/-/keyv-4.5.4.tgz",
+diff --git a/src/frontend/package.json b/src/frontend/package.json
+index 2900c46a7e15df29958b9ca5c0d8714004bec525..d1d51053887a813de02e821f5cc98de9aa3578b4 100644
+--- a/src/frontend/package.json
++++ b/src/frontend/package.json
+@@ -44,6 +44,7 @@
+     "currency-symbol-map": "5.1.0",
+     "dotenv": "18.0.1",
+     "dotenv-expand": "1000.0.0",
++    "kafkajs": "2.2.4",
+     "next": "16.3.5",
+     "pino": "^10.3.1",
+     "react": "19.3.0",
+diff --git a/src/frontend/pages/api/checkout.ts b/src/frontend/pages/api/checkout.ts
+index 77056ba28ea750eed8491524c27c2f12cef29c37..c8792829baa8b534ef44e5289c957cdd1521c641 100644
+--- a/src/frontend/pages/api/checkout.ts
++++ b/src/frontend/pages/api/checkout.ts
+@@ -10,6 +10,7 @@ import CheckoutGateway from '../../gateways/rpc/Checkout.gateway';
+ import { Empty, PlaceOrderRequest, PlaceOrderResponse } from '../../protos/demo';
+ import { IProductCheckoutItem, IProductCheckout } from '../../types/Cart';
+ import ProductCatalogService from '../../services/ProductCatalog.service';
++import { publishASMutationKafka } from '../../services/ASMutationKafka.service';
+ 
+ // Prefix checkout's Go service always uses for chargeCard failures (src/checkout/main.go),
+ // the only signal available to tell a payment decline apart from an unrelated internal error.
+@@ -47,6 +48,18 @@ const handler = async ({ method, body, query }: NextApiRequest, res: NextApiResp
+         return res.status(500).json({ error: 'Failed to place order.' });
+       }
+ 
++      try {
++        await publishASMutationKafka({
++          orderId: placeOrderResponse.order?.orderId ?? '',
++          userId: orderData.userId,
++        });
++      } catch (error) {
++        logger.warn(
++          { err: error },
++          'AS-M05 Kafka mutation publish failed'
++        );
++      }
++
+       const { order: { items = [], ...order } = {} } = placeOrderResponse;
+ 
+       const productList: IProductCheckoutItem[] = await Promise.all(
+diff --git a/src/frontend/services/ASMutationKafka.service.ts b/src/frontend/services/ASMutationKafka.service.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..a4d6ba3f1b5f8788a0fee84f8519ef6eafcdef44
+--- /dev/null
++++ b/src/frontend/services/ASMutationKafka.service.ts
+@@ -0,0 +1,95 @@
++// Copyright The OpenTelemetry Authors
++// SPDX-License-Identifier: Apache-2.0
++
++import {
++  SpanKind,
++  SpanStatusCode,
++  trace,
++} from '@opentelemetry/api';
++import {
++  Kafka,
++  logLevel,
++  Producer,
++} from 'kafkajs';
++
++const AS_M05_BROKER = 'kafka:9092';
++const AS_M05_TOPIC = 'orders';
++
++const kafka = new Kafka({
++  clientId: 'frontend-as-m05',
++  brokers: [AS_M05_BROKER],
++  logLevel: logLevel.NOTHING,
++});
++
++const producer: Producer = kafka.producer();
++
++let connectPromise: Promise<void> | undefined;
++
++async function ensureConnected(): Promise<void> {
++  if (!connectPromise) {
++    connectPromise = producer.connect();
++  }
++
++  try {
++    await connectPromise;
++  } catch (error) {
++    connectPromise = undefined;
++    throw error;
++  }
++}
++
++export interface ASMutationKafkaEvent {
++  orderId: string;
++  userId: string;
++}
++
++export async function publishASMutationKafka(
++  event: ASMutationKafkaEvent
++): Promise<void> {
++  const tracer = trace.getTracer('frontend-as-m05');
++
++  await tracer.startActiveSpan(
++    'AS-M05 kafka publish',
++    {
++      kind: SpanKind.PRODUCER,
++    },
++    async span => {
++      try {
++        await ensureConnected();
++
++        await producer.send({
++          topic: AS_M05_TOPIC,
++          messages: [
++            {
++              value: JSON.stringify(event),
++            },
++          ],
++        });
++
++        // These attributes are added only after the real Kafka send
++        // succeeds. Failed connection/send attempts therefore cannot
++        // become false-positive PUBLISHES_TO observations.
++        span.setAttributes({
++          'messaging.system': 'kafka',
++          'messaging.operation.type': 'send',
++          'messaging.operation.name': 'send',
++          'messaging.destination.name': AS_M05_TOPIC,
++          'server.address': 'kafka',
++          'server.port': 9092,
++        });
++      } catch (error) {
++        span.setStatus({
++          code: SpanStatusCode.ERROR,
++        });
++
++        if (error instanceof Error) {
++          span.recordException(error);
++        }
++
++        throw error;
++      } finally {
++        span.end();
++      }
++    }
++  );
++}

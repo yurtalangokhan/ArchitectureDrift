@@ -1,0 +1,82 @@
+diff --git a/src/Ordering.API/Apis/OrderServices.cs b/src/Ordering.API/Apis/OrderServices.cs
+index f31fcd5a833e71d8c7eee01d94211372b96a35a1..45402c58cfcaa2dad2379c8c0679741dbe5b4460 100644
+--- a/src/Ordering.API/Apis/OrderServices.cs
++++ b/src/Ordering.API/Apis/OrderServices.cs
+@@ -2,10 +2,13 @@
+     IMediator mediator,
+     IOrderQueries queries,
+     IIdentityService identityService,
++    IHttpClientFactory httpClientFactory,
+     ILogger<OrderServices> logger)
+ {
+     public IMediator Mediator { get; set; } = mediator;
+     public ILogger<OrderServices> Logger { get; } = logger;
+     public IOrderQueries Queries { get; } = queries;
+     public IIdentityService IdentityService { get; } = identityService;
++    public IHttpClientFactory HttpClientFactory { get; } =
++        httpClientFactory;
+ }
+diff --git a/src/Ordering.API/Apis/OrdersApi.cs b/src/Ordering.API/Apis/OrdersApi.cs
+index b8c339cf8ebe8e0802ba6d2ca777057d2fadf982..0fdb36e2716a14df0955354c881156fcfc453d9c 100644
+--- a/src/Ordering.API/Apis/OrdersApi.cs
++++ b/src/Ordering.API/Apis/OrdersApi.cs
+@@ -135,6 +135,28 @@ public static class OrdersApi
+             return TypedResults.BadRequest("RequestId is missing.");
+         }
+ 
++        try
++        {
++            var catalogClient =
++                services.HttpClientFactory.CreateClient(
++                    "ESM03Catalog");
++
++            using var catalogResponse =
++                await catalogClient.GetAsync(
++                    "/api/catalog/items/1?api-version=2.0");
++
++            services.Logger.LogInformation(
++                "ES-M03 Catalog mutation call completed "
++                + "with status {StatusCode}",
++                catalogResponse.StatusCode);
++        }
++        catch (Exception exception)
++        {
++            services.Logger.LogWarning(
++                exception,
++                "ES-M03 Catalog mutation call failed");
++        }
++
+         using (services.Logger.BeginScope(new List<KeyValuePair<string, object>> { new("IdentifiedCommandId", requestId) }))
+         {
+             var maskedCCNumber = request.CardNumber.Substring(request.CardNumber.Length - 4).PadLeft(request.CardNumber.Length, 'X');
+diff --git a/src/Ordering.API/Extensions/Extensions.cs b/src/Ordering.API/Extensions/Extensions.cs
+index cce11955ba72a3ac5b2a5490f1a27ddbec4e0695..49a17c940e5bc5d9e237fec687cf9c32ad722533 100644
+--- a/src/Ordering.API/Extensions/Extensions.cs
++++ b/src/Ordering.API/Extensions/Extensions.cs
+@@ -31,6 +31,14 @@ internal static class Extensions
+         services.AddHttpContextAccessor();
+         services.AddTransient<IIdentityService, IdentityService>();
+ 
++        services.AddHttpClient(
++            "ESM03Catalog",
++            client =>
++            {
++                client.BaseAddress = new Uri(
++                    "https+http://catalog-api");
++            });
++
+         // Configure mediatR
+         services.AddMediatR(cfg =>
+         {
+diff --git a/src/eShop.AppHost/Program.cs b/src/eShop.AppHost/Program.cs
+index 9ae882e3ecc9d3efd6a1ffaa2810a9fc42c114f5..3522d3ac35fb20500008042ee1e120dbed9723b1 100644
+--- a/src/eShop.AppHost/Program.cs
++++ b/src/eShop.AppHost/Program.cs
+@@ -41,6 +41,7 @@ var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
+ var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
+     .WithReference(rabbitMq).WaitFor(rabbitMq)
+     .WithReference(orderDb).WaitFor(orderDb)
++    .WithReference(catalogApi)
+     .WithHttpHealthCheck("/health")
+     .WithEnvironment("Identity__Url", identityEndpoint);
+ 

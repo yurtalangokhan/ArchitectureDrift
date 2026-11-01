@@ -1,0 +1,210 @@
+diff --git a/src/checkout/main.go b/src/checkout/main.go
+index 90e19599258c0172ad5326a581a638a1b05627c3..bd95509acb03a7bba88f58a0350d59a2be368755 100644
+--- a/src/checkout/main.go
++++ b/src/checkout/main.go
+@@ -160,6 +160,166 @@ type checkout struct {
+ 	httpClient              *http.Client
+ }
+ 
++type asM06ConsumerGroupHandler struct {
++	tracer     trace.Tracer
++	brokerHost string
++}
++
++func (h *asM06ConsumerGroupHandler) Setup(
++	sarama.ConsumerGroupSession,
++) error {
++	return nil
++}
++
++func (h *asM06ConsumerGroupHandler) Cleanup(
++	sarama.ConsumerGroupSession,
++) error {
++	return nil
++}
++
++func (h *asM06ConsumerGroupHandler) ConsumeClaim(
++	session sarama.ConsumerGroupSession,
++	claim sarama.ConsumerGroupClaim,
++) error {
++	for {
++		select {
++		case <-session.Context().Done():
++			return nil
++
++		case message, ok := <-claim.Messages():
++			if !ok {
++				return nil
++			}
++
++			_, span := h.tracer.Start(
++				session.Context(),
++				"AS-M06 kafka receive",
++				trace.WithSpanKind(
++					trace.SpanKindConsumer,
++				),
++			)
++
++			span.SetAttributes(
++				attribute.String(
++					"messaging.system",
++					"kafka",
++				),
++				attribute.String(
++					"messaging.operation.type",
++					"receive",
++				),
++				attribute.String(
++					"messaging.operation.name",
++					"receive",
++				),
++				attribute.String(
++					"messaging.destination.name",
++					message.Topic,
++				),
++				attribute.String(
++					"server.address",
++					h.brokerHost,
++				),
++			)
++
++			span.End()
++
++			session.MarkMessage(
++				message,
++				"AS-M06 architecture mutation observation",
++			)
++		}
++	}
++}
++
++func asM06BrokerHost(
++	brokerAddress string,
++) string {
++	host, _, err := net.SplitHostPort(
++		brokerAddress,
++	)
++
++	if err == nil && host != "" {
++		return host
++	}
++
++	return brokerAddress
++}
++
++func startASMutationKafkaConsumer(
++	ctx context.Context,
++	brokerAddress string,
++	topic string,
++	logger *slog.Logger,
++	tracer trace.Tracer,
++) (func() error, error) {
++	config := sarama.NewConfig()
++
++	config.Version = sarama.V3_0_0_0
++	config.Consumer.Offsets.Initial = sarama.OffsetNewest
++
++	group, err := sarama.NewConsumerGroup(
++		[]string{
++			brokerAddress,
++		},
++		"checkout-as-m06",
++		config,
++	)
++	if err != nil {
++		return nil, err
++	}
++
++	handler := &asM06ConsumerGroupHandler{
++		tracer: tracer,
++		brokerHost: asM06BrokerHost(
++			brokerAddress,
++		),
++	}
++
++	go func() {
++		for ctx.Err() == nil {
++			err := group.Consume(
++				ctx,
++				[]string{
++					topic,
++				},
++				handler,
++			)
++
++			if ctx.Err() != nil {
++				return
++			}
++
++			if err != nil {
++				logger.Warn(
++					"AS-M06 Kafka consumer session failed",
++					slog.Any(
++						"error",
++						err,
++					),
++				)
++
++				timer := time.NewTimer(
++					time.Second,
++				)
++
++				select {
++				case <-ctx.Done():
++					if !timer.Stop() {
++						<-timer.C
++					}
++
++					return
++
++				case <-timer.C:
++				}
++			}
++		}
++	}()
++
++	return group.Close, nil
++}
++
+ func main() {
+ 	var port string
+ 	mustMapEnv(&port, "CHECKOUT_PORT")
+@@ -275,6 +435,38 @@ func main() {
+ 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+ 	defer cancel()
+ 
++	if svc.kafkaBrokerSvcAddr != "" {
++		stopASMutationKafkaConsumer, consumerErr := startASMutationKafkaConsumer(
++			ctx,
++			svc.kafkaBrokerSvcAddr,
++			kafka.Topic,
++			logger,
++			tracer,
++		)
++
++		if consumerErr != nil {
++			logger.Error(
++				"Failed to start AS-M06 Kafka consumer",
++				slog.Any(
++					"error",
++					consumerErr,
++				),
++			)
++		} else {
++			defer func() {
++				if closeErr := stopASMutationKafkaConsumer(); closeErr != nil {
++					logger.Warn(
++						"Failed to stop AS-M06 Kafka consumer",
++						slog.Any(
++							"error",
++							closeErr,
++						),
++					)
++				}
++			}()
++		}
++	}
++
+ 	go func() {
+ 		if err := srv.Serve(lis); err != nil {
+ 			logger.Error("Failed to serve gRPC server", slog.Any("error", err))

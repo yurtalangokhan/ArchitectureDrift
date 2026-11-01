@@ -51,10 +51,11 @@ contracts:
   - id: ES-C005
     type: COMMUNICATION_MODE
     description: >
-      WebApp-to-eventbus communication may publish but must not subscribe.
+      Webhook Client-to-eventbus communication must not use subscription-based
+      messaging.
     rationale: >
-      Controlled messaging-mode mutation for ES-M05.
-    source: webapp
+      Controlled runtime-only messaging-mode mutation for ES-M05.
+    source: webhooksclient
     target: eventbus
     allowed_relations:
       - PUBLISHES_TO

@@ -1,0 +1,12 @@
+diff --git a/src/eShop.AppHost/Program.cs b/src/eShop.AppHost/Program.cs
+index 9ae882e3ecc9d3efd6a1ffaa2810a9fc42c114f5..1cca2c58435c0dfb2f0cc2a186715855f3914a2c 100644
+--- a/src/eShop.AppHost/Program.cs
++++ b/src/eShop.AppHost/Program.cs
+@@ -73,6 +73,7 @@ var webApp = builder.AddProject<Projects.WebApp>("webapp", launchProfileName)
+     .WithReference(basketApi)
+     .WithReference(catalogApi)
+     .WithReference(orderingApi)
++    .WithReference(webHooksApi)
+     .WithReference(rabbitMq).WaitFor(rabbitMq)
+     .WaitFor(identityApi)
+     .WithEnvironment("IdentityUrl", identityEndpoint);

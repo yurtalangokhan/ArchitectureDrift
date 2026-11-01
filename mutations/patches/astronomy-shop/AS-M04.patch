@@ -1,0 +1,77 @@
+diff --git a/src/cart/src/services/CartService.cs b/src/cart/src/services/CartService.cs
+index 303ebf03e629119a81a28d715e6619a393809c22..b6a35b3857feffdb1755911af1a0faec665e073a 100644
+--- a/src/cart/src/services/CartService.cs
++++ b/src/cart/src/services/CartService.cs
+@@ -4,6 +4,7 @@ using System.Diagnostics;
+ using System.Threading.Tasks;
+ using System;
+ using Grpc.Core;
++using Grpc.Net.Client;
+ using cart.cartstore;
+ using OpenFeature;
+ using Oteldemo;
+@@ -13,6 +14,17 @@ namespace cart.services;
+ public class CartService : Oteldemo.CartService.CartServiceBase
+ {
+     private static readonly Empty Empty = new();
++
++    private const string ASMutationRecommendationAddress =
++        "http://recommendation:9001";
++
++    private static readonly GrpcChannel ASMutationRecommendationChannel =
++        GrpcChannel.ForAddress(ASMutationRecommendationAddress);
++
++    private static readonly RecommendationService.RecommendationServiceClient
++        ASMutationRecommendationClient =
++            new(ASMutationRecommendationChannel);
++
+     private readonly ICartStore _badCartStore;
+     private readonly ICartStore _cartStore;
+     private readonly IFeatureClient _featureFlagHelper;
+@@ -45,12 +57,46 @@ public class CartService : Oteldemo.CartService.CartServiceBase
+         }
+     }
+ 
++    private static bool IsASMutationEnabled(
++        ServerCallContext context)
++    {
++        foreach (var entry in context.RequestHeaders)
++        {
++            if (
++                entry.Key == "x-archdrift-as-m04"
++                && string.Equals(
++                    entry.Value,
++                    "true",
++                    StringComparison.OrdinalIgnoreCase))
++            {
++                return true;
++            }
++        }
++
++        return false;
++    }
++
++    private static async Task InvokeASMutationRecommendation(
++        string userId)
++    {
++        await ASMutationRecommendationClient.ListRecommendationsAsync(
++            new ListRecommendationsRequest
++            {
++                UserId = userId
++            });
++    }
++
+     public override async Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
+     {
+         var activity = Activity.Current;
+         activity?.SetTag("user.id", request.UserId);
+         activity?.AddEvent(new("Fetch cart"));
+ 
++        if (IsASMutationEnabled(context))
++        {
++            await InvokeASMutationRecommendation(request.UserId);
++        }
++
+         try
+         {
+             var cart = await _cartStore.GetCartAsync(request.UserId);

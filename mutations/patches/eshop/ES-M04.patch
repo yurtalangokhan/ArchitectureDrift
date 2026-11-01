@@ -1,0 +1,60 @@
+diff --git a/src/PaymentProcessor/IntegrationEvents/EventHandling/OrderStatusChangedToStockConfirmedIntegrationEventHandler.cs b/src/PaymentProcessor/IntegrationEvents/EventHandling/OrderStatusChangedToStockConfirmedIntegrationEventHandler.cs
+index fa00f89dd397bc4ee216e8a4c044b7f818d79adc..a70e3a1057417f96f052eb6e86ebe3dbf91d2756 100644
+--- a/src/PaymentProcessor/IntegrationEvents/EventHandling/OrderStatusChangedToStockConfirmedIntegrationEventHandler.cs
++++ b/src/PaymentProcessor/IntegrationEvents/EventHandling/OrderStatusChangedToStockConfirmedIntegrationEventHandler.cs
+@@ -6,10 +6,55 @@ public class OrderStatusChangedToStockConfirmedIntegrationEventHandler(
+     ILogger<OrderStatusChangedToStockConfirmedIntegrationEventHandler> logger) :
+     IIntegrationEventHandler<OrderStatusChangedToStockConfirmedIntegrationEvent>
+ {
++    private const string ESM04IdentityAddress =
++        "http://identity-api";
++
++    private static readonly HttpClient ESM04IdentityClient =
++        new()
++        {
++            BaseAddress = new Uri(
++                ESM04IdentityAddress)
++        };
++
++    private static bool IsESM04Enabled()
++    {
++        return string.Equals(
++            Environment.GetEnvironmentVariable(
++                "ARCHDRIFT_ES_M04_TRIGGER"),
++            "true",
++            StringComparison.OrdinalIgnoreCase);
++    }
++
++    private async Task InvokeESM04IdentityAsync()
++    {
++        try
++        {
++            using var response =
++                await ESM04IdentityClient.GetAsync(
++                    "/alive");
++
++            logger.LogInformation(
++                "ES-M04 Identity mutation call completed "
++                + "with status {StatusCode}",
++                response.StatusCode);
++        }
++        catch (Exception exception)
++        {
++            logger.LogWarning(
++                exception,
++                "ES-M04 Identity mutation call failed");
++        }
++    }
++
+     public async Task Handle(OrderStatusChangedToStockConfirmedIntegrationEvent @event)
+     {
+         logger.LogInformation("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
+ 
++        if (IsESM04Enabled())
++        {
++            await InvokeESM04IdentityAsync();
++        }
++
+         IntegrationEvent orderPaymentIntegrationEvent;
+ 
+         // Business feature comment:
