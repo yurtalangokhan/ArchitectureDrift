@@ -52,6 +52,13 @@ from archdrift.model.mutation import (
     RemoveRelationOperation,
     load_mutation_oracle,
 )
+from archdrift.model.mutation_implementation import (
+    MutationImplementation,
+    MutationImplementationError,
+    MutationImplementationLoadError,
+    MutationImplementationManifest,
+    load_mutation_implementation_manifest,
+)
 from archdrift.model.observation import (
     InteractionType,
     NormalizedEndpoint,
@@ -76,14 +83,6 @@ from archdrift.model.static_profile import (
     NonRuntimeEvidenceProfile,
     StaticEvidenceProfile,
     StaticSourceRoot,
-)
-
-from archdrift.model.mutation_implementation import (
-    MutationImplementation,
-    MutationImplementationError,
-    MutationImplementationLoadError,
-    MutationImplementationManifest,
-    load_mutation_implementation_manifest,
 )
 
 __all__ = [
@@ -148,6 +147,7 @@ __all__ = [
     "EndpointBinding",
     "ResolvedStaticInteraction",
     "SourceStaticFinding",
+    "SourcePathRule",
     "StaticResolution",
     "StaticResolutionSet",
     "StaticResolutionStatus",

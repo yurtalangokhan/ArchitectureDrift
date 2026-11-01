@@ -1,0 +1,60 @@
+diff --git a/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java b/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
+index 2cf8bc9336b7ed8d6a9ac268f8cf4e3e9a977423..9f3b9e49951c48f316b06510affabce0da4d9fdd 100644
+--- a/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
++++ b/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
+@@ -14,6 +14,9 @@
+ 
+ package tools.descartes.teastore.auth.rest;
+ 
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
+ import java.time.LocalDateTime;
+ import java.time.format.DateTimeFormatter;
+ 
+@@ -47,6 +50,36 @@ import tools.descartes.teastore.registryclient.util.TimeoutException;
+ @Consumes({ "application/json" })
+ public class AuthUserActionsRest {
+ 
++  private static final String TS_M01_RECOMMENDER_URL =
++      "http://recommender:8080/"
++      + "tools.descartes.teastore.recommender/"
++      + "rest/train/isready";
++
++  private static void invokeTSM01Recommender() {
++    HttpURLConnection connection = null;
++
++    try {
++      URL url = new URL(
++          TS_M01_RECOMMENDER_URL);
++
++      connection = (HttpURLConnection)
++          url.openConnection();
++
++      connection.setRequestMethod("GET");
++      connection.setConnectTimeout(1000);
++      connection.setReadTimeout(1000);
++
++      connection.getResponseCode();
++    } catch (IOException ignored) {
++      // The controlled mutation must not alter
++      // the Authentication business outcome.
++    } finally {
++      if (connection != null) {
++        connection.disconnect();
++      }
++    }
++  }
++
+   /**
+    * Persists order in database.
+    * 
+@@ -132,6 +165,8 @@ public class AuthUserActionsRest {
+   @Path("login")
+   public Response login(SessionBlob blob, @QueryParam("name") String name,
+       @QueryParam("password") String password) {
++    invokeTSM01Recommender();
++
+     User user;
+     try {
+       user = LoadBalancedCRUDOperations.getEntityWithProperties(Service.PERSISTENCE, "users",

@@ -4,24 +4,25 @@ mutation_id: TS-M05
 system_id: teastore
 
 description: >
-  Introduce an unexpected direct CALLS relation from WebUI to Registry.
+  Introduce an unexpected direct CALLS relation from Persistence
+  to Authentication.
 
 rationale: >
-  Tests whether the system distinguishes direct invocation from the
-  expected DISCOVERS_VIA communication mode.
+  Controlled runtime-visible dependency that is absent from the
+  configured non-runtime evidence channels.
 
 operations:
   - operation: ADD_RELATION
     relation:
-      source: webui
+      source: persistence
       relation: CALLS
-      target: registry
+      target: auth
 
 expected_delta:
   added_relations:
-    - source: webui
+    - source: persistence
       relation: CALLS
-      target: registry
+      target: auth
 
 expected_violated_contracts:
   - TS-C005

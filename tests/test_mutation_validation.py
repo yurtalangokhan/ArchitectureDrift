@@ -9,13 +9,7 @@ from archdrift.model import (
     load_mutation_implementation_manifest,
 )
 
-
-PROJECT_ROOT = (
-    Path(__file__)
-    .resolve()
-    .parents[1]
-)
-
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 ESHOP_EXPECTED_PATCH_FILES = {
@@ -40,10 +34,7 @@ ESHOP_EXPECTED_PATCH_FILES = {
     },
     "ES-M05": {
         "src/WebhookClient/Extensions/Extensions.cs",
-        (
-            "src/WebhookClient/IntegrationEvents/"
-            "ESM05OrderStatusSubscription.cs"
-        ),
+        ("src/WebhookClient/IntegrationEvents/" "ESM05OrderStatusSubscription.cs"),
         "src/WebhookClient/WebhookClient.csproj",
         "src/WebhookClient/appsettings.json",
         "src/eShop.AppHost/Program.cs",
@@ -77,51 +68,74 @@ ASTRONOMY_EXPECTED_PATCH_FILES = {
     },
 }
 
+TEASTORE_EXPECTED_PATCH_FILES = {
+    "TS-M01": {
+        (
+            "services/tools.descartes.teastore.auth/"
+            "src/main/java/tools/descartes/teastore/"
+            "auth/rest/AuthUserActionsRest.java"
+        ),
+    },
+    "TS-M02": {
+        "examples/docker/docker-compose_default.yaml",
+        (
+            "services/tools.descartes.teastore.auth/"
+            "src/main/java/tools/descartes/teastore/"
+            "auth/rest/AuthUserActionsRest.java"
+        ),
+    },
+    "TS-M03": {
+        "examples/docker/docker-compose_default.yaml",
+        (
+            "services/tools.descartes.teastore.recommender/"
+            "src/main/java/tools/descartes/teastore/"
+            "recommender/rest/RecommendEndpoint.java"
+        ),
+    },
+    "TS-M04": {
+        (
+            "services/tools.descartes.teastore.image/"
+            "src/main/java/tools/descartes/teastore/"
+            "image/rest/ImageProviderEndpoint.java"
+        ),
+    },
+    "TS-M05": {
+        (
+            "services/tools.descartes.teastore.persistence/"
+            "src/main/java/tools/descartes/teastore/"
+            "persistence/rest/UserEndpoint.java"
+        ),
+    },
+}
+
 EXPECTED_PATCH_FILES = {
     **ASTRONOMY_EXPECTED_PATCH_FILES,
     **ESHOP_EXPECTED_PATCH_FILES,
+    **TEASTORE_EXPECTED_PATCH_FILES,
 }
+
 
 @pytest.mark.parametrize(
     (
         "mutation_id",
         "expected_files",
     ),
-    sorted(
-        EXPECTED_PATCH_FILES.items()
-    ),
+    sorted(EXPECTED_PATCH_FILES.items()),
 )
 def test_astronomy_real_mutation_patch_scope(
     mutation_id: str,
     expected_files: set[str],
 ) -> None:
-    manifest = (
-        load_mutation_implementation_manifest(
-            PROJECT_ROOT
-            / "mutations"
-            / "implementation-manifest.yaml"
-        )
+    manifest = load_mutation_implementation_manifest(
+        PROJECT_ROOT / "mutations" / "implementation-manifest.yaml"
     )
 
-    implementation = (
-        manifest.require(
-            mutation_id
-        )
-    )
+    implementation = manifest.require(mutation_id)
 
-    patch = (
-        PROJECT_ROOT
-        / implementation.patch
-    )
+    patch = PROJECT_ROOT / implementation.patch
 
     assert patch.is_file()
 
     assert patch.stat().st_size > 0
 
-    assert set(
-        extract_patch_touched_files(
-            patch
-        )
-    ) == expected_files
-
-
+    assert set(extract_patch_touched_files(patch)) == expected_files

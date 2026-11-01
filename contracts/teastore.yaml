@@ -11,12 +11,12 @@ contracts:
   - id: TS-C001
     type: FORBIDDEN_RELATION
     description: >
-      WebUI must not directly invoke Persistence.
+      Authentication must not directly invoke Recommender.
     rationale: >
       Controlled runtime-visible mutation for TS-M01.
-    source: webui
+    source: auth
     relation: CALLS
-    target: persistence
+    target: recommender
 
   - id: TS-C002
     type: FORBIDDEN_RELATION
@@ -49,13 +49,11 @@ contracts:
     target: recommender
 
   - id: TS-C005
-    type: COMMUNICATION_MODE
+    type: FORBIDDEN_RELATION
     description: >
-      WebUI-to-Registry communication must use service-discovery
-      semantics and must not use direct service-call semantics.
+      Persistence must not directly invoke Authentication.
     rationale: >
-      Controlled communication-mode mutation for TS-M05.
-    source: webui
-    target: registry
-    allowed_relations:
-      - DISCOVERS_VIA
+      Controlled runtime-visible mutation for TS-M05.
+    source: persistence
+    relation: CALLS
+    target: auth

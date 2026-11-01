@@ -4,7 +4,8 @@ mutation_id: TS-M01
 system_id: teastore
 
 description: >
-  Introduce an unexpected direct CALLS relation from WebUI to Persistence.
+  Introduce an unexpected direct CALLS relation from Authentication
+  to Recommender.
 
 rationale: >
   Runtime-visible controlled service dependency.
@@ -12,15 +13,15 @@ rationale: >
 operations:
   - operation: ADD_RELATION
     relation:
-      source: webui
+      source: auth
       relation: CALLS
-      target: persistence
+      target: recommender
 
 expected_delta:
   added_relations:
-    - source: webui
+    - source: auth
       relation: CALLS
-      target: persistence
+      target: recommender
 
 expected_violated_contracts:
   - TS-C001

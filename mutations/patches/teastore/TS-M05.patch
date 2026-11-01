@@ -1,0 +1,62 @@
+diff --git a/services/tools.descartes.teastore.persistence/src/main/java/tools/descartes/teastore/persistence/rest/UserEndpoint.java b/services/tools.descartes.teastore.persistence/src/main/java/tools/descartes/teastore/persistence/rest/UserEndpoint.java
+index 1079bc1..e89bcc2 100644
+--- a/services/tools.descartes.teastore.persistence/src/main/java/tools/descartes/teastore/persistence/rest/UserEndpoint.java
++++ b/services/tools.descartes.teastore.persistence/src/main/java/tools/descartes/teastore/persistence/rest/UserEndpoint.java
+@@ -13,6 +13,9 @@
+  */
+ package tools.descartes.teastore.persistence.rest;
+ 
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+@@ -36,6 +39,37 @@ import tools.descartes.teastore.entities.User;
+ @Path("users")
+ public class UserEndpoint extends AbstractCRUDEndpoint<User> {
+ 
++    private static final String TS_M05_AUTH_URL =
++            "http://auth:8080/"
++            + "tools.descartes.teastore.auth/"
++            + "rest/ready/isready";
++
++    private static void invokeTSM05Authentication() {
++        HttpURLConnection connection = null;
++
++        try {
++            URL url = new URL(
++                    TS_M05_AUTH_URL);
++
++            connection =
++                    (HttpURLConnection) url.openConnection();
++
++            connection.setRequestMethod("GET");
++            connection.setConnectTimeout(1000);
++            connection.setReadTimeout(1000);
++            connection.getResponseCode();
++
++        } catch (IOException ignored) {
++            // The controlled mutation must not alter
++            // Persistence business behavior.
++
++        } finally {
++            if (connection != null) {
++                connection.disconnect();
++            }
++        }
++    }
++
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
+@@ -109,6 +143,9 @@ public class UserEndpoint extends AbstractCRUDEndpoint<User> {
+ 		if (name == null || name.isEmpty()) {
+ 			return Response.status(Status.NOT_FOUND).build();
+ 		}
++
++		invokeTSM05Authentication();
++
+ 		User entity = UserRepository.REPOSITORY.getUserByName(name);
+ 		if (entity == null) {
+ 			return Response.status(Status.NOT_FOUND).build();

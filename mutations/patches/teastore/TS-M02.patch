@@ -1,0 +1,93 @@
+diff --git a/examples/docker/docker-compose_default.yaml b/examples/docker/docker-compose_default.yaml
+index c1f5aa7..4354084 100644
+--- a/examples/docker/docker-compose_default.yaml
++++ b/examples/docker/docker-compose_default.yaml
+@@ -26,6 +26,7 @@ services:
+     environment:
+       HOST_NAME: "auth"
+       REGISTRY_HOST: "registry"
++      IMAGE_ADDR: "image"
+   image:
+     image: descartesresearch/teastore-image
+     expose:
+diff --git a/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java b/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
+index 2cf8bc9..f1b1c39 100644
+--- a/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
++++ b/services/tools.descartes.teastore.auth/src/main/java/tools/descartes/teastore/auth/rest/AuthUserActionsRest.java
+@@ -14,6 +14,9 @@
+ 
+ package tools.descartes.teastore.auth.rest;
+ 
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
+ import java.time.LocalDateTime;
+ import java.time.format.DateTimeFormatter;
+ 
+@@ -47,6 +50,57 @@ import tools.descartes.teastore.registryclient.util.TimeoutException;
+ @Consumes({ "application/json" })
+ public class AuthUserActionsRest {
+ 
++  private static final String TS_M02_TRIGGER_ENV =
++      "ARCHDRIFT_TS_M02_TRIGGER";
++
++  private static final String TS_M02_IMAGE_ADDR_ENV =
++      "IMAGE_ADDR";
++
++  private static final String TS_M02_IMAGE_PATH =
++      "/tools.descartes.teastore.image/rest/image/finished";
++
++  private static void invokeTSM02ImageIfEnabled() {
++    if (!"true".equalsIgnoreCase(
++        System.getenv(TS_M02_TRIGGER_ENV))) {
++      return;
++    }
++
++    String imageHost =
++        System.getenv(TS_M02_IMAGE_ADDR_ENV);
++
++    if (imageHost == null
++        || imageHost.trim().isEmpty()) {
++      return;
++    }
++
++    HttpURLConnection connection = null;
++
++    try {
++      URL url = new URL(
++          "http://"
++              + imageHost
++              + ":8080"
++              + TS_M02_IMAGE_PATH);
++
++      connection =
++          (HttpURLConnection) url.openConnection();
++
++      connection.setRequestMethod("GET");
++      connection.setConnectTimeout(1000);
++      connection.setReadTimeout(1000);
++      connection.getResponseCode();
++
++    } catch (IOException ignored) {
++      // Mutation probe must not alter
++      // Authentication business outcome.
++
++    } finally {
++      if (connection != null) {
++        connection.disconnect();
++      }
++    }
++  }
++
+   /**
+    * Persists order in database.
+    * 
+@@ -132,6 +186,8 @@ public class AuthUserActionsRest {
+   @Path("login")
+   public Response login(SessionBlob blob, @QueryParam("name") String name,
+       @QueryParam("password") String password) {
++    invokeTSM02ImageIfEnabled();
++
+     User user;
+     try {
+       user = LoadBalancedCRUDOperations.getEntityWithProperties(Service.PERSISTENCE, "users",

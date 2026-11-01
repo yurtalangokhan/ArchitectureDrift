@@ -4,7 +4,6 @@ from archdrift.model import (
     load_mutation_implementation_manifest,
 )
 
-
 PROJECT_ROOT = (
     Path(__file__)
     .resolve()

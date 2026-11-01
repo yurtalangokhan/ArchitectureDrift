@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Hashable, Set
-from typing import TypeVar
+from collections.abc import Set
 
 from pydantic import (
     BaseModel,
@@ -29,12 +28,6 @@ from archdrift.model.mutation import (
     ExpectedGraphDelta,
     MutationOracle,
 )
-
-_Item = TypeVar(
-    "_Item",
-    bound=Hashable,
-)
-
 
 # =============================================================================
 # Exceptions
@@ -145,10 +138,10 @@ class SetDetectionMetrics(BaseModel):
         return 2 * precision * recall / denominator
 
 
-def compute_set_detection_metrics(
+def compute_set_detection_metrics[Item](
     *,
-    expected: Set[_Item],
-    predicted: Set[_Item],
+    expected: Set[Item],
+    predicted: Set[Item],
 ) -> SetDetectionMetrics:
     """
     Compare an expected-positive set with a predicted-positive set.
@@ -173,7 +166,7 @@ def compute_set_detection_metrics(
 
 
 class StructuralDetectionMetrics(BaseModel):
-   
+
     model_config = ConfigDict(
         extra="forbid",
         frozen=True,
@@ -275,12 +268,9 @@ def evaluate_structural_detection(
 
     expected_removed_node_ids = {node.id for node in expected.removed_nodes}
 
-    predicted_removed_node_ids: set[str]
-
-    if infer_removals:
-        predicted_removed_node_ids = set(raw_graph_delta.removed_node_ids)
-    else:
-        predicted_removed_node_ids = set()
+    predicted_removed_node_ids = (
+        set(raw_graph_delta.removed_node_ids) if infer_removals else set()
+    )
 
     removed_nodes = compute_set_detection_metrics(
         expected=expected_removed_node_ids,

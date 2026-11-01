@@ -13,9 +13,7 @@ from archdrift.model.source_static import (
 )
 
 
-class ComposeBindingError(
-    ValueError
-):
+class ComposeBindingError(ValueError):
     """Raised when resolved Compose endpoint bindings cannot be read."""
 
 
@@ -45,11 +43,7 @@ def _environment_mapping(
             if raw_value is None:
                 continue
 
-            result[
-                str(key)
-            ] = str(
-                raw_value
-            )
+            result[str(key)] = str(raw_value)
 
         return result
 
@@ -69,22 +63,17 @@ def _environment_mapping(
             if "=" not in item:
                 continue
 
-            key, raw_value = (
-                item.split(
-                    "=",
-                    1,
-                )
+            key, raw_value = item.split(
+                "=",
+                1,
             )
 
-            result[
-                key
-            ] = raw_value
+            result[key] = raw_value
 
         return result
 
     raise ComposeBindingError(
-        "Compose service environment must be "
-        "a mapping or a list."
+        "Compose service environment must be " "a mapping or a list."
     )
 
 
@@ -107,14 +96,9 @@ def _endpoint_host(
         return None
 
     try:
-        if "://" in normalized:
-            parsed = urlsplit(
-                normalized
-            )
-        else:
-            parsed = urlsplit(
-                f"//{normalized}"
-            )
+        parsed = (
+            urlsplit(normalized) if "://" in normalized else urlsplit(f"//{normalized}")
+        )
 
     except ValueError:
         return None
@@ -147,53 +131,38 @@ class ComposeEndpointBindingAdapter:
         EndpointBinding,
         ...,
     ]:
-        path = (
-            result_file.resolve()
-        )
+        path = result_file.resolve()
 
         if not path.is_file():
-            raise FileNotFoundError(
-                f"Resolved Compose file not found: {path}"
-            )
+            raise FileNotFoundError(f"Resolved Compose file not found: {path}")
 
         try:
-            document: Any = (
-                json.loads(
-                    path.read_text(
-                        encoding="utf-8",
-                    )
+            document: Any = json.loads(
+                path.read_text(
+                    encoding="utf-8",
                 )
             )
 
         except json.JSONDecodeError as exc:
-            raise ComposeBindingError(
-                f"Invalid resolved Compose JSON: {path}"
-            ) from exc
+            raise ComposeBindingError(f"Invalid resolved Compose JSON: {path}") from exc
 
         if not isinstance(
             document,
             dict,
         ):
-            raise ComposeBindingError(
-                "Resolved Compose root must be an object."
-            )
+            raise ComposeBindingError("Resolved Compose root must be an object.")
 
-        services = document.get(
-            "services"
-        )
+        services = document.get("services")
 
         if not isinstance(
             services,
             dict,
         ):
             raise ComposeBindingError(
-                "Resolved Compose document must contain "
-                "a services object."
+                "Resolved Compose document must contain " "a services object."
             )
 
-        bindings: list[
-            EndpointBinding
-        ] = []
+        bindings: list[EndpointBinding] = []
 
         seen: set[
             tuple[
@@ -207,10 +176,7 @@ class ComposeEndpointBindingAdapter:
             source_service_id,
             service_document,
         ) in services.items():
-            if (
-                source_service_id
-                not in node_types
-            ):
+            if source_service_id not in node_types:
                 continue
 
             if not isinstance(
@@ -219,23 +185,13 @@ class ComposeEndpointBindingAdapter:
             ):
                 continue
 
-            environment = (
-                _environment_mapping(
-                    service_document.get(
-                        "environment"
-                    )
-                )
-            )
+            environment = _environment_mapping(service_document.get("environment"))
 
             for (
                 environment_key,
                 raw_value,
             ) in environment.items():
-                hostname = (
-                    _endpoint_host(
-                        raw_value
-                    )
-                )
+                hostname = _endpoint_host(raw_value)
 
                 if hostname is None:
                     continue
@@ -252,29 +208,15 @@ class ComposeEndpointBindingAdapter:
                 if identity in seen:
                     continue
 
-                seen.add(
-                    identity
-                )
+                seen.add(identity)
 
                 bindings.append(
                     EndpointBinding(
-                        source_service_id=(
-                            source_service_id
-                        ),
-                        environment_key=(
-                            environment_key
-                        ),
-                        target_service_id=(
-                            hostname
-                        ),
-                        target_type=(
-                            node_types[
-                                hostname
-                            ]
-                        ),
-                        raw_value=(
-                            raw_value
-                        ),
+                        source_service_id=(source_service_id),
+                        environment_key=(environment_key),
+                        target_service_id=(hostname),
+                        target_type=(node_types[hostname]),
+                        raw_value=(raw_value),
                     )
                 )
 

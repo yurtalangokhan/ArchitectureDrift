@@ -1,0 +1,84 @@
+diff --git a/examples/docker/docker-compose_default.yaml b/examples/docker/docker-compose_default.yaml
+index c1f5aa7..f29aed2 100644
+--- a/examples/docker/docker-compose_default.yaml
++++ b/examples/docker/docker-compose_default.yaml
+@@ -40,6 +40,7 @@ services:
+     environment:
+       HOST_NAME: "recommender"
+       REGISTRY_HOST: "registry"
++      AUTH_ADDR: "auth"
+   webui:
+     image: descartesresearch/teastore-webui
+     expose:
+diff --git a/services/tools.descartes.teastore.recommender/src/main/java/tools/descartes/teastore/recommender/rest/RecommendEndpoint.java b/services/tools.descartes.teastore.recommender/src/main/java/tools/descartes/teastore/recommender/rest/RecommendEndpoint.java
+index e2eae76..5327363 100644
+--- a/services/tools.descartes.teastore.recommender/src/main/java/tools/descartes/teastore/recommender/rest/RecommendEndpoint.java
++++ b/services/tools.descartes.teastore.recommender/src/main/java/tools/descartes/teastore/recommender/rest/RecommendEndpoint.java
+@@ -13,6 +13,9 @@
+  */
+ package tools.descartes.teastore.recommender.rest;
+ 
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
+ import java.util.List;
+ 
+ import jakarta.ws.rs.Consumes;
+@@ -38,6 +41,49 @@ import tools.descartes.teastore.entities.User;
+ @Consumes({ "application/json" })
+ public class RecommendEndpoint {
+ 
++    private static final String TS_M03_AUTH_ADDR_ENV =
++            "AUTH_ADDR";
++
++    private static final String TS_M03_AUTH_PATH =
++            "/tools.descartes.teastore.auth/rest/ready/isready";
++
++    private static void invokeTSM03Authentication() {
++        String authHost =
++                System.getenv(TS_M03_AUTH_ADDR_ENV);
++
++        if (authHost == null
++                || authHost.trim().isEmpty()) {
++            return;
++        }
++
++        HttpURLConnection connection = null;
++
++        try {
++            URL url = new URL(
++                    "http://"
++                            + authHost
++                            + ":8080"
++                            + TS_M03_AUTH_PATH);
++
++            connection =
++                    (HttpURLConnection) url.openConnection();
++
++            connection.setRequestMethod("GET");
++            connection.setConnectTimeout(1000);
++            connection.setReadTimeout(1000);
++            connection.getResponseCode();
++
++        } catch (IOException ignored) {
++            // The controlled mutation must not alter
++            // recommendation business behavior.
++
++        } finally {
++            if (connection != null) {
++                connection.disconnect();
++            }
++        }
++    }
++
+ 	/**
+ 	 * Return a list of all {@link Product}s, that are recommended for the given
+ 	 * {@link User} buying the given list of {@link OrderItem}s. <br>
+@@ -56,6 +102,7 @@ public class RecommendEndpoint {
+ 	 */
+ 	@POST
+ 	public Response recommend(List<OrderItem> currentItems, @QueryParam("uid") final Long uid) {
++		invokeTSM03Authentication();
+ 		List<Long> recommended = RecommenderSelector.getInstance().recommendProducts(uid, currentItems);
+ 		return Response.ok().entity(recommended).build();
+ 	}

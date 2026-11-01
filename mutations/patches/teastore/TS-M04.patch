@@ -1,0 +1,68 @@
+diff --git a/services/tools.descartes.teastore.image/src/main/java/tools/descartes/teastore/image/rest/ImageProviderEndpoint.java b/services/tools.descartes.teastore.image/src/main/java/tools/descartes/teastore/image/rest/ImageProviderEndpoint.java
+index 69992fd..a2eac5c 100644
+--- a/services/tools.descartes.teastore.image/src/main/java/tools/descartes/teastore/image/rest/ImageProviderEndpoint.java
++++ b/services/tools.descartes.teastore.image/src/main/java/tools/descartes/teastore/image/rest/ImageProviderEndpoint.java
+@@ -13,6 +13,9 @@
+  */
+ package tools.descartes.teastore.image.rest;
+ 
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
+ import java.util.HashMap;
+ import java.util.stream.Collectors;
+ 
+@@ -36,6 +39,45 @@ import tools.descartes.teastore.image.setup.SetupController;
+ @Consumes({ "application/json" })
+ public class ImageProviderEndpoint {
+ 
++  private static final String TS_M04_TRIGGER_ENV =
++      "ARCHDRIFT_TS_M04_TRIGGER";
++
++  private static final String TS_M04_RECOMMENDER_URL =
++      "http://recommender:8080/"
++      + "tools.descartes.teastore.recommender/"
++      + "rest/train/isready";
++
++  private static void invokeTSM04RecommenderIfEnabled() {
++    if (!"true".equalsIgnoreCase(
++        System.getenv(TS_M04_TRIGGER_ENV))) {
++      return;
++    }
++
++    HttpURLConnection connection = null;
++
++    try {
++      URL url = new URL(
++          TS_M04_RECOMMENDER_URL);
++
++      connection =
++          (HttpURLConnection) url.openConnection();
++
++      connection.setRequestMethod("GET");
++      connection.setConnectTimeout(1000);
++      connection.setReadTimeout(1000);
++      connection.getResponseCode();
++
++    } catch (IOException ignored) {
++      // The controlled mutation must not alter
++      // Image service business behavior.
++
++    } finally {
++      if (connection != null) {
++        connection.disconnect();
++      }
++    }
++  }
++
+   /**
+    * Queries the image provider for the given product IDs in the given size, provided as strings.
+    * @param images Map of product IDs and the corresponding image size as string.
+@@ -98,6 +140,7 @@ public class ImageProviderEndpoint {
+   @Path("state")
+   @Produces({ "text/plain" })
+   public Response getState() {
++    invokeTSM04RecommenderIfEnabled();
+     return Response.ok().entity(SetupController.SETUP.getState()).build();
+   }
+ 
