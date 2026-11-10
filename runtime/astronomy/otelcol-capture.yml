@@ -1,0 +1,14 @@
+exporters:
+  file/archdrift:
+    path: /var/lib/archdrift/traces.otlp.jsonl
+    format: json
+    append: false
+    flush_interval: 1s
+
+service:
+  pipelines:
+    traces:
+      exporters:
+        - debug
+        - span_metrics
+        - file/archdrift

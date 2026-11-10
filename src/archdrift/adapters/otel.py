@@ -660,7 +660,7 @@ class OtelAdapter:
         self,
         span: _ParsedSpan,
     ) -> str | None:
-        # Current semantic-convention field.
+        # Strongest signal: explicit peer identity.
         peer_name = _string_attribute(
             span.attributes,
             "service.peer.name",
@@ -669,7 +669,7 @@ class OtelAdapter:
         if peer_name is not None:
             return self._canonical_name(peer_name)
 
-        # Backward compatibility for older instrumentation.
+        # Backward compatibility.
         legacy_peer = _string_attribute(
             span.attributes,
             "peer.service",
@@ -678,26 +678,129 @@ class OtelAdapter:
         if legacy_peer is not None:
             return self._canonical_name(legacy_peer)
 
+        # Prefer a directly resolvable server.address.
         server_address = _string_attribute(
             span.attributes,
             "server.address",
         )
 
-        if server_address is None:
-            return None
+        if server_address is not None:
+            if server_address in self._aliases:
+                return self._aliases[server_address]
 
-        if server_address in self._aliases:
-            return self._aliases[server_address]
+            canonical_address = self._canonical_name(server_address)
 
-        canonical_address = self._canonical_name(server_address)
+            if canonical_address in self._node_types:
+                return canonical_address
 
-        if canonical_address in self._node_types:
-            return canonical_address
+        # gRPC instrumentation may expose only the
+        # post-DNS server.address (for example a
+        # Docker container IP). In that case use
+        # protocol-level service identity as a
+        # conservative fallback.
+        grpc_target = self._resolve_grpc_target(span)
 
-        if self._allow_unmapped_server_addresses:
-            return canonical_address
+        if grpc_target is not None:
+            return grpc_target
+
+        if server_address is not None and self._allow_unmapped_server_addresses:
+            return self._canonical_name(server_address)
 
         return None
+
+    def _resolve_grpc_target(
+        self,
+        span: _ParsedSpan,
+    ) -> str | None:
+        protocol = _first_string_attribute(
+            span.attributes,
+            "rpc.system.name",
+            "rpc.system",
+        )
+
+        if protocol is None or protocol.lower() != "grpc":
+            return None
+
+        rpc_service = _string_attribute(
+            span.attributes,
+            "rpc.service",
+        )
+
+        if rpc_service is None:
+            rpc_method = _string_attribute(
+                span.attributes,
+                "rpc.method",
+            )
+
+            if rpc_method is None:
+                return None
+
+            rpc_service = rpc_method.split(
+                "/",
+                maxsplit=1,
+            )[0]
+
+        observed_key = self._grpc_service_key(rpc_service)
+
+        if observed_key is None:
+            return None
+
+        matches: list[str] = []
+
+        for node_id, node_type in self._node_types.items():
+            if node_type in {
+                NodeType.DATASTORE,
+                NodeType.BROKER,
+            }:
+                continue
+
+            node_key = self._grpc_service_key(node_id)
+
+            if node_key == observed_key:
+                matches.append(node_id)
+
+        # Conservative policy:
+        # infer only when there is exactly
+        # one architecture-level match.
+        if len(matches) != 1:
+            return None
+
+        return matches[0]
+
+    @staticmethod
+    def _grpc_service_key(
+        raw_name: str,
+    ) -> str | None:
+        normalized = raw_name.strip()
+
+        if not normalized:
+            return None
+
+        # Example:
+        # oteldemo.RecommendationService
+        #     -> RecommendationService
+        normalized = normalized.rsplit(
+            ".",
+            maxsplit=1,
+        )[-1]
+
+        # Defensive handling if a method name
+        # was supplied accidentally.
+        normalized = normalized.split(
+            "/",
+            maxsplit=1,
+        )[0]
+
+        key = "".join(
+            character.lower() for character in normalized if character.isalnum()
+        )
+
+        suffix = "service"
+
+        if key.endswith(suffix) and len(key) > len(suffix):
+            key = key[: -len(suffix)]
+
+        return key or None
 
     # =========================================================================
     # Relation Classification

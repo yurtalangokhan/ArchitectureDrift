@@ -54,9 +54,7 @@ def write_otlp(
     }
 
     path.write_text(
-        json.dumps(
-            document
-        ),
+        json.dumps(document),
         encoding="utf-8",
     )
 
@@ -64,9 +62,7 @@ def write_otlp(
 def client_span(
     *,
     span_id: str,
-    attributes: list[
-        dict[str, object]
-    ],
+    attributes: list[dict[str, object]],
 ) -> dict[str, object]:
     return {
         "traceId": "trace-001",
@@ -105,9 +101,7 @@ def test_client_span_creates_runtime_service_call(
 
     observations = OtelAdapter(
         trace_file,
-        artifact_id=(
-            "astronomy-shop/traces.json"
-        ),
+        artifact_id=("astronomy-shop/traces.json"),
     ).collect()
 
     relations = tuple(
@@ -125,22 +119,13 @@ def test_client_span_creates_runtime_service_call(
 
     assert relation.source.id == "checkout"
 
-    assert (
-        relation.target.id
-        == "recommendation"
-    )
+    assert relation.target.id == "recommendation"
 
-    assert (
-        relation.interaction
-        is InteractionType.SERVICE_CALL
-    )
+    assert relation.interaction is InteractionType.SERVICE_CALL
 
     assert relation.protocol == "grpc"
 
-    assert (
-        relation.channel
-        is EvidenceChannel.RUNTIME
-    )
+    assert relation.channel is EvidenceChannel.RUNTIME
 
 
 def test_runtime_call_canonicalizes_to_calls(
@@ -168,9 +153,7 @@ def test_runtime_call_canonicalizes_to_calls(
         ],
     )
 
-    observations = OtelAdapter(
-        trace_file
-    ).collect()
+    observations = OtelAdapter(trace_file).collect()
 
     relation = next(
         observation
@@ -181,11 +164,7 @@ def test_runtime_call_canonicalizes_to_calls(
         )
     )
 
-    candidate = (
-        canonicalize_relation_observation(
-            relation
-        )
-    )
+    candidate = canonicalize_relation_observation(relation)
 
     assert candidate.identity == (
         "checkout",
@@ -215,9 +194,7 @@ def test_legacy_peer_service_is_supported(
         ],
     )
 
-    observations = OtelAdapter(
-        trace_file
-    ).collect()
+    observations = OtelAdapter(trace_file).collect()
 
     relations = tuple(
         observation
@@ -230,10 +207,7 @@ def test_legacy_peer_service_is_supported(
 
     assert len(relations) == 1
 
-    assert (
-        relations[0].target.id
-        == "recommendation"
-    )
+    assert relations[0].target.id == "recommendation"
 
 
 def test_server_address_can_be_mapped_to_canonical_service(
@@ -265,9 +239,7 @@ def test_server_address_can_be_mapped_to_canonical_service(
         trace_file,
         aliases={
             "checkoutservice": "checkout",
-            "recommendationservice": (
-                "recommendation"
-            ),
+            "recommendationservice": ("recommendation"),
         },
     ).collect()
 
@@ -282,10 +254,7 @@ def test_server_address_can_be_mapped_to_canonical_service(
 
     assert relation.source.id == "checkout"
 
-    assert (
-        relation.target.id
-        == "recommendation"
-    )
+    assert relation.target.id == "recommendation"
 
 
 def test_unmapped_server_address_is_not_inferred(
@@ -309,9 +278,7 @@ def test_unmapped_server_address_is_not_inferred(
         ],
     )
 
-    observations = OtelAdapter(
-        trace_file
-    ).collect()
+    observations = OtelAdapter(trace_file).collect()
 
     relations = tuple(
         observation
@@ -349,9 +316,7 @@ def test_server_span_does_not_create_calls_relation(
         ],
     )
 
-    observations = OtelAdapter(
-        trace_file
-    ).collect()
+    observations = OtelAdapter(trace_file).collect()
 
     nodes = tuple(
         observation
@@ -469,23 +434,14 @@ def test_producer_span_creates_publish_observation(
         )
     )
 
-    assert (
-        relation.interaction
-        is InteractionType.MESSAGE_PUBLISH
-    )
+    assert relation.interaction is InteractionType.MESSAGE_PUBLISH
 
     assert relation.target.id == "kafka"
     assert relation.target.type is NodeType.BROKER
 
-    candidate = (
-        canonicalize_relation_observation(
-            relation
-        )
-    )
+    candidate = canonicalize_relation_observation(relation)
 
-    assert candidate.relation.relation is (
-        RelationType.PUBLISHES_TO
-    )
+    assert candidate.relation.relation is (RelationType.PUBLISHES_TO)
 
 
 def test_consumer_span_creates_subscribe_observation(
@@ -536,20 +492,11 @@ def test_consumer_span_creates_subscribe_observation(
         )
     )
 
-    assert (
-        relation.interaction
-        is InteractionType.MESSAGE_SUBSCRIBE
-    )
+    assert relation.interaction is InteractionType.MESSAGE_SUBSCRIBE
 
-    candidate = (
-        canonicalize_relation_observation(
-            relation
-        )
-    )
+    candidate = canonicalize_relation_observation(relation)
 
-    assert candidate.relation.relation is (
-        RelationType.SUBSCRIBES_TO
-    )
+    assert candidate.relation.relation is (RelationType.SUBSCRIBES_TO)
 
 
 def test_runtime_evidence_contains_stable_span_locator(
@@ -575,9 +522,7 @@ def test_runtime_evidence_contains_stable_span_locator(
 
     observations = OtelAdapter(
         trace_file,
-        artifact_id=(
-            "runtime/astronomy-shop/otel.json"
-        ),
+        artifact_id=("runtime/astronomy-shop/otel.json"),
     ).collect()
 
     relation = next(
@@ -591,20 +536,11 @@ def test_runtime_evidence_contains_stable_span_locator(
 
     evidence = relation.evidence[0]
 
-    assert (
-        evidence.artifact
-        == "runtime/astronomy-shop/otel.json"
-    )
+    assert evidence.artifact == "runtime/astronomy-shop/otel.json"
 
-    assert (
-        evidence.locator
-        == "trace:trace-001/span:span-007"
-    )
+    assert evidence.locator == "trace:trace-001/span:span-007"
 
-    assert (
-        evidence.channel
-        is EvidenceChannel.RUNTIME
-    )
+    assert evidence.channel is EvidenceChannel.RUNTIME
 
 
 def test_unknown_service_is_not_promoted_to_architecture_node(
@@ -628,8 +564,114 @@ def test_unknown_service_is_not_promoted_to_architecture_node(
         ],
     )
 
-    observations = OtelAdapter(
-        trace_file
-    ).collect()
+    observations = OtelAdapter(trace_file).collect()
 
     assert observations == ()
+
+
+def test_grpc_rpc_method_resolves_target_when_server_address_is_ip(
+    tmp_path: Path,
+) -> None:
+    trace_file = tmp_path / "traces.json"
+
+    write_otlp(
+        trace_file,
+        service_name="checkout",
+        spans=[
+            client_span(
+                span_id="span-001",
+                attributes=[
+                    attribute(
+                        "server.address",
+                        "172.20.0.15",
+                    ),
+                    attribute(
+                        "rpc.system.name",
+                        "grpc",
+                    ),
+                    attribute(
+                        "rpc.method",
+                        ("oteldemo." "RecommendationService/" "ListRecommendations"),
+                    ),
+                ],
+            )
+        ],
+    )
+
+    observations = OtelAdapter(
+        trace_file,
+        node_types={
+            "checkout": (NodeType.SERVICE),
+            "recommendation": (NodeType.SERVICE),
+        },
+    ).collect()
+
+    relations = tuple(
+        observation
+        for observation in observations
+        if isinstance(
+            observation,
+            NormalizedRelationObservation,
+        )
+    )
+
+    assert len(relations) == 1
+
+    relation = relations[0]
+
+    assert relation.source.id == "checkout"
+
+    assert relation.target.id == "recommendation"
+
+    assert relation.interaction is InteractionType.SERVICE_CALL
+
+    assert relation.protocol == "grpc"
+
+
+def test_grpc_rpc_method_does_not_infer_unknown_target(
+    tmp_path: Path,
+) -> None:
+    trace_file = tmp_path / "traces.json"
+
+    write_otlp(
+        trace_file,
+        service_name="checkout",
+        spans=[
+            client_span(
+                span_id="span-001",
+                attributes=[
+                    attribute(
+                        "server.address",
+                        "172.20.0.15",
+                    ),
+                    attribute(
+                        "rpc.system.name",
+                        "grpc",
+                    ),
+                    attribute(
+                        "rpc.method",
+                        ("external." "UnknownService/" "Call"),
+                    ),
+                ],
+            )
+        ],
+    )
+
+    observations = OtelAdapter(
+        trace_file,
+        node_types={
+            "checkout": (NodeType.SERVICE),
+            "recommendation": (NodeType.SERVICE),
+        },
+    ).collect()
+
+    relations = tuple(
+        observation
+        for observation in observations
+        if isinstance(
+            observation,
+            NormalizedRelationObservation,
+        )
+    )
+
+    assert relations == ()
