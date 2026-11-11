@@ -1,5 +1,5 @@
 diff --git a/compose.yaml b/compose.yaml
-index bca3f2fe094554d4a8f6102b0f7f68ba2e170e73..b256bfab3dc1d677be346d6c8674a3a1655937bd 100644
+index bca3f2fe..b256bfab 100644
 --- a/compose.yaml
 +++ b/compose.yaml
 @@ -271,6 +271,7 @@ services:
@@ -12,14 +12,18 @@ index bca3f2fe094554d4a8f6102b0f7f68ba2e170e73..b256bfab3dc1d677be346d6c8674a3a1
        - RECOMMENDATION_ADDR
 diff --git a/src/frontend/gateways/rpc/Payment.gateway.ts b/src/frontend/gateways/rpc/Payment.gateway.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..043d651aa7a2d817be7b520ada2e83db28399ac5
+index 00000000..51a5561b
 --- /dev/null
 +++ b/src/frontend/gateways/rpc/Payment.gateway.ts
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,49 @@
 +// Copyright The OpenTelemetry Authors
 +// SPDX-License-Identifier: Apache-2.0
 +
-+import { ChannelCredentials } from '@grpc/grpc-js';
++import {
++  ChannelCredentials,
++  Metadata,
++} from '@grpc/grpc-js';
++
 +import {
 +  ChargeRequest,
 +  ChargeResponse,
@@ -33,12 +37,24 @@ index 0000000000000000000000000000000000000000..043d651aa7a2d817be7b520ada2e83db
 +  ChannelCredentials.createInsecure()
 +);
 +
++const PAYMENT_CALL_TIMEOUT_MS = 5_000;
++
 +const PaymentGateway = () => ({
 +  charge(request: ChargeRequest) {
++    const metadata = new Metadata();
++
++    const deadline = new Date(
++      Date.now() + PAYMENT_CALL_TIMEOUT_MS
++    );
++
 +    return new Promise<ChargeResponse>(
 +      (resolve, reject) =>
 +        client.charge(
 +          request,
++          metadata,
++          {
++            deadline,
++          },
 +          (error, response) =>
 +            error
 +              ? reject(error)
@@ -49,8 +65,9 @@ index 0000000000000000000000000000000000000000..043d651aa7a2d817be7b520ada2e83db
 +});
 +
 +export default PaymentGateway();
+\ No newline at end of file
 diff --git a/src/frontend/pages/api/checkout.ts b/src/frontend/pages/api/checkout.ts
-index 77056ba28ea750eed8491524c27c2f12cef29c37..62cb6a5bce3d57cba9702fed4f9300744cea0849 100644
+index 77056ba2..62cb6a5b 100644
 --- a/src/frontend/pages/api/checkout.ts
 +++ b/src/frontend/pages/api/checkout.ts
 @@ -7,6 +7,7 @@ import { context, Exception, SpanStatusCode, trace } from '@opentelemetry/api';

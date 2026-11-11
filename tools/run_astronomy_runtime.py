@@ -31,6 +31,14 @@ from archdrift.model.graph import (
 )
 
 ASTRONOMY_VERSION = "3.1.0"
+FRONTEND_CONTAINER_PORT = 8080
+
+ASTRONOMY_MUTABLE_SERVICES = (
+    "frontend",
+    "checkout",
+    "payment",
+    "cart",
+)
 
 FRONTEND_URL = "http://localhost:8080"
 
@@ -120,8 +128,56 @@ def run_command(
     return process
 
 
+def resolve_frontend_url(
+    *,
+    compose: list[str],
+    cwd: Path,
+    environment: Mapping[str, str],
+    timeout_seconds: int = 60,
+) -> str:
+    deadline = time.monotonic() + timeout_seconds
+
+    while time.monotonic() < deadline:
+        process = subprocess.run(
+            compose
+            + [
+                "port",
+                "frontend",
+                str(FRONTEND_CONTAINER_PORT),
+            ],
+            cwd=cwd,
+            env=dict(environment),
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+
+        if process.returncode == 0:
+            for line in process.stdout.splitlines():
+                endpoint = line.strip()
+
+                if not endpoint:
+                    continue
+
+                _, separator, port_text = endpoint.rpartition(":")
+
+                if separator and port_text.isdigit():
+                    frontend_url = f"http://127.0.0.1:{port_text}"
+
+                    print("[OK] frontend endpoint " f"resolved: {frontend_url}")
+
+                    return frontend_url
+
+        time.sleep(1)
+
+    raise AstronomyRuntimeError("Could not resolve frontend host port.")
+
+
 def wait_for_frontend(
     *,
+    frontend_url: str,
     timeout_seconds: int = 300,
 ) -> None:
     deadline = time.monotonic() + timeout_seconds
@@ -129,7 +185,7 @@ def wait_for_frontend(
     while time.monotonic() < deadline:
         try:
             with urllib.request.urlopen(
-                FRONTEND_URL,
+                frontend_url,
                 timeout=5,
             ) as response:
                 if 200 <= response.status < 500:
@@ -163,7 +219,7 @@ def post_json(
         url,
         data=body,
         headers={
-            "Content-Type": ("application/json"),
+            "Content-Type": "application/json",
             "baggage": ("synthetic_request=true," "archdrift.runtime=true"),
         },
         method="POST",
@@ -187,9 +243,20 @@ def post_json(
 
         raise AstronomyRuntimeError(f"HTTP {exc.code}: " f"{body_text[:500]}") from exc
 
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        ConnectionError,
+        http.client.HTTPException,
+    ) as exc:
+        raise AstronomyRuntimeError(
+            "HTTP request failed: " f"{type(exc).__name__}: {exc}"
+        ) from exc
+
 
 def run_checkout(
     *,
+    frontend_url: str,
     mutation_id: str,
     variant: RuntimeVariant,
     timeout_seconds: int = 120,
@@ -208,7 +275,7 @@ def run_checkout(
 
         try:
             post_json(
-                url=(FRONTEND_URL + "/api/cart"),
+                url=(frontend_url + "/api/cart"),
                 payload={
                     "item": {
                         "productId": PRODUCT_ID,
@@ -223,7 +290,7 @@ def run_checkout(
             checkout["userId"] = user_id
 
             post_json(
-                url=(FRONTEND_URL + "/api/checkout"),
+                url=(frontend_url + "/api/checkout"),
                 payload=checkout,
             )
 
@@ -349,9 +416,16 @@ def main() -> int:
         ]
     )
 
+    if profile.compose_mode is AstronomyComposeMode.FULL:
+        compose.extend(
+            [
+                "-f",
+                str(root / "runtime" / "astronomy" / "compose.runtime.full.yaml"),
+            ]
+        )
+
     try:
-        # Clean any previous Astronomy
-        # execution first.
+        # Clean any previous Astronomy execution first.
         run_command(
             compose
             + [
@@ -364,9 +438,23 @@ def main() -> int:
             check=False,
         )
 
-        # AS-M01 changes checkout, so both
-        # baseline and mutant build checkout
-        # from the exact pinned workspace.
+        # Restore official pinned images for all services that
+        # can be modified by Astronomy Shop mutations.
+        #
+        # This prevents a mutant image from contaminating a
+        # subsequent baseline or another mutation execution.
+        run_command(
+            compose
+            + [
+                "pull",
+                *ASTRONOMY_MUTABLE_SERVICES,
+            ],
+            cwd=workspace,
+            environment=environment,
+        )
+
+        # Build only the service modified by the current
+        # mutation/profile from the exact selected workspace.
         run_command(
             compose
             + [
@@ -377,12 +465,20 @@ def main() -> int:
             environment=environment,
         )
 
+        runtime_services = [
+            "frontend",
+        ]
+
+        if profile.compose_mode is AstronomyComposeMode.FULL:
+            runtime_services.append("kafka")
+
         up_result = run_command(
             compose
             + [
                 "up",
                 "-d",
                 "--no-build",
+                *runtime_services,
             ],
             cwd=workspace,
             environment=environment,
@@ -390,9 +486,14 @@ def main() -> int:
         )
 
         if up_result.returncode != 0:
+            print(
+                "[ERROR] Astronomy Shop startup failed. "
+                "Collecting diagnostics before cleanup."
+            )
+
             run_command(
-                [
-                    "docker",
+                compose
+                + [
                     "ps",
                     "-a",
                 ],
@@ -401,46 +502,90 @@ def main() -> int:
                 check=False,
             )
 
-            run_command(
-                compose
-                + [
-                    "ps",
-                ],
-                cwd=workspace,
-                environment=environment,
-                check=False,
-            )
+            for diagnostic_service in (
+                "frontend",
+                "checkout",
+                "payment",
+                "product-catalog",
+                "shipping",
+                "quote",
+                "recommendation",
+                "cart",
+                "email",
+            ):
+                run_command(
+                    compose
+                    + [
+                        "logs",
+                        "--no-color",
+                        "--tail",
+                        "120",
+                        diagnostic_service,
+                    ],
+                    cwd=workspace,
+                    environment=environment,
+                    check=False,
+                )
 
-        for diagnostic_service in (
-            "ad",
-            "payment",
-            "product-catalog",
-            "checkout",
-            "frontend",
-            "email",
-        ):
-            run_command(
-                [
-                    "docker",
-                    "logs",
-                    diagnostic_service,
-                    "--tail",
-                    "120",
-                ],
-                cwd=workspace,
-                environment=environment,
-                check=False,
-            )
+                run_command(
+                    [
+                        "docker",
+                        "inspect",
+                        diagnostic_service,
+                        "--format",
+                        "{{json .State.Health}}",
+                    ],
+                    cwd=workspace,
+                    environment=environment,
+                    check=False,
+                )
 
             raise AstronomyRuntimeError("Astronomy Shop failed to start.")
 
-        wait_for_frontend()
+        frontend_url = resolve_frontend_url(
+            compose=compose,
+            cwd=workspace,
+            environment=environment,
+        )
+
+        wait_for_frontend(
+            frontend_url=frontend_url,
+        )
 
         if profile.workload is AstronomyWorkload.CHECKOUT:
-            run_checkout(
-                mutation_id=args.mutation,
-                variant=variant,
-            )
+            try:
+                run_checkout(
+                    frontend_url=frontend_url,
+                    mutation_id=args.mutation,
+                    variant=variant,
+                )
+
+            except AstronomyRuntimeError:
+                print(
+                    "[ERROR] Astronomy workload failed. "
+                    "Collecting runtime diagnostics."
+                )
+
+                for diagnostic_service in (
+                    "frontend",
+                    "checkout",
+                    "payment",
+                ):
+                    run_command(
+                        compose
+                        + [
+                            "logs",
+                            "--no-color",
+                            "--tail",
+                            "200",
+                            diagnostic_service,
+                        ],
+                        cwd=workspace,
+                        environment=environment,
+                        check=False,
+                    )
+
+                raise
         else:
             raise AstronomyRuntimeError(
                 "Unsupported Astronomy workload: " f"{profile.workload}"

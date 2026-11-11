@@ -44,13 +44,6 @@ services:
         source: ${ARCHDRIFT_CAPTURE_DIR}
         target: /var/lib/archdrift
 
-  load-generator:
-    environment:
-      LOCUST_AUTOSTART: "false"
-      LOCUST_HEADLESS: "false"
-      LOCUST_BROWSER_TRAFFIC_ENABLED: "false"
-
-
   ad:
     healthcheck:
       test:
