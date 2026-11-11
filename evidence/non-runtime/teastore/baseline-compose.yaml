@@ -1,0 +1,32 @@
+services:
+  registry:
+    image: descartesresearch/teastore-registry
+  database:
+    image: descartesresearch/teastore-db
+  webui:
+    image: descartesresearch/teastore-webui
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: '8080'
+  auth:
+    image: descartesresearch/teastore-auth
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: '8080'
+  recommender:
+    image: descartesresearch/teastore-recommender
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: '8080'
+  persistence:
+    image: descartesresearch/teastore-persistence
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: '8080'
+      DB_HOST: database
+      DB_PORT: '3306'
+  image:
+    image: descartesresearch/teastore-image
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: '8080'

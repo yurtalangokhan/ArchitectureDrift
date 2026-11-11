@@ -1,0 +1,6 @@
+services:
+  checkout:
+    image: checkout
+
+  recommendation:
+    image: recommendation

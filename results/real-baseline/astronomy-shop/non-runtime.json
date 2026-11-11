@@ -1,0 +1,1122 @@
+{
+  "complementarity": {
+    "combined_relation_count": 15,
+    "deployment_corroboration_rate": 0.4666666666666667,
+    "deployment_only_relation_count": 8,
+    "deployment_relation_count": 15,
+    "overlap_relation_count": 7,
+    "source_static_corroboration_rate": 1.0,
+    "source_static_only_relation_count": 0,
+    "source_static_relation_count": 7,
+    "structural_gain_over_deployment_count": 0,
+    "structural_gain_over_deployment_rate": 0.0
+  },
+  "schema_version": "1.0",
+  "source_static": {
+    "findings": 7,
+    "resolved": 7,
+    "unresolved": 0
+  },
+  "subject_id": "astronomy-shop",
+  "views": {
+    "combined": {
+      "excluded_observations": 54,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "astronomy-shop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "ad",
+            "type": "SERVICE"
+          },
+          {
+            "id": "cart",
+            "type": "SERVICE"
+          },
+          {
+            "id": "checkout",
+            "type": "SERVICE"
+          },
+          {
+            "id": "currency",
+            "type": "SERVICE"
+          },
+          {
+            "id": "email",
+            "type": "SERVICE"
+          },
+          {
+            "id": "frontend",
+            "type": "SERVICE"
+          },
+          {
+            "id": "kafka",
+            "type": "BROKER"
+          },
+          {
+            "id": "payment",
+            "type": "SERVICE"
+          },
+          {
+            "id": "product-catalog",
+            "type": "SERVICE"
+          },
+          {
+            "id": "quote",
+            "type": "SERVICE"
+          },
+          {
+            "id": "recommendation",
+            "type": "SERVICE"
+          },
+          {
+            "id": "shipping",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "cart"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "currency"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "email"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "payment"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "shipping"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          },
+          {
+            "relation": "CALLS",
+            "source": "recommendation",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "shipping",
+            "target": "quote"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 34,
+      "nodes": 12,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.CART_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "cart"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "currency"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.EMAIL_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "email"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.PAYMENT_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "payment"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "shipping"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Ad.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:AD_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            },
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.AD_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Cart.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CART_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            },
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CART_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CHECKOUT_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            },
+            {
+              "artifact": "src/frontend/gateways/rpc/Checkout.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CHECKOUT_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            },
+            {
+              "artifact": "src/frontend/gateways/rpc/Currency.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/ProductCatalog.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            },
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.RECOMMENDATION_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            },
+            {
+              "artifact": "src/frontend/gateways/rpc/Recommendations.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:RECOMMENDATION_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            },
+            {
+              "artifact": "src/frontend/gateways/http/Shipping.gateway.ts",
+              "attributes": {},
+              "locator": "line:31;rule:archdrift.typescript.fetch;resolution:CONFIGURATION_BINDING;env:SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.recommendation.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "recommendation",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.shipping.environment.QUOTE_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "shipping",
+            "target": "quote"
+          }
+        }
+      ],
+      "relations": 15
+    },
+    "deployment": {
+      "excluded_observations": 54,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "astronomy-shop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "ad",
+            "type": "SERVICE"
+          },
+          {
+            "id": "cart",
+            "type": "SERVICE"
+          },
+          {
+            "id": "checkout",
+            "type": "SERVICE"
+          },
+          {
+            "id": "currency",
+            "type": "SERVICE"
+          },
+          {
+            "id": "email",
+            "type": "SERVICE"
+          },
+          {
+            "id": "frontend",
+            "type": "SERVICE"
+          },
+          {
+            "id": "kafka",
+            "type": "BROKER"
+          },
+          {
+            "id": "payment",
+            "type": "SERVICE"
+          },
+          {
+            "id": "product-catalog",
+            "type": "SERVICE"
+          },
+          {
+            "id": "quote",
+            "type": "SERVICE"
+          },
+          {
+            "id": "recommendation",
+            "type": "SERVICE"
+          },
+          {
+            "id": "shipping",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "cart"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "currency"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "email"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "payment"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "shipping"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          },
+          {
+            "relation": "CALLS",
+            "source": "recommendation",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "shipping",
+            "target": "quote"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 27,
+      "nodes": 12,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.CART_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "cart"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "currency"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.EMAIL_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "email"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.PAYMENT_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "payment"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.checkout.environment.SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "checkout",
+            "target": "shipping"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.AD_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CART_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CHECKOUT_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.RECOMMENDATION_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.frontend.environment.SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.recommendation.environment.PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "recommendation",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/astronomy-shop/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.shipping.environment.QUOTE_ADDR",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "shipping",
+            "target": "quote"
+          }
+        }
+      ],
+      "relations": 15
+    },
+    "source_static": {
+      "excluded_observations": 0,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "astronomy-shop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "ad",
+            "type": "SERVICE"
+          },
+          {
+            "id": "cart",
+            "type": "SERVICE"
+          },
+          {
+            "id": "checkout",
+            "type": "SERVICE"
+          },
+          {
+            "id": "currency",
+            "type": "SERVICE"
+          },
+          {
+            "id": "frontend",
+            "type": "SERVICE"
+          },
+          {
+            "id": "product-catalog",
+            "type": "SERVICE"
+          },
+          {
+            "id": "recommendation",
+            "type": "SERVICE"
+          },
+          {
+            "id": "shipping",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          },
+          {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 7,
+      "nodes": 8,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Ad.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:AD_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "ad"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Cart.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CART_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "cart"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Checkout.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CHECKOUT_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "checkout"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Currency.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CURRENCY_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "currency"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/ProductCatalog.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:PRODUCT_CATALOG_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "product-catalog"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/rpc/Recommendations.gateway.ts",
+              "attributes": {},
+              "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:RECOMMENDATION_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "grpc"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "recommendation"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/frontend/gateways/http/Shipping.gateway.ts",
+              "attributes": {},
+              "locator": "line:31;rule:archdrift.typescript.fetch;resolution:CONFIGURATION_BINDING;env:SHIPPING_ADDR",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "frontend",
+            "target": "shipping"
+          }
+        }
+      ],
+      "relations": 7
+    }
+  }
+}

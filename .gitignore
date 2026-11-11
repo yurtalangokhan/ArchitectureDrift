@@ -24,9 +24,9 @@ htmlcov/
 Thumbs.db
 
 # Generated experimental evidence
-evidence/
-graphs/
-results/
+#evidence/
+#graphs/
+#results/
 
 # Temporary files
 *.log

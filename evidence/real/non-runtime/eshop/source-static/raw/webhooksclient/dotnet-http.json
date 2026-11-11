@@ -1,0 +1,124 @@
+{
+  "engine_requested": "OSS",
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Endpoints\\AuthenticationEndpoints.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Endpoints\\WebhookEndpoints.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Extensions\\Extensions.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\GlobalUsings.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Program.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\HooksRepository.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebhookClientOptions.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebhookData.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebHookReceived.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebhookResponse.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebHooksClient.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebhookSubscriptionRequest.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Services\\WebhookType.cs"
+    ]
+  },
+  "profiling_results": [],
+  "results": [
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.dotnet.http-client-base-address",
+      "end": {
+        "col": 104,
+        "line": 19,
+        "offset": 781
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=\"http://webhooks-api\"",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "http"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebhookClient\\Extensions\\Extensions.cs",
+      "start": {
+        "col": 9,
+        "line": 19,
+        "offset": 686
+      }
+    }
+  ],
+  "skipped_rules": [],
+  "time": {
+    "fixpoint_timeouts": [],
+    "matching_time": {
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "max_memory_bytes": 118145024,
+    "parsing_time": {
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "prefiltering": {
+      "file_level_time": 0.0,
+      "project_level_time": 0.0,
+      "rules_matched_ratio": 0.07692307692307693,
+      "rules_selected_ratio": 0.07692307692307693,
+      "rules_with_file_prefilters_ratio": 1.0,
+      "rules_with_project_prefilters_ratio": 0.0
+    },
+    "profiling_times": {
+      "config_time": 0.1400001049041748,
+      "core_time": 0.49500107765197754,
+      "ignores_time": 0.0,
+      "total_time": 0.6569993495941162
+    },
+    "rules": [],
+    "rules_parse_time": 0.00896596908569336,
+    "scanning_time": {
+      "per_file_time": {
+        "mean": 0.006695747375488281,
+        "std_dev": 9.417262707791869e-05
+      },
+      "total_time": 0.08704471588134766,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "tainting_time": {
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_defs": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "targets": [],
+    "total_bytes": 0
+  },
+  "version": "1.178.0"
+}

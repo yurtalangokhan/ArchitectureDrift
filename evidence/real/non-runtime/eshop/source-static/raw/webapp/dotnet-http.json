@@ -1,0 +1,165 @@
+{
+  "engine_requested": "OSS",
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Components\\Chatbot\\ChatState.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Components\\Chatbot\\MessageProcessor.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Extensions\\Extensions.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\GlobalUsings.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Program.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\BasketCheckoutInfo.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\BasketItem.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\BasketService.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\BasketState.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\IBasketState.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\LogOutService.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderingService.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToAwaitingValidationIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToCancelledIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToPaidIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToShippedIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToStockConfirmedIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\EventHandling\\OrderStatusChangedToSubmittedIntegrationEventHandler.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToAwaitingValidationIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToCancelledIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToPaidIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToShippedIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToStockConfirmedIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\IntegrationEvents\\Events\\OrderStatusChangedToSubmittedIntegrationEvent.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\OrderStatus\\OrderStatusNotificationService.cs",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Services\\ProductImageUrlProvider.cs"
+    ]
+  },
+  "profiling_results": [],
+  "results": [
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.dotnet.http-client-base-address",
+      "end": {
+        "col": 109,
+        "line": 34,
+        "offset": 1453
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=\"https+http://catalog-api\"",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "http"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Extensions\\Extensions.cs",
+      "start": {
+        "col": 9,
+        "line": 34,
+        "offset": 1353
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.dotnet.http-client-base-address",
+      "end": {
+        "col": 111,
+        "line": 38,
+        "offset": 1630
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=\"https+http://ordering-api\"",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "http"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\subjects\\eshop\\src\\WebApp\\Extensions\\Extensions.cs",
+      "start": {
+        "col": 9,
+        "line": 38,
+        "offset": 1528
+      }
+    }
+  ],
+  "skipped_rules": [],
+  "time": {
+    "fixpoint_timeouts": [],
+    "matching_time": {
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "max_memory_bytes": 123518208,
+    "parsing_time": {
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "prefiltering": {
+      "file_level_time": 0.0,
+      "project_level_time": 0.0,
+      "rules_matched_ratio": 0.038461538461538464,
+      "rules_selected_ratio": 0.038461538461538464,
+      "rules_with_file_prefilters_ratio": 1.0,
+      "rules_with_project_prefilters_ratio": 0.0
+    },
+    "profiling_times": {
+      "config_time": 0.149000883102417,
+      "core_time": 1.0169591903686523,
+      "ignores_time": 0.0,
+      "total_time": 1.1879587173461914
+    },
+    "rules": [],
+    "rules_parse_time": 0.013954877853393555,
+    "scanning_time": {
+      "per_file_time": {
+        "mean": 0.003502084658696101,
+        "std_dev": 3.655547423993028e-05
+      },
+      "total_time": 0.09105420112609863,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "tainting_time": {
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_defs": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "targets": [],
+    "total_bytes": 0
+  },
+  "version": "1.178.0"
+}

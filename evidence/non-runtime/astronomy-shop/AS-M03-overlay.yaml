@@ -1,0 +1,5 @@
+services:
+  frontend:
+    environment:
+      ARCHDRIFT_MUTATION_TARGET: http://payment:8080
+  payment: {}

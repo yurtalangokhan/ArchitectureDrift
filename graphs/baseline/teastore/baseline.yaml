@@ -1,0 +1,49 @@
+schema_version: "1.0"
+
+metadata:
+  system_id: teastore
+  role: BASELINE
+  revision: TEASTORE-BASELINE-01
+
+nodes:
+  - id: webui
+    type: SERVICE
+
+  - id: auth
+    type: SERVICE
+
+  - id: recommender
+    type: SERVICE
+
+  - id: persistence
+    type: SERVICE
+
+  - id: image
+    type: SERVICE
+
+  - id: registry
+    type: REGISTRY
+
+  - id: database
+    type: DATASTORE
+
+relations:
+  - source: webui
+    relation: DISCOVERS_VIA
+    target: registry
+
+  - source: auth
+    relation: DISCOVERS_VIA
+    target: registry
+
+  - source: recommender
+    relation: DISCOVERS_VIA
+    target: registry
+
+  - source: persistence
+    relation: DISCOVERS_VIA
+    target: registry
+
+  - source: image
+    relation: DISCOVERS_VIA
+    target: registry

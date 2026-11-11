@@ -1,0 +1,5 @@
+services:
+  auth:
+    environment:
+      ARCHDRIFT_DIRECT_TARGET: http://image:8080
+  image: {}

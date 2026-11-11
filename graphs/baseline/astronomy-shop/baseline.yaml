@@ -1,0 +1,104 @@
+schema_version: "1.0"
+
+metadata:
+  system_id: astronomy-shop
+  role: BASELINE
+  revision: AS-BASELINE-03
+
+nodes:
+  - id: ad
+    type: SERVICE
+
+  - id: cart
+    type: SERVICE
+
+  - id: checkout
+    type: SERVICE
+
+  - id: currency
+    type: SERVICE
+
+  - id: email
+    type: SERVICE
+
+  - id: frontend
+    type: SERVICE
+
+  - id: kafka
+    type: BROKER
+
+  - id: payment
+    type: SERVICE
+
+  - id: product-catalog
+    type: SERVICE
+
+  - id: quote
+    type: SERVICE
+
+  - id: recommendation
+    type: SERVICE
+
+  - id: shipping
+    type: SERVICE
+
+relations:
+  - source: frontend
+    relation: CALLS
+    target: ad
+
+  - source: frontend
+    relation: CALLS
+    target: recommendation
+
+  - source: frontend
+    relation: CALLS
+    target: product-catalog
+
+  - source: frontend
+    relation: CALLS
+    target: cart
+
+  - source: frontend
+    relation: CALLS
+    target: checkout
+
+  - source: checkout
+    relation: CALLS
+    target: cart
+
+  - source: checkout
+    relation: CALLS
+    target: payment
+
+  - source: checkout
+    relation: CALLS
+    target: shipping
+
+  - source: checkout
+    relation: CALLS
+    target: email
+
+  - source: checkout
+    relation: CALLS
+    target: product-catalog
+
+  - source: checkout
+    relation: CALLS
+    target: currency
+
+  - source: recommendation
+    relation: CALLS
+    target: product-catalog
+
+  - source: shipping
+    relation: CALLS
+    target: quote
+
+  - source: frontend
+    relation: CALLS
+    target: currency
+
+  - source: frontend
+    relation: CALLS
+    target: shipping

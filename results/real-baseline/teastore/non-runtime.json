@@ -1,0 +1,354 @@
+{
+  "complementarity": {
+    "combined_relation_count": 5,
+    "deployment_corroboration_rate": 0.0,
+    "deployment_only_relation_count": 5,
+    "deployment_relation_count": 5,
+    "overlap_relation_count": 0,
+    "source_static_corroboration_rate": null,
+    "source_static_only_relation_count": 0,
+    "source_static_relation_count": 0,
+    "structural_gain_over_deployment_count": 0,
+    "structural_gain_over_deployment_rate": 0.0
+  },
+  "schema_version": "1.0",
+  "source_static": {
+    "findings": 0,
+    "resolved": 0,
+    "unresolved": 0
+  },
+  "subject_id": "teastore",
+  "views": {
+    "combined": {
+      "excluded_observations": 2,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "teastore",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "auth",
+            "type": "SERVICE"
+          },
+          {
+            "id": "image",
+            "type": "SERVICE"
+          },
+          {
+            "id": "persistence",
+            "type": "SERVICE"
+          },
+          {
+            "id": "recommender",
+            "type": "SERVICE"
+          },
+          {
+            "id": "registry",
+            "type": "REGISTRY"
+          },
+          {
+            "id": "webui",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "auth",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "image",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "persistence",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "recommender",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "webui",
+            "target": "registry"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 11,
+      "nodes": 6,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.auth.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "auth",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.image.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "image",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.persistence.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "persistence",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.recommender.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "recommender",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.webui.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "webui",
+            "target": "registry"
+          }
+        }
+      ],
+      "relations": 5
+    },
+    "deployment": {
+      "excluded_observations": 2,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "teastore",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "auth",
+            "type": "SERVICE"
+          },
+          {
+            "id": "image",
+            "type": "SERVICE"
+          },
+          {
+            "id": "persistence",
+            "type": "SERVICE"
+          },
+          {
+            "id": "recommender",
+            "type": "SERVICE"
+          },
+          {
+            "id": "registry",
+            "type": "REGISTRY"
+          },
+          {
+            "id": "webui",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "auth",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "image",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "persistence",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "recommender",
+            "target": "registry"
+          },
+          {
+            "relation": "DISCOVERS_VIA",
+            "source": "webui",
+            "target": "registry"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 11,
+      "nodes": 6,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.auth.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "auth",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.image.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "image",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.persistence.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "persistence",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.recommender.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "recommender",
+            "target": "registry"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "evidence/real/non-runtime/teastore/compose.resolved.json",
+              "attributes": {},
+              "locator": "services.webui.environment.REGISTRY_HOST",
+              "observed_at": null,
+              "type": "DEPLOYMENT_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "DISCOVERS_VIA",
+            "source": "webui",
+            "target": "registry"
+          }
+        }
+      ],
+      "relations": 5
+    },
+    "source_static": {
+      "excluded_observations": 0,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "teastore",
+          "variant": null
+        },
+        "nodes": [],
+        "relations": [],
+        "schema_version": "1.0"
+      },
+      "included_observations": 0,
+      "nodes": 0,
+      "relation_support": [],
+      "relations": 0
+    }
+  }
+}

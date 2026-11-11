@@ -1,0 +1,42 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "recommender"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "mutation-recommender-auth",
+              "spanId": "span-0101",
+              "name": "recommender to auth",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "auth"
+                  }
+                },
+                {
+                  "key": "url.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

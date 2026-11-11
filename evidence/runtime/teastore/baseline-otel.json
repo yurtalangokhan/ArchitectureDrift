@@ -1,0 +1,179 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "webui"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-webui",
+              "spanId": "span-webui",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "auth"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-auth",
+              "spanId": "span-auth",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "recommender"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-recommender",
+              "spanId": "span-recommender",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "persistence"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-persistence",
+              "spanId": "span-persistence",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "image"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-image",
+              "spanId": "span-image",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "registry"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-registry",
+              "spanId": "span-registry",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "database"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-database",
+              "spanId": "span-database",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

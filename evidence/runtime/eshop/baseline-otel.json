@@ -1,0 +1,384 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "basket-api"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-basket-api",
+              "spanId": "span-presence-basket-api",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "catalog-api"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-catalog-api",
+              "spanId": "span-presence-catalog-api",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "eventbus"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-eventbus",
+              "spanId": "span-presence-eventbus",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "identity-api"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-identity-api",
+              "spanId": "span-presence-identity-api",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-processor"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-order-processor",
+              "spanId": "span-presence-order-processor",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "ordering-api"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-ordering-api",
+              "spanId": "span-presence-ordering-api",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "payment-processor"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-payment-processor",
+              "spanId": "span-presence-payment-processor",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "postgres"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-postgres",
+              "spanId": "span-presence-postgres",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "redis"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-redis",
+              "spanId": "span-presence-redis",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "webapp"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-webapp",
+              "spanId": "span-presence-webapp",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            },
+            {
+              "traceId": "trace-webapp-basket-api",
+              "spanId": "span-call-001",
+              "name": "webapp to basket-api",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "basket-api"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "trace-webapp-catalog-api",
+              "spanId": "span-call-002",
+              "name": "webapp to catalog-api",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "catalog-api"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "trace-webapp-ordering-api",
+              "spanId": "span-call-003",
+              "name": "webapp to ordering-api",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "ordering-api"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "webhooks-api"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-webhooks-api",
+              "spanId": "span-presence-webhooks-api",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "webhooksclient"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "trace-presence-webhooksclient",
+              "spanId": "span-presence-webhooksclient",
+              "name": "runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            },
+            {
+              "traceId": "trace-webhooksclient-webhooks-api",
+              "spanId": "span-call-004",
+              "name": "webhooksclient to webhooks-api",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "webhooks-api"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

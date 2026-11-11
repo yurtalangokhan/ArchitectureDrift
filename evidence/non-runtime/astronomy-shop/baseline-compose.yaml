@@ -1,0 +1,32 @@
+services:
+  ad: {}
+  cart: {}
+  checkout:
+    environment:
+      ARCHDRIFT_TARGET_06: http://cart:8080
+      ARCHDRIFT_TARGET_07: http://payment:8080
+      ARCHDRIFT_TARGET_08: http://shipping:8080
+      ARCHDRIFT_TARGET_09: http://email:8080
+      ARCHDRIFT_TARGET_10: http://product-catalog:8080
+      ARCHDRIFT_TARGET_11: http://currency:8080
+  currency: {}
+  email: {}
+  frontend:
+    environment:
+      ARCHDRIFT_TARGET_01: http://ad:8080
+      ARCHDRIFT_TARGET_02: http://recommendation:8080
+      ARCHDRIFT_TARGET_03: http://product-catalog:8080
+      ARCHDRIFT_TARGET_04: http://cart:8080
+      ARCHDRIFT_TARGET_05: http://checkout:8080
+      ARCHDRIFT_TARGET_14: http://currency:8080
+      ARCHDRIFT_TARGET_15: http://shipping:8080
+  kafka: {}
+  payment: {}
+  product-catalog: {}
+  quote: {}
+  recommendation:
+    environment:
+      ARCHDRIFT_TARGET_12: http://product-catalog:8080
+  shipping:
+    environment:
+      ARCHDRIFT_TARGET_13: http://quote:8080

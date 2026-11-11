@@ -1,0 +1,126 @@
+{
+  "name": "docker",
+  "networks": {
+    "default": {
+      "ipam": {},
+      "name": "docker_default"
+    }
+  },
+  "services": {
+    "auth": {
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "HOST_NAME": "auth",
+        "REGISTRY_HOST": "registry"
+      },
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-auth",
+      "networks": {
+        "default": null
+      }
+    },
+    "db": {
+      "command": null,
+      "entrypoint": null,
+      "expose": [
+        "3306"
+      ],
+      "image": "descartesresearch/teastore-db",
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": "3306",
+          "target": 3306
+        }
+      ]
+    },
+    "image": {
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "HOST_NAME": "image",
+        "REGISTRY_HOST": "registry"
+      },
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-image",
+      "networks": {
+        "default": null
+      }
+    },
+    "persistence": {
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "DB_HOST": "db",
+        "DB_PORT": "3306",
+        "HOST_NAME": "persistence",
+        "REGISTRY_HOST": "registry"
+      },
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-persistence",
+      "networks": {
+        "default": null
+      }
+    },
+    "recommender": {
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "HOST_NAME": "recommender",
+        "REGISTRY_HOST": "registry"
+      },
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-recommender",
+      "networks": {
+        "default": null
+      }
+    },
+    "registry": {
+      "command": null,
+      "entrypoint": null,
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-registry",
+      "networks": {
+        "default": null
+      }
+    },
+    "webui": {
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "HOST_NAME": "webui",
+        "REGISTRY_HOST": "registry"
+      },
+      "expose": [
+        "8080"
+      ],
+      "image": "descartesresearch/teastore-webui",
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": "8080",
+          "target": 8080
+        }
+      ]
+    }
+  }
+}

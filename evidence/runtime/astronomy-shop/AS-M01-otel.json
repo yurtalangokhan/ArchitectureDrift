@@ -1,0 +1,42 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "checkout"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-checkout-recommendation",
+              "spanId": "span-0100",
+              "name": "checkout to recommendation",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "recommendation"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

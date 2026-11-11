@@ -1,0 +1,42 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-frontend-payment",
+              "spanId": "span-0101",
+              "name": "frontend to payment",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "payment"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

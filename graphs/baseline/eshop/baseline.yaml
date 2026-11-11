@@ -1,0 +1,60 @@
+schema_version: "1.0"
+
+metadata:
+  system_id: eshop
+  role: BASELINE
+  revision: ESHOP-BASELINE-01
+
+nodes:
+  - id: basket-api
+    type: SERVICE
+
+  - id: catalog-api
+    type: SERVICE
+
+  - id: identity-api
+    type: SERVICE
+
+  - id: ordering-api
+    type: SERVICE
+
+  - id: order-processor
+    type: SERVICE
+
+  - id: payment-processor
+    type: SERVICE
+
+  - id: webhooks-api
+    type: SERVICE
+
+  - id: webhooksclient
+    type: SERVICE
+
+  - id: webapp
+    type: SERVICE
+
+  - id: redis
+    type: DATASTORE
+
+  - id: postgres
+    type: DATASTORE
+
+  - id: eventbus
+    type: BROKER
+
+relations:
+  - source: webapp
+    relation: CALLS
+    target: basket-api
+
+  - source: webapp
+    relation: CALLS
+    target: catalog-api
+
+  - source: webapp
+    relation: CALLS
+    target: ordering-api
+
+  - source: webhooksclient
+    relation: CALLS
+    target: webhooks-api

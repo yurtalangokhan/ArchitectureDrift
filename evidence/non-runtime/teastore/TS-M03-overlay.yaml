@@ -1,0 +1,5 @@
+services:
+  recommender:
+    environment:
+      ARCHDRIFT_DIRECT_TARGET: http://auth:8080
+  auth: {}

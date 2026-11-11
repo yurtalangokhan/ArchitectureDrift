@@ -1,0 +1,480 @@
+{
+  "complementarity": {
+    "combined_relation_count": 4,
+    "deployment_corroboration_rate": 0.75,
+    "deployment_only_relation_count": 1,
+    "deployment_relation_count": 4,
+    "overlap_relation_count": 3,
+    "source_static_corroboration_rate": 1.0,
+    "source_static_only_relation_count": 0,
+    "source_static_relation_count": 3,
+    "structural_gain_over_deployment_count": 0,
+    "structural_gain_over_deployment_rate": 0.0
+  },
+  "schema_version": "1.0",
+  "source_static": {
+    "findings": 3,
+    "resolved": 3,
+    "unresolved": 0
+  },
+  "subject_id": "eshop",
+  "views": {
+    "combined": {
+      "excluded_observations": 0,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "eshop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "basket-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "catalog-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "eventbus",
+            "type": "BROKER"
+          },
+          {
+            "id": "identity-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "order-processor",
+            "type": "SERVICE"
+          },
+          {
+            "id": "ordering-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "payment-processor",
+            "type": "SERVICE"
+          },
+          {
+            "id": "postgres",
+            "type": "DATASTORE"
+          },
+          {
+            "id": "redis",
+            "type": "DATASTORE"
+          },
+          {
+            "id": "webapp",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooks-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooksclient",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "basket-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 19,
+      "nodes": 12,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:73:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "basket-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:74:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            },
+            {
+              "artifact": "src/WebApp/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:34;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/WebApp/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:38;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            },
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:75:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/WebhookClient/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:19;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            },
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:67:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        }
+      ],
+      "relations": 4
+    },
+    "deployment": {
+      "excluded_observations": 0,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "eshop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "basket-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "catalog-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "eventbus",
+            "type": "BROKER"
+          },
+          {
+            "id": "identity-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "order-processor",
+            "type": "SERVICE"
+          },
+          {
+            "id": "ordering-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "payment-processor",
+            "type": "SERVICE"
+          },
+          {
+            "id": "postgres",
+            "type": "DATASTORE"
+          },
+          {
+            "id": "redis",
+            "type": "DATASTORE"
+          },
+          {
+            "id": "webapp",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooks-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooksclient",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "basket-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 16,
+      "nodes": 12,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:73:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "basket-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:74:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:75:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/eShop.AppHost/Program.cs",
+              "attributes": {},
+              "locator": "line:67:WithReference",
+              "observed_at": null,
+              "type": "REPOSITORY_CONFIG"
+            }
+          ],
+          "protocols": [],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        }
+      ],
+      "relations": 4
+    },
+    "source_static": {
+      "excluded_observations": 0,
+      "graph": {
+        "metadata": {
+          "reconstruction_mode": "NON_RUNTIME",
+          "revision": null,
+          "role": "OBSERVED",
+          "system_id": "eshop",
+          "variant": null
+        },
+        "nodes": [
+          {
+            "id": "catalog-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "ordering-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webapp",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooks-api",
+            "type": "SERVICE"
+          },
+          {
+            "id": "webhooksclient",
+            "type": "SERVICE"
+          }
+        ],
+        "relations": [
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          },
+          {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        ],
+        "schema_version": "1.0"
+      },
+      "included_observations": 3,
+      "nodes": 5,
+      "relation_support": [
+        {
+          "evidence": [
+            {
+              "artifact": "src/WebApp/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:34;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "catalog-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/WebApp/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:38;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webapp",
+            "target": "ordering-api"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "artifact": "src/WebhookClient/Extensions/Extensions.cs",
+              "attributes": {},
+              "locator": "line:19;rule:archdrift.dotnet.http-client-base-address;resolution:DIRECT_SERVICE_URI",
+              "observed_at": null,
+              "type": "SOURCE_CODE"
+            }
+          ],
+          "protocols": [
+            "http"
+          ],
+          "relation": {
+            "relation": "CALLS",
+            "source": "webhooksclient",
+            "target": "webhooks-api"
+          }
+        }
+      ],
+      "relations": 3
+    }
+  }
+}

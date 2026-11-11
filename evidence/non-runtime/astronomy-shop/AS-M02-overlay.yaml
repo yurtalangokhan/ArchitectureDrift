@@ -1,0 +1,5 @@
+services:
+  payment:
+    environment:
+      ARCHDRIFT_MUTATION_TARGET: http://shipping:8080
+  shipping: {}

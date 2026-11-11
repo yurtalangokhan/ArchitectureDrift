@@ -1,0 +1,401 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "checkout"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-checkout-cart",
+              "spanId": "span-0006",
+              "name": "checkout to cart",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "cart"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-checkout-payment",
+              "spanId": "span-0007",
+              "name": "checkout to payment",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "payment"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-checkout-shipping",
+              "spanId": "span-0008",
+              "name": "checkout to shipping",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "shipping"
+                  }
+                },
+                {
+                  "key": "url.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-checkout-email",
+              "spanId": "span-0009",
+              "name": "checkout to email",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "email"
+                  }
+                },
+                {
+                  "key": "url.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-checkout-product-catalog",
+              "spanId": "span-0010",
+              "name": "checkout to product-catalog",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "product-catalog"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-checkout-currency",
+              "spanId": "span-0011",
+              "name": "checkout to currency",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "currency"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-frontend-ad",
+              "spanId": "span-0001",
+              "name": "frontend to ad",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "ad"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-recommendation",
+              "spanId": "span-0002",
+              "name": "frontend to recommendation",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "recommendation"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-product-catalog",
+              "spanId": "span-0003",
+              "name": "frontend to product-catalog",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "product-catalog"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-cart",
+              "spanId": "span-0004",
+              "name": "frontend to cart",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "cart"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-checkout",
+              "spanId": "span-0005",
+              "name": "frontend to checkout",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-currency",
+              "spanId": "span-0014",
+              "name": "frontend to currency",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "currency"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "baseline-frontend-shipping",
+              "spanId": "span-0015",
+              "name": "frontend to shipping",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "shipping"
+                  }
+                },
+                {
+                  "key": "url.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "recommendation"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-recommendation-product-catalog",
+              "spanId": "span-0012",
+              "name": "recommendation to product-catalog",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "product-catalog"
+                  }
+                },
+                {
+                  "key": "rpc.system.name",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "shipping"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-shipping-quote",
+              "spanId": "span-0013",
+              "name": "shipping to quote",
+              "kind": "SPAN_KIND_CLIENT",
+              "attributes": [
+                {
+                  "key": "service.peer.name",
+                  "value": {
+                    "stringValue": "quote"
+                  }
+                },
+                {
+                  "key": "url.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "kafka"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "baseline-kafka",
+              "spanId": "span-kafka-0001",
+              "name": "kafka runtime presence",
+              "kind": "SPAN_KIND_INTERNAL",
+              "attributes": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
