@@ -1,0 +1,13 @@
+schema_version: '1.0'
+suite_id: architecture-drift-astronomy-real
+metadata:
+  purpose: Empirical Astronomy Shop controlled mutation evaluation using acquired
+    non-runtime and runtime evidence.
+  revision: REAL-AS-01
+cases:
+- cases/real/astronomy-shop/AS-M01.yaml
+- cases/real/astronomy-shop/AS-M02.yaml
+- cases/real/astronomy-shop/AS-M03.yaml
+- cases/real/astronomy-shop/AS-M04.yaml
+- cases/real/astronomy-shop/AS-M05.yaml
+- cases/real/astronomy-shop/AS-M06.yaml

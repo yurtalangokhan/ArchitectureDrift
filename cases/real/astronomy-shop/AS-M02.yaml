@@ -1,0 +1,42 @@
+schema_version: '1.0'
+case_id: astronomy-shop-real-AS-M02
+system_id: astronomy-shop
+variant: AS-M02
+baseline_graph: graphs/baseline/astronomy-shop/baseline.yaml
+contract_document: contracts/astronomy-shop.yaml
+mutation_oracle: mutations/astronomy-shop/AS-M02.yaml
+components:
+- id: ad
+  type: SERVICE
+- id: cart
+  type: SERVICE
+- id: checkout
+  type: SERVICE
+- id: currency
+  type: SERVICE
+- id: email
+  type: SERVICE
+- id: frontend
+  type: SERVICE
+- id: kafka
+  type: BROKER
+- id: payment
+  type: SERVICE
+- id: product-catalog
+  type: SERVICE
+- id: quote
+  type: SERVICE
+- id: recommendation
+  type: SERVICE
+- id: shipping
+  type: SERVICE
+non_runtime:
+  observation_files:
+  - evidence/real/experiments/astronomy-shop/AS-M02/non-runtime/observations.json
+runtime:
+  otlp_files:
+  - evidence/real/experiments/astronomy-shop/AS-M02/runtime/baseline.otlp.json
+  - evidence/real/experiments/astronomy-shop/AS-M02/runtime/mutant.otlp.json
+provenance_files:
+- evidence/real/experiments/astronomy-shop/AS-M02/runtime/baseline.execution.json
+- evidence/real/experiments/astronomy-shop/AS-M02/runtime/mutant.execution.json

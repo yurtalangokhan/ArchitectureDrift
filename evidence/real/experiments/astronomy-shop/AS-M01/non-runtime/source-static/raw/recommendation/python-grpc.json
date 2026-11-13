@@ -1,0 +1,87 @@
+{
+  "engine_requested": "OSS",
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\recommendation\\demo_pb2.py",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\recommendation\\demo_pb2_grpc.py",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\recommendation\\logger.py",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\recommendation\\metrics.py",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\recommendation\\recommendation_server.py"
+    ]
+  },
+  "profiling_results": [],
+  "results": [],
+  "skipped_rules": [],
+  "time": {
+    "fixpoint_timeouts": [],
+    "matching_time": {
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "max_memory_bytes": 107543360,
+    "parsing_time": {
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "prefiltering": {
+      "file_level_time": 0.0,
+      "project_level_time": 0.0,
+      "rules_matched_ratio": 0.2,
+      "rules_selected_ratio": 0.2,
+      "rules_with_file_prefilters_ratio": 1.0,
+      "rules_with_project_prefilters_ratio": 0.0
+    },
+    "profiling_times": {
+      "config_time": 0.305464506149292,
+      "core_time": 0.8544821739196777,
+      "ignores_time": 0.0,
+      "total_time": 1.1995396614074707
+    },
+    "rules": [],
+    "rules_parse_time": 0.030559539794921875,
+    "scanning_time": {
+      "per_file_time": {
+        "mean": 0.010001659393310547,
+        "std_dev": 0.0003072254781500305
+      },
+      "total_time": 0.050008296966552734,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "tainting_time": {
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_defs": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "targets": [],
+    "total_bytes": 0
+  },
+  "version": "1.178.0"
+}

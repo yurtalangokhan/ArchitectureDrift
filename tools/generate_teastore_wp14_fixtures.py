@@ -64,16 +64,16 @@ NON_RUNTIME_MUTATIONS = {
 
 RUNTIME_CALL_MUTATIONS = {
     "TS-M01": (
-        "webui",
-        "persistence",
+        "auth",
+        "recommender",
     ),
     "TS-M03": (
         "recommender",
         "auth",
     ),
     "TS-M05": (
-        "webui",
-        "registry",
+        "persistence",
+        "auth",
     ),
 }
 

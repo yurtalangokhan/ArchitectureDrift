@@ -1,0 +1,327 @@
+{
+  "cases": [
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M01.yaml",
+          "sha256": "4517d991df240349300b5a5099c8c778b89402efca6228fa0ac376b3c8d83e53",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M01/non-runtime/observations.json",
+          "sha256": "25545b5203c05c39301cbd604cb0e6dfaedd8143ffca7e2daa7651a0b0558dd6",
+          "size_bytes": 49721
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M01/runtime/baseline.execution.json",
+          "sha256": "c50f811df148b477a0916238abe70bf5d316b8fe520e5433dc0173ba7eec7c2c",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M01/runtime/baseline.otlp.json",
+          "sha256": "ebc4f91ff98e55fba8d88bdfe0ba4808160162d8cc6dde27b2666e7d25b2b293",
+          "size_bytes": 1365769
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M01/runtime/mutant.execution.json",
+          "sha256": "efa9caf50a86fb3f22a8949f68437df61207f14dcd6d1f95038591253909925d",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M01/runtime/mutant.otlp.json",
+          "sha256": "93580a36967f45fb1f89d78cc40031af1dc8b651793b046ff49a2143ff51ef4b",
+          "size_bytes": 721408
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M01.yaml",
+          "sha256": "8bd1fe8c5984b695077179f70e546d9d4687e144806edb8ef61058bc682d6876",
+          "size_bytes": 904
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M01.yaml",
+      "input_fingerprint": "1db6ed29c44bf490a8fe4b3212ac908dd4ce3981206e72383282f089930832d0",
+      "mutation_id": "AS-M01",
+      "system_id": "astronomy-shop"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M02.yaml",
+          "sha256": "cf9e3701d4c797dce7e7f407e2543bfafb16e85d45c81b3d7b6da12aef2b8225",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M02/non-runtime/observations.json",
+          "sha256": "256702a8b2276e96aec93a942bf9780341ed93326e8e95253c6840b71444b653",
+          "size_bytes": 50321
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M02/runtime/baseline.execution.json",
+          "sha256": "2a36bab0f0ccff1201db936426697ef860e07b0fe775ba44faa7c1a3eb77af7d",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M02/runtime/baseline.otlp.json",
+          "sha256": "5bdd9a10097ed452bc37a635f701e7ec01db8ab36e04a188e12b5252f592a5cd",
+          "size_bytes": 759943
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M02/runtime/mutant.execution.json",
+          "sha256": "e8356daf452065bfd90601531cf1050e3ae00b71e4acbec7388ec112a7a56c6d",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M02/runtime/mutant.otlp.json",
+          "sha256": "ae53a934878e0d6206836af39c25af722aff8c26a6a8364bbe1d75338e22950c",
+          "size_bytes": 657902
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M02.yaml",
+          "sha256": "7e16f63295b5564da3da6afbcc9af7a6105a7602e2710e6527e77217be745845",
+          "size_bytes": 600
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M02.yaml",
+      "input_fingerprint": "76c693fb31282ea88b0404c3c9e148343f1e088202222968e04ff5ae4e63645f",
+      "mutation_id": "AS-M02",
+      "system_id": "astronomy-shop"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M03.yaml",
+          "sha256": "6ae9fe1d37d83b1e0ce54450339f9e008c59af87672e72907944838548f38d94",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M03/non-runtime/observations.json",
+          "sha256": "e8b2c1ca8c3f93f451500c42320f441f4c09c95dc99eccb8e90edf216b1657f9",
+          "size_bytes": 50929
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M03/runtime/baseline.execution.json",
+          "sha256": "3123095672bb39767009d10802b2ef047d4df1cf1efedc2fbffa06808fafd9cf",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M03/runtime/baseline.otlp.json",
+          "sha256": "21d8648f9ef9f346f1c9985cfc2429edafe498a31911b56b6b6d57cb4f230476",
+          "size_bytes": 1053644
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M03/runtime/mutant.execution.json",
+          "sha256": "7922db939ce20e0767a0f59958b410c2500bd58f27fd637a92158bdcd9285d14",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M03/runtime/mutant.otlp.json",
+          "sha256": "f39d3387258279f8eeb227ac2f317a58d62ad6d2da36cd76d20c3555944ba055",
+          "size_bytes": 1200821
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M03.yaml",
+          "sha256": "4d758475e97b24dfa67ba0a5653b5e2ae323c9cac36c7d104161e0a12c189aec",
+          "size_bytes": 536
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M03.yaml",
+      "input_fingerprint": "3abeddc54684aa6e0045152c2cb873504c1cd6b20ab022b667b15c58ac3d2176",
+      "mutation_id": "AS-M03",
+      "system_id": "astronomy-shop"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M04.yaml",
+          "sha256": "2f32bcd5f3fc26fea1a5cc860ba3f76443eb131b6d69ec8c53808baa47ba753f",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M04/non-runtime/observations.json",
+          "sha256": "e008356b6af7fcbf242a146c9006333abd9b0fa1b4e3ecb7329a3097353e0491",
+          "size_bytes": 49721
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M04/runtime/baseline.execution.json",
+          "sha256": "50b874c1db673e51c5322282470462fc4bd463297371293458263477b13ec0d8",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M04/runtime/baseline.otlp.json",
+          "sha256": "914a1faf50a9ed1514fed8e7e6d30afd01d05db80dffa97c6c6526cb1d26ba0d",
+          "size_bytes": 545955
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M04/runtime/mutant.execution.json",
+          "sha256": "e36d5b6083b6d558df67979c29b89ec750db2e48fd1ef4d29a1d32c4f97d0b71",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M04/runtime/mutant.otlp.json",
+          "sha256": "8242b012372c4319015d4130ed8ad2d764c3cd522600a36df1540517e1519f91",
+          "size_bytes": 651673
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M04.yaml",
+          "sha256": "c8871a0b05c92c8632b991a206bc92b82700e798033e8d72e078022f1df1140e",
+          "size_bytes": 603
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M04.yaml",
+      "input_fingerprint": "7b52a6cee8b478409ea300b6945bb948f9db7ecadecb7dfde89f68e4e00cf9e7",
+      "mutation_id": "AS-M04",
+      "system_id": "astronomy-shop"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M05.yaml",
+          "sha256": "b51512438bf7e58f0c172774a6ad6dafb76dc289deb6a9489104514e4a3cfa1d",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/observations.json",
+          "sha256": "c06aa173af3c2c1cf22b340fc6824a3dbb551680c3e3af9cf4024ea0c84a5c44",
+          "size_bytes": 49721
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M05/runtime/baseline.execution.json",
+          "sha256": "bfced7280f8ba677cbd205a1c4c7270b6d599f243ffc278cdf846524af323443",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M05/runtime/baseline.otlp.json",
+          "sha256": "a86ec5f5998fc75f618bc33adbb47873b2aa867311f05222c8f2abc6b6c261d9",
+          "size_bytes": 1714275
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M05/runtime/mutant.execution.json",
+          "sha256": "7510998f7d8ce865e42e51403cf68ffc1681d51fc00a38f6c85096202313c1be",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M05/runtime/mutant.otlp.json",
+          "sha256": "f90a22d81d5ed226e41271ecef2b3737858bd55a67cafc1153b492ac0c81f2d7",
+          "size_bytes": 846099
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M05.yaml",
+          "sha256": "1255155249fdc231b749e8322807bfe733f8988163902916ecab734770878c41",
+          "size_bytes": 561
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M05.yaml",
+      "input_fingerprint": "2cda4dbfc060d04ed3f85121c9a2d608e76d03e82a4df1921b616899c7d96753",
+      "mutation_id": "AS-M05",
+      "system_id": "astronomy-shop"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "cases/real/astronomy-shop/AS-M06.yaml",
+          "sha256": "f09438f832348522ab1dfdf2cd4181474c8f9443f867fbaac39155f9d8455933",
+          "size_bytes": 1157
+        },
+        {
+          "path": "contracts/astronomy-shop.yaml",
+          "sha256": "fc27ded95e721d56ee6e8d57bb07a515cf109478c92f0060a24e4d8cb63a1800",
+          "size_bytes": 1986
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M06/non-runtime/observations.json",
+          "sha256": "36143cda57ac7932810d4a0750a2867e5fcaa9f16ab3d76994e2dcc267e5f31c",
+          "size_bytes": 49721
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M06/runtime/baseline.execution.json",
+          "sha256": "83432437d9b40ea73b7d9c3d1d55400a95c2e2c9a6a8a32b6dd42a6f61ce2685",
+          "size_bytes": 429
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M06/runtime/baseline.otlp.json",
+          "sha256": "05e56499c56de895806e5a4a1893edbf824f86fa87c4a17a568e22fbfd7f97fc",
+          "size_bytes": 442621
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M06/runtime/mutant.execution.json",
+          "sha256": "a993eafc83a7011d46a29a86a875d96897ec55c5cb94b4606ac2f38bce3832c6",
+          "size_bytes": 564
+        },
+        {
+          "path": "evidence/real/experiments/astronomy-shop/AS-M06/runtime/mutant.otlp.json",
+          "sha256": "c341baa71bfed5aae5abad4a3abab0fabd05a0c674f327ff0d2b96cdfbe73fcb",
+          "size_bytes": 762175
+        },
+        {
+          "path": "graphs/baseline/astronomy-shop/baseline.yaml",
+          "sha256": "02354469aa2ca25810392541f0f510cbfe41777d651de776ecf341620c09119f",
+          "size_bytes": 1606
+        },
+        {
+          "path": "mutations/astronomy-shop/AS-M06.yaml",
+          "sha256": "7c53aafbd08bc1e13eca537a7eb0c07e45ac9b64ad75079a5f577e8f7ff5661c",
+          "size_bytes": 552
+        }
+      ],
+      "case_file": "cases/real/astronomy-shop/AS-M06.yaml",
+      "input_fingerprint": "9c5ec88f20732d247e4b7ba7c1724501231a6b18184b4356ad421b5a113a8e57",
+      "mutation_id": "AS-M06",
+      "system_id": "astronomy-shop"
+    }
+  ],
+  "git_commit": "baec0147a515654d883075a3d16727150075e805",
+  "implementation_fingerprint": "6603539adafc3bb178435c6775afc3334f1d8773840769de2710200a4ade3a88",
+  "suite_file": "cases/real/astronomy-suite.yaml",
+  "suite_fingerprint": "30fef305ce5ff59a50112cef5dd7b146aaf67256b96c2332bf44372601c7e2e0",
+  "suite_id": "architecture-drift-astronomy-real"
+}

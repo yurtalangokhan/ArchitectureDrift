@@ -1,0 +1,1737 @@
+{
+  "name": "as-m02",
+  "networks": {
+    "default": {
+      "driver": "bridge",
+      "ipam": {},
+      "name": "opentelemetry-demo"
+    }
+  },
+  "services": {
+    "accounting": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-accounting"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/accounting/Dockerfile"
+      },
+      "command": null,
+      "container_name": "accounting",
+      "depends_on": {
+        "kafka": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "167772160"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "DB_CONNECTION_STRING": "Host=astronomy-db;Username=astronomy_user;Password=astronomy_password;Database=astronomy_db",
+        "KAFKA_ADDR": "kafka:9092",
+        "KAFKA_TOPIC": "orders",
+        "OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED": "false",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "accounting"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-accounting",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "restart": "unless-stopped"
+    },
+    "ad": {
+      "build": {
+        "args": {
+          "OTEL_JAVA_AGENT_VERSION": "2.31.1"
+        },
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-ad"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/ad/Dockerfile"
+      },
+      "command": null,
+      "container_name": "ad",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "314572800"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "AD_PORT": "9555",
+        "AD_PROMETHEUS_PORT": "9465",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "OTEL_EXPERIMENTAL_SDK_TELEMETRY_VERSION": "latest",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_LOGS_EXPORTER": "otlp",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=medium",
+        "OTEL_SERVICE_NAME": "ad"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "20s",
+        "test": [
+          "CMD-SHELL",
+          "bash -c 'echo > /dev/tcp/localhost/9555'"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-ad",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 9555
+        },
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 9465
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "astronomy-db": {
+      "command": [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=pg_stat_statements"
+      ],
+      "container_name": "astronomy-db",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "83886080"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "POSTGRES_PASSWORD": "changeit"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 10,
+        "start_period": "10s",
+        "test": [
+          "CMD-SHELL",
+          "pg_isready"
+        ],
+        "timeout": "5s"
+      },
+      "image": "postgres:18.6",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 5432
+        }
+      ],
+      "restart": "unless-stopped",
+      "volumes": [
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\postgresql\\init.sql",
+          "target": "/docker-entrypoint-initdb.d/init.sql",
+          "type": "bind"
+        }
+      ]
+    },
+    "cart": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-cart"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/cart/src/Dockerfile"
+      },
+      "command": null,
+      "container_name": "cart",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        },
+        "valkey-cart": {
+          "condition": "service_healthy",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "167772160"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "ASPNETCORE_HTTP_PORTS": "7070",
+        "CART_PORT": "7070",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=high",
+        "OTEL_SERVICE_NAME": "cart",
+        "VALKEY_ADDR": "valkey-cart:6379"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-cart",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 7070
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "checkout": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-checkout"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/checkout/Dockerfile"
+      },
+      "command": null,
+      "container_name": "checkout",
+      "depends_on": {
+        "cart": {
+          "condition": "service_started",
+          "required": true
+        },
+        "currency": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "email": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "kafka": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        },
+        "payment": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "product-catalog": {
+          "condition": "service_started",
+          "required": true
+        },
+        "shipping": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "20971520"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "CART_ADDR": "cart:7070",
+        "CHECKOUT_PORT": "5050",
+        "CURRENCY_ADDR": "currency:7001",
+        "EMAIL_ADDR": "http://email:6060",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "GOMEMLIMIT": "16MiB",
+        "KAFKA_ADDR": "kafka:9092",
+        "KAFKA_TOPIC": "orders",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+        "OTEL_GO_X_OBSERVABILITY": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=critical",
+        "OTEL_SERVICE_NAME": "checkout",
+        "PAYMENT_ADDR": "payment:50051",
+        "PRODUCT_CATALOG_ADDR": "product-catalog:3550",
+        "SHIPPING_ADDR": "http://shipping:50050"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "/bin/grpc_health_probe",
+          "-addr=:5050"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-checkout",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 5050
+        }
+      ],
+      "read_only": true,
+      "restart": "unless-stopped",
+      "tmpfs": [
+        "/tmp"
+      ]
+    },
+    "currency": {
+      "build": {
+        "args": {
+          "OPENTELEMETRY_CPP_VERSION": "1.28.0"
+        },
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-currency"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/currency/Dockerfile"
+      },
+      "command": null,
+      "container_name": "currency",
+      "depends_on": {
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "20971520"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "CURRENCY_PORT": "7001",
+        "IPV6_ENABLED": "false",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=high",
+        "OTEL_SERVICE_NAME": "currency",
+        "VERSION": "3.1.0"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD-SHELL",
+          "nc -z localhost 7001"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-currency",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 7001
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "email": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-email"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/email/Dockerfile"
+      },
+      "command": null,
+      "container_name": "email",
+      "depends_on": {
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "104857600"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "APP_ENV": "production",
+        "EMAIL_PORT": "6060",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=medium",
+        "OTEL_SERVICE_NAME": "email"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "ruby",
+          "-e",
+          "require 'socket'; TCPSocket.new('localhost', 6060).close"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-email",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 6060
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "flagd": {
+      "command": [
+        "start",
+        "--uri",
+        "file:./etc/flagd/demo.flagd.json"
+      ],
+      "container_name": "flagd",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "78643200"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "GOMEMLIMIT": "60MiB",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "flagd"
+      },
+      "image": "ghcr.io/open-feature/flagd:v0.16.0",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8013
+        },
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8016
+        }
+      ],
+      "restart": "unless-stopped",
+      "volumes": [
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\flagd",
+          "target": "/etc/flagd",
+          "type": "bind"
+        }
+      ]
+    },
+    "flagd-ui": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-flagd-ui"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/flagd-ui/Dockerfile"
+      },
+      "command": null,
+      "container_name": "flagd-ui",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "209715200"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_UI_PORT": "4000",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "flagd-ui",
+        "PHX_HOST": "localhost",
+        "SECRET_KEY_BASE": "yYrECL4qbNwleYInGJYvVnSkwJuSQJ4ijPTx5tirGUXrbznFIBFVJdPl5t6O9ASw"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "bash",
+          "-c",
+          "echo > /dev/tcp/localhost/4000"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-flagd-ui",
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 4000
+        }
+      ],
+      "restart": "always",
+      "volumes": [
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\flagd",
+          "target": "/app/data",
+          "type": "bind"
+        }
+      ]
+    },
+    "fraud-detection": {
+      "build": {
+        "args": {
+          "OTEL_JAVA_AGENT_VERSION": "2.31.1"
+        },
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-fraud-detection"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/fraud-detection/Dockerfile"
+      },
+      "command": null,
+      "container_name": "fraud-detection",
+      "depends_on": {
+        "kafka": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "314572800"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "KAFKA_ADDR": "kafka:9092",
+        "KAFKA_TOPIC": "orders",
+        "OTEL_EXPERIMENTAL_SDK_TELEMETRY_VERSION": "latest",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_INSTRUMENTATION_KAFKA_EXPERIMENTAL_SPAN_ATTRIBUTES": "true",
+        "OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "fraud-detection"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-fraud-detection",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "restart": "unless-stopped"
+    },
+    "frontend": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-frontend"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/frontend/Dockerfile"
+      },
+      "command": null,
+      "container_name": "frontend",
+      "depends_on": {
+        "ad": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "cart": {
+          "condition": "service_started",
+          "required": true
+        },
+        "checkout": {
+          "condition": "service_started",
+          "required": true
+        },
+        "currency": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "image-provider": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        },
+        "product-catalog": {
+          "condition": "service_started",
+          "required": true
+        },
+        "quote": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "recommendation": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "shipping": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "262144000"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "AD_ADDR": "ad:9555",
+        "CART_ADDR": "cart:7070",
+        "CHECKOUT_ADDR": "checkout:5050",
+        "CURRENCY_ADDR": "currency:7001",
+        "ENV_PLATFORM": "local",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "FRONTEND_ADDR": "frontend:8080",
+        "OTEL_COLLECTOR_HOST": "otel-collector",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=critical",
+        "OTEL_SERVICE_NAME": "frontend",
+        "PORT": "8080",
+        "PRODUCT_CATALOG_ADDR": "product-catalog:3550",
+        "PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "http://localhost:8080/otlp-http/v1/traces",
+        "RECOMMENDATION_ADDR": "recommendation:9001",
+        "SHIPPING_ADDR": "http://shipping:50050",
+        "WEB_OTEL_SERVICE_NAME": "frontend-web"
+      },
+      "healthcheck": {
+        "interval": "10s",
+        "retries": 5,
+        "start_period": "1m0s",
+        "test": [
+          "CMD",
+          "/nodejs/bin/node",
+          "-e",
+          "require('net').connect(8080,require('os').hostname(),function(){process.exit(0)}).on('error',function(){process.exit(1)})"
+        ],
+        "timeout": "10s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-frontend",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8080
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "frontend-proxy": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-frontend-proxy"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/frontend-proxy/Dockerfile"
+      },
+      "command": null,
+      "container_name": "frontend-proxy",
+      "depends_on": {
+        "flagd-ui": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "frontend": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "load-generator": {
+          "condition": "service_started",
+          "required": true
+        },
+        "telemetry-docs": {
+          "condition": "service_healthy",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "94371840"
+          }
+        }
+      },
+      "dns_search": [
+        ""
+      ],
+      "entrypoint": null,
+      "environment": {
+        "CHATBOT_HOST": "chatbot",
+        "CHATBOT_PORT": "7860",
+        "ENVOY_ADDR": "0.0.0.0",
+        "ENVOY_ADMIN_PORT": "10000",
+        "ENVOY_PORT": "8080",
+        "FIREPIT_HOST": "firepit",
+        "FIREPIT_PORT": "8080",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "FLAGD_UI_HOST": "flagd-ui",
+        "FLAGD_UI_PORT": "4000",
+        "FRONTEND_HOST": "frontend",
+        "FRONTEND_PORT": "8080",
+        "GRAFANA_HOST": "grafana",
+        "GRAFANA_PORT": "3000",
+        "IMAGE_PROVIDER_HOST": "image-provider",
+        "IMAGE_PROVIDER_PORT": "8081",
+        "JAEGER_HOST": "jaeger",
+        "JAEGER_UI_PORT": "16686",
+        "LOCUST_WEB_HOST": "load-generator",
+        "LOCUST_WEB_PORT": "8089",
+        "OPAMP_SERVER_HOST": "opamp-server",
+        "OPAMP_SERVER_UI_PORT": "4321",
+        "OTEL_COLLECTOR_HOST": "otel-collector",
+        "OTEL_COLLECTOR_PORT_GRPC": "4317",
+        "OTEL_COLLECTOR_PORT_HTTP": "4318",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=critical",
+        "OTEL_SERVICE_NAME": "frontend-proxy",
+        "OTEL_SERVICE_NAMESPACE": "opentelemetry-demo",
+        "TELEMETRY_DOCS_HOST": "telemetry-docs",
+        "TELEMETRY_DOCS_PORT": "8000"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "bash",
+          "-c",
+          "echo > /dev/tcp/localhost/8080"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-frontend-proxy",
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": "8080",
+          "target": 8080
+        },
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": "10000",
+          "target": 10000
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "image-provider": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-image-provider"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/image-provider/Dockerfile"
+      },
+      "command": null,
+      "container_name": "image-provider",
+      "depends_on": {
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "125829120"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "IMAGE_PROVIDER_PORT": "8081",
+        "OTEL_COLLECTOR_HOST": "otel-collector",
+        "OTEL_COLLECTOR_PORT_GRPC": "4317",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "image-provider"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8081/status"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-image-provider",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8081
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "kafka": {
+      "build": {
+        "args": {
+          "OTEL_JAVA_AGENT_VERSION": "2.31.1"
+        },
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-kafka"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/kafka/Dockerfile"
+      },
+      "command": null,
+      "container_name": "kafka",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "650117120"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://kafka:9092",
+        "KAFKA_CONTROLLER_QUORUM_VOTERS": "1@kafka:9093",
+        "KAFKA_HEAP_OPTS": "-Xmx400m -Xms400m",
+        "KAFKA_LISTENERS": "PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093",
+        "OTEL_EXPERIMENTAL_SDK_TELEMETRY_VERSION": "latest",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "kafka"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 10,
+        "start_period": "10s",
+        "test": [
+          "CMD-SHELL",
+          "nc -z kafka 9092"
+        ],
+        "timeout": "10s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-kafka",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "restart": "unless-stopped"
+    },
+    "load-generator": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-load-generator"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/load-generator/Dockerfile"
+      },
+      "command": null,
+      "container_name": "load-generator",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "frontend": {
+          "condition": "service_healthy",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "1572864000"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_HOST": "flagd",
+        "FLAGD_OFREP_PORT": "8016",
+        "FLAGD_PORT": "8013",
+        "LOCUST_AUTOSTART": "true",
+        "LOCUST_BROWSER_TRAFFIC_ENABLED": "true",
+        "LOCUST_BROWSER_USER_WEIGHT": "1",
+        "LOCUST_HEADLESS": "false",
+        "LOCUST_HOST": "http://frontend-proxy:8080",
+        "LOCUST_HTTP_USER_WEIGHT": "9",
+        "LOCUST_USERS": "5",
+        "LOCUST_WEB_HOST": "0.0.0.0",
+        "LOCUST_WEB_PORT": "8089",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_PYTHON_SDK_INTERNAL_METRICS_ENABLED": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "load-generator",
+        "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "30s",
+        "test": [
+          "CMD",
+          "python3",
+          "-c",
+          "import socket; s=socket.create_connection(('localhost',8089),2); s.close()"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-load-generator",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8089
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "otel-collector": {
+      "command": [
+        "--config=/etc/otelcol-config.yml",
+        "--config=/etc/otelcol-config-full.yml",
+        "--config=/etc/otelcol-config-extras.yml",
+        "--feature-gates=service.profilesSupport"
+      ],
+      "container_name": "otel-collector",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "419430400"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "AD_PROMETHEUS_PORT": "9465",
+        "FRONTEND_PROXY_ADDR": "frontend-proxy:8080",
+        "GOMEMLIMIT": "160MiB",
+        "HOST_FILESYSTEM": "/",
+        "IMAGE_PROVIDER_HOST": "image-provider",
+        "IMAGE_PROVIDER_PORT": "8081",
+        "KAFKA_ADDR": "kafka:9092",
+        "OTEL_COLLECTOR_HOST": "otel-collector",
+        "OTEL_COLLECTOR_PORT_GRPC": "4317",
+        "OTEL_COLLECTOR_PORT_HTTP": "4318",
+        "POSTGRES_HOST": "astronomy-db",
+        "POSTGRES_MONITORING_PASSWORD": "monitoring_password",
+        "POSTGRES_PORT": "5432"
+      },
+      "image": "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.160.0",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 4317
+        },
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 4318
+        }
+      ],
+      "restart": "unless-stopped",
+      "user": "0:0",
+      "volumes": [
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "read_only": true,
+          "source": "/",
+          "target": "/hostfs",
+          "type": "bind"
+        },
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "read_only": true,
+          "source": "/var/run/docker.sock",
+          "target": "/var/run/docker.sock",
+          "type": "bind"
+        },
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\otel-collector\\otelcol-config.yml",
+          "target": "/etc/otelcol-config.yml",
+          "type": "bind"
+        },
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\otel-collector\\otelcol-config-extras.yml",
+          "target": "/etc/otelcol-config-extras.yml",
+          "type": "bind"
+        },
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\src\\otel-collector\\otelcol-config-full.yml",
+          "target": "/etc/otelcol-config-full.yml",
+          "type": "bind"
+        }
+      ]
+    },
+    "payment": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-payment"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/payment/Dockerfile"
+      },
+      "command": null,
+      "container_name": "payment",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "146800640"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "IPV6_ENABLED": "false",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=critical",
+        "OTEL_SERVICE_NAME": "payment",
+        "PAYMENT_PORT": "50051",
+        "SHIPPING_ADDR": "http://shipping:50050"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "/nodejs/bin/node",
+          "-e",
+          "const net=require('net');const c=new net.Socket(); c.setTimeout(2000); c.connect(50051,'127.0.0.1',()=>{c.destroy();process.exit(0)}); c.on('error',()=>process.exit(1)); c.on('timeout',()=>process.exit(1))"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-payment",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 50051
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "product-catalog": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-product-catalog"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/product-catalog/Dockerfile"
+      },
+      "command": null,
+      "container_name": "product-catalog",
+      "depends_on": {
+        "astronomy-db": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "20971520"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "DB_CONNECTION_STRING": "postgres://astronomy_user:astronomy_password@astronomy-db/astronomy_db?sslmode=disable",
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "GOMEMLIMIT": "16MiB",
+        "OTEL_CONFIG_FILE": "/otel-config.yml",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_GO_X_OBSERVABILITY": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=high",
+        "OTEL_SEMCONV_STABILITY_OPT_IN": "database",
+        "OTEL_SERVICE_NAME": "product-catalog",
+        "PRODUCT_CATALOG_PORT": "3550"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "/bin/grpc_health_probe",
+          "-addr=:3550"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-product-catalog",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 3550
+        }
+      ],
+      "read_only": true,
+      "restart": "unless-stopped",
+      "tmpfs": [
+        "/tmp"
+      ],
+      "volumes": [
+        {
+          "bind": {
+            "create_host_path": true
+          },
+          "source": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02\\otel-config.yml",
+          "target": "/otel-config.yml",
+          "type": "bind"
+        }
+      ]
+    },
+    "quote": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-quote"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/quote/Dockerfile"
+      },
+      "command": null,
+      "container_name": "quote",
+      "depends_on": {
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "41943040"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "IPV6_ENABLED": "false",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_PHP_AUTOLOAD_ENABLED": "true",
+        "OTEL_PHP_INTERNAL_METRICS_ENABLED": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=low",
+        "OTEL_SERVICE_NAME": "quote",
+        "QUOTE_PORT": "8090"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "php",
+          "-r",
+          "fsockopen('localhost', 8090) or die('fail');"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-quote",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8090
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "recommendation": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-recommendation"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/recommendation/Dockerfile"
+      },
+      "command": null,
+      "container_name": "recommendation",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        },
+        "product-catalog": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "524288000"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_PYTHON_LOG_CORRELATION": "true",
+        "OTEL_PYTHON_SDK_INTERNAL_METRICS_ENABLED": "true",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=medium",
+        "OTEL_SERVICE_NAME": "recommendation",
+        "PRODUCT_CATALOG_ADDR": "product-catalog:3550",
+        "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python",
+        "RECOMMENDATION_PORT": "9001"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD-SHELL",
+          "nc -z localhost 9001"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-recommendation",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 9001
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "shipping": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-shipping"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/shipping/Dockerfile"
+      },
+      "command": null,
+      "container_name": "shipping",
+      "depends_on": {
+        "flagd": {
+          "condition": "service_started",
+          "required": true
+        },
+        "otel-collector": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "20971520"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FLAGD_HOST": "flagd",
+        "FLAGD_PORT": "8013",
+        "IPV6_ENABLED": "false",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318",
+        "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION": "explicit_bucket_histogram",
+        "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "cumulative",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+        "OTEL_RESOURCE_ATTRIBUTES": "docker.cli.cobra.command_path=docker%20compose,service.criticality=high",
+        "OTEL_SERVICE_NAME": "shipping",
+        "QUOTE_ADDR": "http://quote:8090",
+        "SHIPPING_PORT": "50050"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "/app/healthcheck"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-shipping",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 50050
+        }
+      ],
+      "read_only": true,
+      "restart": "unless-stopped",
+      "tmpfs": [
+        "/tmp"
+      ]
+    },
+    "telemetry-docs": {
+      "build": {
+        "cache_from": [
+          "ghcr.io/open-telemetry/demo:3.1.0-telemetry-docs"
+        ],
+        "context": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M02",
+        "dockerfile": "./src/telemetry-docs/Dockerfile"
+      },
+      "command": null,
+      "container_name": "telemetry-docs",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "104857600"
+          }
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "OTEL_COLLECTOR_HOST": "otel-collector",
+        "OTEL_COLLECTOR_PORT_GRPC": "4317",
+        "OTEL_SERVICE_NAME": "telemetry-docs",
+        "TELEMETRY_DOCS_PORT": "8000"
+      },
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 20,
+        "start_period": "10s",
+        "test": [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8000/"
+        ],
+        "timeout": "5s"
+      },
+      "image": "ghcr.io/open-telemetry/demo:latest-telemetry-docs",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 8000
+        }
+      ],
+      "restart": "unless-stopped"
+    },
+    "valkey-cart": {
+      "command": null,
+      "container_name": "valkey-cart",
+      "deploy": {
+        "placement": {},
+        "resources": {
+          "limits": {
+            "memory": "20971520"
+          }
+        }
+      },
+      "entrypoint": null,
+      "healthcheck": {
+        "interval": "5s",
+        "retries": 10,
+        "start_period": "5s",
+        "test": [
+          "CMD-SHELL",
+          "valkey-cli ping"
+        ],
+        "timeout": "3s"
+      },
+      "image": "ghcr.io/valkey-io/valkey:9.1.2-alpine3.24",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "networks": {
+        "default": null
+      },
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "target": 6379
+        }
+      ],
+      "restart": "unless-stopped",
+      "user": "valkey"
+    }
+  },
+  "x-default-logging": {
+    "driver": "json-file",
+    "options": {
+      "max-file": "2",
+      "max-size": "5m"
+    }
+  }
+}

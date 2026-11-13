@@ -1,0 +1,1805 @@
+{
+  "schema_version": "1.0",
+  "system_id": "astronomy-shop",
+  "variant": "AS-M05",
+  "observations": [
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "accounting",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.accounting",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "ad",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.ad",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "astronomy-db",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.astronomy-db",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.cart",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "currency",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.currency",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "email",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.email",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.flagd",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "flagd-ui",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.flagd-ui",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "fraud-detection",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.fraud-detection",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "image-provider",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.image-provider",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "kafka",
+        "type": "BROKER"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.kafka",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "load-generator",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.load-generator",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.otel-collector",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "payment",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.payment",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.product-catalog",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "quote",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.quote",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.recommendation",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.shipping",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "telemetry-docs",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.telemetry-docs",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "NODE",
+      "endpoint": {
+        "id": "valkey-cart",
+        "type": "SERVICE"
+      },
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.valkey-cart",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "accounting",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.accounting.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "ad",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.ad.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "ad",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.ad.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.cart.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.cart.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "valkey-cart",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.cart.environment.VALKEY_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.CART_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "currency",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.CURRENCY_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "email",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.EMAIL_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "payment",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.PAYMENT_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.PRODUCT_CATALOG_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.checkout.environment.SHIPPING_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "currency",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.currency.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "email",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.email.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "email",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.email.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.flagd.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "flagd-ui",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.flagd-ui.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "fraud-detection",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.fraud-detection.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "fraud-detection",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.fraud-detection.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "ad",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.AD_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.CART_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.CHECKOUT_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "currency",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.CURRENCY_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.OTEL_COLLECTOR_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.PRODUCT_CATALOG_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.RECOMMENDATION_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend.environment.SHIPPING_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd-ui",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.FLAGD_UI_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.FRONTEND_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "image-provider",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.IMAGE_PROVIDER_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "load-generator",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.LOCUST_WEB_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.OTEL_COLLECTOR_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "telemetry-docs",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.frontend-proxy.environment.TELEMETRY_DOCS_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "image-provider",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.image-provider.environment.OTEL_COLLECTOR_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "load-generator",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.load-generator.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "load-generator",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.load-generator.environment.LOCUST_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "load-generator",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.load-generator.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "astronomy-db",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.otel-collector.environment.POSTGRES_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "frontend-proxy",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.otel-collector.environment.FRONTEND_PROXY_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "image-provider",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.otel-collector.environment.IMAGE_PROVIDER_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "payment",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.payment.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "payment",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.payment.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "astronomy-db",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "postgres",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.product-catalog.environment.DB_CONNECTION_STRING",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.product-catalog.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.product-catalog.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "quote",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.quote.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.recommendation.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.recommendation.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.recommendation.environment.PRODUCT_CATALOG_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "flagd",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.shipping.environment.FLAGD_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.shipping.environment.OTEL_EXPORTER_OTLP_ENDPOINT",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "quote",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.shipping.environment.QUOTE_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "telemetry-docs",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "otel-collector",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": null,
+      "evidence": [
+        {
+          "type": "DEPLOYMENT_CONFIG",
+          "artifact": "evidence/real/experiments/astronomy-shop/AS-M05/non-runtime/compose.resolved.json",
+          "locator": "services.telemetry-docs.environment.OTEL_COLLECTOR_HOST",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "shipping",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "http",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/http/Shipping.gateway.ts",
+          "locator": "line:31;rule:archdrift.typescript.fetch;resolution:CONFIGURATION_BINDING;env:SHIPPING_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "ad",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/Ad.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:AD_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "cart",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/Cart.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CART_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "checkout",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/Checkout.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CHECKOUT_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "currency",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/Currency.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:CURRENCY_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "product-catalog",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/ProductCatalog.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:PRODUCT_CATALOG_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    },
+    {
+      "kind": "RELATION",
+      "source": {
+        "id": "frontend",
+        "type": "SERVICE"
+      },
+      "target": {
+        "id": "recommendation",
+        "type": "SERVICE"
+      },
+      "interaction": "SERVICE_CALL",
+      "protocol": "grpc",
+      "evidence": [
+        {
+          "type": "SOURCE_CODE",
+          "artifact": "src/frontend/gateways/rpc/Recommendations.gateway.ts",
+          "locator": "line:9;rule:archdrift.typescript.grpc-client;resolution:CONFIGURATION_BINDING;env:RECOMMENDATION_ADDR",
+          "observed_at": null,
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}

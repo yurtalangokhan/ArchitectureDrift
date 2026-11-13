@@ -1,0 +1,11 @@
+{
+  "applied_diff_sha256": "da3c0e32eea1ab382834177c44658a5c27bb6052436e967b0ea38e0ad0d76e4a",
+  "baseline_commit": "6a89faba15c8097c4bd82bcc15d906ac70baccd9",
+  "mutation_id": "AS-M04",
+  "otlp_trace_file": "results/runtime/raw/astronomy-shop/AS-M04/mutant/traces.otlp.json",
+  "output_directory": "results/runtime/raw/astronomy-shop/AS-M04/mutant",
+  "patch_sha256": "0cdf5f00c647c4ab1b7c1f1490a13e2f9fc64066b171cdd7cca445b951798469",
+  "system_id": "astronomy-shop",
+  "variant": "mutant",
+  "workspace": "workspaces/mutants/astronomy-shop/AS-M04"
+}

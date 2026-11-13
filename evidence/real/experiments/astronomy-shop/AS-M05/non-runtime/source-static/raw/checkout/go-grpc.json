@@ -1,0 +1,88 @@
+{
+  "engine_requested": "OSS",
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\flags\\flags_gen.go",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\genproto\\oteldemo\\demo.pb.go",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\genproto\\oteldemo\\demo_grpc.pb.go",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\kafka\\producer.go",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\main.go",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M05\\src\\checkout\\money\\money.go"
+    ]
+  },
+  "profiling_results": [],
+  "results": [],
+  "skipped_rules": [],
+  "time": {
+    "fixpoint_timeouts": [],
+    "matching_time": {
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "max_memory_bytes": 136344768,
+    "parsing_time": {
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "prefiltering": {
+      "file_level_time": 0.0,
+      "project_level_time": 0.0,
+      "rules_matched_ratio": 0.16666666666666666,
+      "rules_selected_ratio": 0.16666666666666666,
+      "rules_with_file_prefilters_ratio": 1.0,
+      "rules_with_project_prefilters_ratio": 0.0
+    },
+    "profiling_times": {
+      "config_time": 0.19112706184387207,
+      "core_time": 0.8233485221862793,
+      "ignores_time": 0.0,
+      "total_time": 1.0813922882080078
+    },
+    "rules": [],
+    "rules_parse_time": 0.01257634162902832,
+    "scanning_time": {
+      "per_file_time": {
+        "mean": 0.10853079954783121,
+        "std_dev": 0.003177951314634065
+      },
+      "total_time": 0.6511847972869873,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "tainting_time": {
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_defs": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "targets": [],
+    "total_bytes": 0
+  },
+  "version": "1.178.0"
+}

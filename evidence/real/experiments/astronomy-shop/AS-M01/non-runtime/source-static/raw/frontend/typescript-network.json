@@ -1,0 +1,288 @@
+{
+  "engine_requested": "OSS",
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\Api.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\http\\Shipping.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Ad.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Cart.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Checkout.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Currency.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\ProductCatalog.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Recommendations.gateway.ts",
+      "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\Session.gateway.ts"
+    ]
+  },
+  "profiling_results": [],
+  "results": [
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.fetch",
+      "end": {
+        "col": 7,
+        "line": 37,
+        "offset": 1154
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=`${SHIPPING_ADDR}/get-quote",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "http"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\http\\Shipping.gateway.ts",
+      "start": {
+        "col": 28,
+        "line": 31,
+        "offset": 971
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 81,
+        "line": 9,
+        "offset": 324
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=AD_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Ad.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 259
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 85,
+        "line": 9,
+        "offset": 343
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=CART_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Cart.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 274
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 93,
+        "line": 9,
+        "offset": 375
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=CHECKOUT_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Checkout.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 298
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 93,
+        "line": 9,
+        "offset": 375
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=CURRENCY_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Currency.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 298
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 106,
+        "line": 9,
+        "offset": 393
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=PRODUCT_CATALOG_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\ProductCatalog.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 303
+      }
+    },
+    {
+      "check_id": "E.Repositories.PythonProjects.ArchitectureDrift.rules.semgrep.packs.archdrift.typescript.grpc-client",
+      "end": {
+        "col": 105,
+        "line": 9,
+        "offset": 389
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "message": "ARCHDRIFT_TARGET=RECOMMENDATION_ADDR",
+        "metadata": {
+          "archdrift": {
+            "interaction": "SERVICE_CALL",
+            "protocol": "grpc"
+          }
+        },
+        "severity": "INFO",
+        "validation_state": "NO_VALIDATOR"
+      },
+      "path": "E:\\Repositories\\PythonProjects\\ArchitectureDrift\\workspaces\\mutants\\astronomy-shop\\AS-M01\\src\\frontend\\gateways\\rpc\\Recommendations.gateway.ts",
+      "start": {
+        "col": 16,
+        "line": 9,
+        "offset": 300
+      }
+    }
+  ],
+  "skipped_rules": [],
+  "time": {
+    "fixpoint_timeouts": [],
+    "matching_time": {
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "max_memory_bytes": 144966528,
+    "parsing_time": {
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "prefiltering": {
+      "file_level_time": 0.0,
+      "project_level_time": 0.0,
+      "rules_matched_ratio": 0.5555555555555556,
+      "rules_selected_ratio": 0.5555555555555556,
+      "rules_with_file_prefilters_ratio": 0.5,
+      "rules_with_project_prefilters_ratio": 0.0
+    },
+    "profiling_times": {
+      "config_time": 0.5936226844787598,
+      "core_time": 1.018930435180664,
+      "ignores_time": 0.0,
+      "total_time": 1.6432766914367676
+    },
+    "rules": [],
+    "rules_parse_time": 0.025000333786010742,
+    "scanning_time": {
+      "per_file_time": {
+        "mean": 0.03838435808817545,
+        "std_dev": 2.647343750241921e-06
+      },
+      "total_time": 0.3454592227935791,
+      "very_slow_files": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "tainting_time": {
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "total_time": 0.0,
+      "very_slow_rules_on_defs": [],
+      "very_slow_stats": {
+        "count_ratio": 0.0,
+        "time_ratio": 0.0
+      }
+    },
+    "targets": [],
+    "total_bytes": 0
+  },
+  "version": "1.178.0"
+}

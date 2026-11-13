@@ -43,6 +43,9 @@ from archdrift.experiments.activation import (
     MutationActivationError,
     apply_mutation,
 )
+from archdrift.experiments.evidence_snapshot import (
+    load_observation_snapshot,
+)
 from archdrift.model._validation import (
     normalize_identifier,
 )
@@ -143,6 +146,8 @@ class NonRuntimeEvidenceConfig(BaseModel):
 
     aspire_files: tuple[str, ...] = ()
 
+    observation_files: tuple[str, ...] = ()
+
 
 class RuntimeEvidenceConfig(BaseModel):
     model_config = ConfigDict(
@@ -190,6 +195,26 @@ class CaseDefinition(BaseModel):
     non_runtime: NonRuntimeEvidenceConfig
 
     runtime: RuntimeEvidenceConfig
+
+    provenance_files: tuple[
+        str,
+        ...,
+    ] = ()
+
+    @field_validator(
+        "provenance_files",
+    )
+    @classmethod
+    def validate_provenance_files(
+        cls,
+        value: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        normalized = tuple(_validate_relative_path(path) for path in value)
+
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("Provenance files must be unique.")
+
+        return normalized
 
     @field_validator(
         "case_id",
@@ -467,9 +492,36 @@ def _collect_non_runtime_candidates(
     root: Path,
     case: CaseDefinition,
 ) -> tuple[CanonicalCandidate, ...]:
-    candidates: list[
-        CanonicalCandidate
-    ] = []
+    candidates: list[CanonicalCandidate] = []
+
+    for observation_file in case.non_runtime.observation_files:
+        snapshot_path = resolve_repository_path(
+            root,
+            observation_file,
+        )
+
+        snapshot = load_observation_snapshot(snapshot_path)
+
+        if snapshot.system_id != case.system_id:
+            raise ExperimentConsistencyError(
+                "Non-runtime evidence snapshot "
+                "system does not match case: "
+                f"{snapshot.system_id!r} != "
+                f"{case.system_id!r}"
+            )
+
+        if snapshot.variant != case.variant:
+            raise ExperimentConsistencyError(
+                "Non-runtime evidence snapshot "
+                "variant does not match case: "
+                f"{snapshot.variant!r} != "
+                f"{case.variant!r}"
+            )
+
+        candidates.extend(
+            canonicalize_observation(observation)
+            for observation in (snapshot.observations)
+        )
 
     # -------------------------------------------------------------------------
     # Docker Compose
@@ -483,10 +535,7 @@ def _collect_non_runtime_candidates(
         ).collect()
 
         candidates.extend(
-            canonicalize_observation(
-                observation
-            )
-            for observation in observations
+            canonicalize_observation(observation) for observation in observations
         )
 
     # -------------------------------------------------------------------------
@@ -500,15 +549,10 @@ def _collect_non_runtime_candidates(
         ).collect()
 
         candidates.extend(
-            canonicalize_observation(
-                observation
-            )
-            for observation in observations
+            canonicalize_observation(observation) for observation in observations
         )
 
-    return tuple(
-        candidates
-    )
+    return tuple(candidates)
 
 
 def _collect_runtime_candidates(

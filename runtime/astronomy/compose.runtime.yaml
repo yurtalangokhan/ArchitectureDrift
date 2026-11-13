@@ -1,3 +1,7 @@
+networks:
+  default:
+    name: ${ARCHDRIFT_NETWORK_NAME}
+
 services:
 
   astronomy-db:

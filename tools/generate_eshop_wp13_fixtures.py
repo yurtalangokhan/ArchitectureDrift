@@ -419,7 +419,7 @@ def generate_runtime_messaging_mutation() -> None:
         {
             "resourceSpans": [
                 resource_span(
-                    service_name="webapp",
+                    service_name="webhooksclient",
                     spans=[
                         {
                             "traceId": (

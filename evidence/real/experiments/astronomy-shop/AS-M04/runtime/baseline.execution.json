@@ -1,0 +1,11 @@
+{
+  "applied_diff_sha256": null,
+  "baseline_commit": "6a89faba15c8097c4bd82bcc15d906ac70baccd9",
+  "mutation_id": "AS-M04",
+  "otlp_trace_file": "results/runtime/raw/astronomy-shop/AS-M04/baseline/traces.otlp.json",
+  "output_directory": "results/runtime/raw/astronomy-shop/AS-M04/baseline",
+  "patch_sha256": null,
+  "system_id": "astronomy-shop",
+  "variant": "baseline",
+  "workspace": "subjects/astronomy-shop"
+}

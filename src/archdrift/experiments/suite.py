@@ -60,23 +60,15 @@ def _validate_relative_path(
     normalized = value.strip()
 
     if not normalized:
-        raise ValueError(
-            "Suite case path must not be empty."
-        )
+        raise ValueError("Suite case path must not be empty.")
 
-    path = Path(
-        normalized
-    )
+    path = Path(normalized)
 
     if path.is_absolute():
-        raise ValueError(
-            "Suite case paths must be repository-relative."
-        )
+        raise ValueError("Suite case paths must be repository-relative.")
 
     if ".." in path.parts:
-        raise ValueError(
-            "Suite case paths must not contain '..'."
-        )
+        raise ValueError("Suite case paths must not contain '..'.")
 
     return path.as_posix()
 
@@ -107,9 +99,7 @@ class ExperimentSuiteDefinition(BaseModel):
         normalized = value.strip()
 
         if not normalized:
-            raise ValueError(
-                "suite_id must not be empty."
-            )
+            raise ValueError("suite_id must not be empty.")
 
         return normalized
 
@@ -120,23 +110,12 @@ class ExperimentSuiteDefinition(BaseModel):
         value: tuple[str, ...],
     ) -> tuple[str, ...]:
         if not value:
-            raise ValueError(
-                "Experiment suite requires at least one case."
-            )
+            raise ValueError("Experiment suite requires at least one case.")
 
-        normalized = tuple(
-            _validate_relative_path(
-                case
-            )
-            for case in value
-        )
+        normalized = tuple(_validate_relative_path(case) for case in value)
 
-        if len(normalized) != len(
-            set(normalized)
-        ):
-            raise ValueError(
-                "Experiment suite contains duplicate case paths."
-            )
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("Experiment suite contains duplicate case paths.")
 
         return normalized
 
@@ -210,10 +189,7 @@ class EvidenceModeAggregate(BaseModel):
         if self.case_count == 0:
             return None
 
-        return (
-            self.fully_detected_case_count
-            / self.case_count
-        )
+        return self.fully_detected_case_count / self.case_count
 
 
 class ScopeAggregate(BaseModel):
@@ -269,48 +245,34 @@ class ExperimentSuiteResult(BaseModel):
 def load_suite_definition(
     path: str | Path,
 ) -> ExperimentSuiteDefinition:
-    suite_path = Path(
-        path
-    )
+    suite_path = Path(path)
 
     if not suite_path.is_file():
-        raise FileNotFoundError(
-            f"Experiment suite file not found: {suite_path}"
-        )
+        raise FileNotFoundError(f"Experiment suite file not found: {suite_path}")
 
     try:
         with suite_path.open(
             "r",
             encoding="utf-8",
         ) as file:
-            document = yaml.safe_load(
-                file
-            )
+            document = yaml.safe_load(file)
 
     except yaml.YAMLError as exc:
-        raise SuiteConfigurationError(
-            f"Invalid suite YAML: {suite_path}"
-        ) from exc
+        raise SuiteConfigurationError(f"Invalid suite YAML: {suite_path}") from exc
 
     if not isinstance(
         document,
         dict,
     ):
-        raise SuiteConfigurationError(
-            "Experiment suite YAML root must be a mapping."
-        )
+        raise SuiteConfigurationError("Experiment suite YAML root must be a mapping.")
 
-    return ExperimentSuiteDefinition.model_validate(
-        document
-    )
+    return ExperimentSuiteDefinition.model_validate(document)
 
 
 def _sha256_bytes(
     content: bytes,
 ) -> str:
-    return hashlib.sha256(
-        content
-    ).hexdigest()
+    return hashlib.sha256(content).hexdigest()
 
 
 def _digest_file(
@@ -321,58 +283,38 @@ def _digest_file(
     resolved = path.resolve()
 
     try:
-        relative = resolved.relative_to(
-            root
-        )
+        relative = resolved.relative_to(root)
     except ValueError as exc:
         raise SuiteConfigurationError(
             f"Input artifact escapes project root: {path}"
         ) from exc
 
     if not resolved.is_file():
-        raise FileNotFoundError(
-            f"Experiment input artifact not found: {resolved}"
-        )
+        raise FileNotFoundError(f"Experiment input artifact not found: {resolved}")
 
     content = resolved.read_bytes()
 
     return InputArtifactDigest(
         path=relative.as_posix(),
-        sha256=_sha256_bytes(
-            content
-        ),
-        size_bytes=len(
-            content
-        ),
+        sha256=_sha256_bytes(content),
+        size_bytes=len(content),
     )
 
 
 def _fingerprint_artifacts(
-    artifacts: Iterable[
-        InputArtifactDigest
-    ],
+    artifacts: Iterable[InputArtifactDigest],
 ) -> str:
     lines = tuple(
-        (
-            f"{artifact.path}\0"
-            f"{artifact.sha256}\0"
-            f"{artifact.size_bytes}"
-        )
+        (f"{artifact.path}\0" f"{artifact.sha256}\0" f"{artifact.size_bytes}")
         for artifact in sorted(
             artifacts,
             key=lambda item: item.path,
         )
     )
 
-    payload = "\n".join(
-        lines
-    ).encode(
-        "utf-8"
-    )
+    payload = "\n".join(lines).encode("utf-8")
 
-    return _sha256_bytes(
-        payload
-    )
+    return _sha256_bytes(payload)
 
 
 def _case_input_paths(
@@ -388,7 +330,9 @@ def _case_input_paths(
         case.mutation_oracle,
         *case.non_runtime.compose_files,
         *case.non_runtime.aspire_files,
+        *case.non_runtime.observation_files,
         *case.runtime.otlp_files,
+        *case.provenance_files,
     }
 
     return tuple(
@@ -396,9 +340,7 @@ def _case_input_paths(
             root,
             relative_path,
         )
-        for relative_path in sorted(
-            relative_paths
-        )
+        for relative_path in sorted(relative_paths)
     )
 
 
@@ -412,9 +354,7 @@ def build_case_input_manifest(
         case_file,
     )
 
-    case = load_case_definition(
-        case_path
-    )
+    case = load_case_definition(case_path)
 
     artifacts = tuple(
         _digest_file(
@@ -431,9 +371,7 @@ def build_case_input_manifest(
     return CaseInputManifest(
         case_file=case_file,
         artifacts=artifacts,
-        fingerprint=_fingerprint_artifacts(
-            artifacts
-        ),
+        fingerprint=_fingerprint_artifacts(artifacts),
     )
 
 
@@ -444,28 +382,18 @@ def _implementation_fingerprint(
         sorted(
             (
                 path
-                for path in (
-                    root
-                    / "src"
-                    / "archdrift"
-                ).rglob("*.py")
+                for path in (root / "src" / "archdrift").rglob("*.py")
                 if path.is_file()
             ),
             key=lambda path: path.as_posix(),
         )
     )
 
-    optional_files = (
-        root / "pyproject.toml",
-    )
+    optional_files = (root / "pyproject.toml",)
 
     all_files = (
         *files,
-        *(
-            path
-            for path in optional_files
-            if path.is_file()
-        ),
+        *(path for path in optional_files if path.is_file()),
     )
 
     artifacts = tuple(
@@ -476,9 +404,7 @@ def _implementation_fingerprint(
         for path in all_files
     )
 
-    return _fingerprint_artifacts(
-        artifacts
-    )
+    return _fingerprint_artifacts(artifacts)
 
 
 def _git_commit(
@@ -505,11 +431,7 @@ def _git_commit(
 
     commit = process.stdout.strip()
 
-    return (
-        commit
-        if commit
-        else None
-    )
+    return commit if commit else None
 
 
 def _view_for_mode(
@@ -519,36 +441,25 @@ def _view_for_mode(
     EvidenceViewMetrics,
     ConformanceReport,
 ]:
-    if (
-        mode
-        is ReconstructionMode.NON_RUNTIME
-    ):
+    if mode is ReconstructionMode.NON_RUNTIME:
         return (
             result.metrics.non_runtime,
             result.non_runtime_conformance,
         )
 
-    if (
-        mode
-        is ReconstructionMode.RUNTIME
-    ):
+    if mode is ReconstructionMode.RUNTIME:
         return (
             result.metrics.runtime,
             result.runtime_conformance,
         )
 
-    if (
-        mode
-        is ReconstructionMode.FUSED
-    ):
+    if mode is ReconstructionMode.FUSED:
         return (
             result.metrics.fused,
             result.fused_conformance,
         )
 
-    raise SuiteError(
-        f"Unsupported reconstruction mode: {mode!r}"
-    )
+    raise SuiteError(f"Unsupported reconstruction mode: {mode!r}")
 
 
 def _aggregate_mode(
@@ -578,68 +489,36 @@ def _aggregate_mode(
             mode,
         )
 
-        structural = (
-            metrics.structural.overall
-        )
+        structural = metrics.structural.overall
 
-        structural_tp += (
-            structural.true_positive
-        )
+        structural_tp += structural.true_positive
 
-        structural_fp += (
-            structural.false_positive
-        )
+        structural_fp += structural.false_positive
 
-        structural_fn += (
-            structural.false_negative
-        )
+        structural_fn += structural.false_negative
 
-        contract = (
-            metrics.contract_violations
-        )
+        contract = metrics.contract_violations
 
-        contract_tp += (
-            contract.true_positive
-        )
+        contract_tp += contract.true_positive
 
-        contract_fp += (
-            contract.false_positive
-        )
+        contract_fp += contract.false_positive
 
-        contract_fn += (
-            contract.false_negative
-        )
+        contract_fn += contract.false_negative
 
-        contract_tn += (
-            contract.true_negative
-        )
+        contract_tn += contract.true_negative
 
-        not_evaluable_positive += (
-            contract.not_evaluable_positive
-        )
+        not_evaluable_positive += contract.not_evaluable_positive
 
-        not_evaluable_negative += (
-            contract.not_evaluable_negative
-        )
+        not_evaluable_negative += contract.not_evaluable_negative
 
-        expected_positive_count = (
-            contract.true_positive
-            + contract.false_negative
-        )
+        expected_positive_count = contract.true_positive + contract.false_negative
 
-        if (
-            expected_positive_count > 0
-            and contract.false_negative == 0
-        ):
+        if expected_positive_count > 0 and contract.false_negative == 0:
             fully_detected += 1
 
     return EvidenceModeAggregate(
-        case_count=len(
-            cases
-        ),
-        fully_detected_case_count=(
-            fully_detected
-        ),
+        case_count=len(cases),
+        fully_detected_case_count=(fully_detected),
         structural=SetDetectionMetrics(
             true_positive=structural_tp,
             false_positive=structural_fp,
@@ -651,12 +530,8 @@ def _aggregate_mode(
                 false_positive=contract_fp,
                 false_negative=contract_fn,
                 true_negative=contract_tn,
-                not_evaluable_positive=(
-                    not_evaluable_positive
-                ),
-                not_evaluable_negative=(
-                    not_evaluable_negative
-                ),
+                not_evaluable_positive=(not_evaluable_positive),
+                not_evaluable_negative=(not_evaluable_negative),
             )
         ),
     )
@@ -672,9 +547,7 @@ def _aggregate_scope(
 ) -> ScopeAggregate:
     return ScopeAggregate(
         scope_id=scope_id,
-        case_count=len(
-            cases
-        ),
+        case_count=len(cases),
         non_runtime=_aggregate_mode(
             cases,
             ReconstructionMode.NON_RUNTIME,
@@ -702,25 +575,15 @@ def _suite_fingerprint(
     payload = "\n".join(
         (
             f"suite={suite_artifact.sha256}",
-            (
-                "implementation="
-                f"{implementation_fingerprint}"
-            ),
+            ("implementation=" f"{implementation_fingerprint}"),
             *(
-                (
-                    f"{case.case_file}="
-                    f"{case.input_manifest.fingerprint}"
-                )
+                (f"{case.case_file}=" f"{case.input_manifest.fingerprint}")
                 for case in case_results
             ),
         )
     )
 
-    return _sha256_bytes(
-        payload.encode(
-            "utf-8"
-        )
-    )
+    return _sha256_bytes(payload.encode("utf-8"))
 
 
 def run_suite(
@@ -728,38 +591,24 @@ def run_suite(
     project_root: str | Path,
     suite_file: str | Path,
 ) -> ExperimentSuiteResult:
-    root = Path(
-        project_root
-    ).resolve()
+    root = Path(project_root).resolve()
 
     if not root.is_dir():
-        raise SuiteConfigurationError(
-            f"Project root does not exist: {root}"
-        )
+        raise SuiteConfigurationError(f"Project root does not exist: {root}")
 
     suite_path = resolve_repository_path(
         root,
         suite_file,
     )
 
-    suite_definition = (
-        load_suite_definition(
-            suite_path
-        )
-    )
+    suite_definition = load_suite_definition(suite_path)
 
-    case_results: list[
-        SuiteCaseResult
-    ] = []
+    case_results: list[SuiteCaseResult] = []
 
-    for case_file in (
-        suite_definition.cases
-    ):
-        manifest = (
-            build_case_input_manifest(
-                root=root,
-                case_file=case_file,
-            )
+    for case_file in suite_definition.cases:
+        manifest = build_case_input_manifest(
+            root=root,
+            case_file=case_file,
         )
 
         experiment = run_case(
@@ -770,57 +619,32 @@ def run_suite(
         case_results.append(
             SuiteCaseResult(
                 case_file=case_file,
-                system_id=(
-                    experiment
-                    .baseline
-                    .metadata
-                    .system_id
-                ),
-                mutation_id=(
-                    experiment.mutation_id
-                ),
+                system_id=(experiment.baseline.metadata.system_id),
+                mutation_id=(experiment.mutation_id),
                 input_manifest=manifest,
                 result=experiment,
             )
         )
 
-    frozen_cases = tuple(
-        case_results
-    )
+    frozen_cases = tuple(case_results)
 
     grouped: dict[
         str,
         list[SuiteCaseResult],
-    ] = defaultdict(
-        list
-    )
+    ] = defaultdict(list)
 
     for case in frozen_cases:
-        grouped[
-            case.system_id
-        ].append(
-            case
-        )
+        grouped[case.system_id].append(case)
 
     systems = tuple(
         _aggregate_scope(
             scope_id=system_id,
-            cases=tuple(
-                grouped[
-                    system_id
-                ]
-            ),
+            cases=tuple(grouped[system_id]),
         )
-        for system_id in sorted(
-            grouped
-        )
+        for system_id in sorted(grouped)
     )
 
-    implementation_fingerprint = (
-        _implementation_fingerprint(
-            root
-        )
-    )
+    implementation_fingerprint = _implementation_fingerprint(root)
 
     suite_artifact = _digest_file(
         root=root,
@@ -828,29 +652,15 @@ def run_suite(
     )
 
     return ExperimentSuiteResult(
-        suite_id=(
-            suite_definition.suite_id
-        ),
-        suite_file=(
-            suite_path
-            .relative_to(root)
-            .as_posix()
-        ),
-        git_commit=_git_commit(
-            root
-        ),
-        implementation_fingerprint=(
-            implementation_fingerprint
-        ),
+        suite_id=(suite_definition.suite_id),
+        suite_file=(suite_path.relative_to(root).as_posix()),
+        git_commit=_git_commit(root),
+        implementation_fingerprint=(implementation_fingerprint),
         suite_fingerprint=(
             _suite_fingerprint(
-                suite_artifact=(
-                    suite_artifact
-                ),
+                suite_artifact=(suite_artifact),
                 case_results=frozen_cases,
-                implementation_fingerprint=(
-                    implementation_fingerprint
-                ),
+                implementation_fingerprint=(implementation_fingerprint),
             )
         ),
         cases=frozen_cases,

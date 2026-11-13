@@ -6,7 +6,7 @@
           {
             "key": "service.name",
             "value": {
-              "stringValue": "webui"
+              "stringValue": "auth"
             }
           }
         ]
@@ -15,15 +15,15 @@
         {
           "spans": [
             {
-              "traceId": "mutation-webui-persistence",
+              "traceId": "mutation-auth-recommender",
               "spanId": "span-0100",
-              "name": "webui to persistence",
+              "name": "auth to recommender",
               "kind": "SPAN_KIND_CLIENT",
               "attributes": [
                 {
                   "key": "service.peer.name",
                   "value": {
-                    "stringValue": "persistence"
+                    "stringValue": "recommender"
                   }
                 },
                 {

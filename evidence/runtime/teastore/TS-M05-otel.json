@@ -6,7 +6,7 @@
           {
             "key": "service.name",
             "value": {
-              "stringValue": "webui"
+              "stringValue": "persistence"
             }
           }
         ]
@@ -15,15 +15,15 @@
         {
           "spans": [
             {
-              "traceId": "mutation-webui-registry",
+              "traceId": "mutation-persistence-auth",
               "spanId": "span-0102",
-              "name": "webui to registry",
+              "name": "persistence to auth",
               "kind": "SPAN_KIND_CLIENT",
               "attributes": [
                 {
                   "key": "service.peer.name",
                   "value": {
-                    "stringValue": "registry"
+                    "stringValue": "auth"
                   }
                 },
                 {

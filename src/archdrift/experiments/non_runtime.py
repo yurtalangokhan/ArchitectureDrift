@@ -94,8 +94,20 @@ class NonRuntimeEvidenceRunner:
         project_root: Path,
         profile: NonRuntimeEvidenceProfile,
         rule_pack_root: Path,
+        output_root: Path | None = None,
     ) -> NonRuntimeEvidenceRun:
         root = project_root.resolve()
+
+        evidence_root = (
+            output_root.resolve()
+            if output_root is not None
+            else (root / "evidence" / "real" / "non-runtime" / profile.subject_id)
+        )
+
+        evidence_root.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
         subject_root = (root / profile.subject_root).resolve()
 
@@ -109,21 +121,14 @@ class NonRuntimeEvidenceRunner:
             project_root=root,
             subject_root=subject_root,
             profile=profile,
+            output_root=evidence_root,
         )
 
         static_scan = self._static_runner.run(
             profile=profile,
             subject_root=(subject_root),
             rule_pack_root=(rule_pack_root),
-            output_root=(
-                root
-                / "evidence"
-                / "real"
-                / "non-runtime"
-                / profile.subject_id
-                / "source-static"
-                / "raw"
-            ),
+            output_root=(evidence_root / "source-static" / "raw"),
         )
 
         bindings: tuple[
@@ -182,6 +187,7 @@ class NonRuntimeEvidenceRunner:
         project_root: Path,
         subject_root: Path,
         profile: NonRuntimeEvidenceProfile,
+        output_root: Path,
     ) -> tuple[
         tuple[
             NormalizedObservation,
@@ -194,6 +200,7 @@ class NonRuntimeEvidenceRunner:
                 project_root=(project_root),
                 subject_root=(subject_root),
                 profile=profile,
+                output_root=(output_root),
             )
 
         if profile.aspire is not None:
@@ -213,6 +220,7 @@ class NonRuntimeEvidenceRunner:
         project_root: Path,
         subject_root: Path,
         profile: NonRuntimeEvidenceProfile,
+        output_root: Path,
     ) -> tuple[
         tuple[
             NormalizedObservation,
@@ -230,14 +238,7 @@ class NonRuntimeEvidenceRunner:
             project_directory=(Path(compose.project_directory)),
         )
 
-        output_file = (
-            project_root
-            / "evidence"
-            / "real"
-            / "non-runtime"
-            / profile.subject_id
-            / "compose.resolved.json"
-        )
+        output_file = output_root / "compose.resolved.json"
 
         rendered.write_json(output_file)
 

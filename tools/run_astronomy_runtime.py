@@ -31,6 +31,7 @@ from archdrift.model.graph import (
 )
 
 ASTRONOMY_VERSION = "3.1.0"
+ASTRONOMY_SYSTEM_ID = "astronomy-shop"
 FRONTEND_CONTAINER_PORT = 8080
 
 ASTRONOMY_MUTABLE_SERVICES = (
@@ -75,6 +76,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mutation",
         default="AS-M01",
+    )
+
+    parser.add_argument(
+        "--force-output",
+        action="store_true",
+        help=(
+            "Explicitly replace an existing runtime capture. "
+            "Completed experiment artifacts are protected by default."
+        ),
     )
 
     parser.add_argument(
@@ -173,6 +183,93 @@ def resolve_frontend_url(
         time.sleep(1)
 
     raise AstronomyRuntimeError("Could not resolve frontend host port.")
+
+
+def wait_for_container_health(
+    *,
+    container_name: str,
+    cwd: Path,
+    environment: Mapping[str, str],
+    timeout_seconds: int = 600,
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+
+    last_status: str | None = None
+
+    while time.monotonic() < deadline:
+        process = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                container_name,
+                "--format",
+                "{{if .State.Health}}" "{{.State.Health.Status}}" "{{else}}none{{end}}",
+            ],
+            cwd=cwd,
+            env=dict(environment),
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+
+        if process.returncode != 0:
+            time.sleep(5)
+            continue
+
+        status = process.stdout.strip()
+
+        if status != last_status:
+            print("[INFO] " f"{container_name} health=" f"{status or 'unknown'}")
+            last_status = status
+
+        if status == "healthy":
+            print("[OK] " f"{container_name} healthy")
+            return
+
+        if status == "unhealthy":
+            print("[ERROR] " f"{container_name} became unhealthy.")
+
+            subprocess.run(
+                [
+                    "docker",
+                    "inspect",
+                    container_name,
+                    "--format",
+                    "{{json .State.Health}}",
+                ],
+                cwd=cwd,
+                env=dict(environment),
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+            )
+
+            subprocess.run(
+                [
+                    "docker",
+                    "logs",
+                    "--tail",
+                    "200",
+                    container_name,
+                ],
+                cwd=cwd,
+                env=dict(environment),
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+            )
+
+            raise AstronomyRuntimeError(f"{container_name} became unhealthy.")
+
+        time.sleep(5)
+
+    raise AstronomyRuntimeError(
+        f"{container_name} did not become healthy " f"within {timeout_seconds}s."
+    )
 
 
 def wait_for_frontend(
@@ -346,7 +443,102 @@ def main() -> int:
 
     variant = RuntimeVariant(args.variant)
 
+    candidate_output_directory = (
+        root
+        / "results"
+        / "runtime"
+        / "raw"
+        / "astronomy-shop"
+        / args.mutation
+        / variant.value
+    )
+
+    candidate_raw_trace = candidate_output_directory / "traces.otlp.jsonl"
+
+    candidate_normalized_trace = candidate_output_directory / "traces.otlp.json"
+
+    existing_trace_artifacts = tuple(
+        path
+        for path in (
+            candidate_raw_trace,
+            candidate_normalized_trace,
+        )
+        if path.exists()
+    )
+
+    if existing_trace_artifacts and not args.force_output:
+        existing_text = ", ".join(
+            str(path.relative_to(root)) for path in existing_trace_artifacts
+        )
+
+        raise AstronomyRuntimeError(
+            "Runtime trace artifacts already exist for "
+            f"{args.mutation}/{variant.value}: "
+            f"{existing_text}. "
+            "Refusing to overwrite valid experimental evidence. "
+            "Use --force-output only when intentionally replacing "
+            "an incomplete or invalid execution."
+        )
+
     profile = require_astronomy_runtime_profile(args.mutation)
+
+    output_directory = (
+        root
+        / "results"
+        / "runtime"
+        / "raw"
+        / ASTRONOMY_SYSTEM_ID
+        / args.mutation
+        / variant.value
+    )
+
+    raw_trace_file = output_directory / "traces.otlp.jsonl"
+
+    normalized_trace_file = output_directory / "traces.otlp.json"
+
+    record_file = (
+        root
+        / "results"
+        / "runtime"
+        / "records"
+        / ASTRONOMY_SYSTEM_ID
+        / args.mutation
+        / f"{variant.value}.json"
+    )
+
+    existing_artifacts = tuple(
+        path
+        for path in (
+            raw_trace_file,
+            normalized_trace_file,
+            record_file,
+        )
+        if path.exists()
+    )
+
+    if existing_artifacts and not args.force_output:
+        existing_text = ", ".join(
+            path.relative_to(root).as_posix() for path in existing_artifacts
+        )
+
+        raise AstronomyRuntimeError(
+            "Refusing to overwrite existing "
+            "runtime evidence for "
+            f"{args.mutation}/{variant.value}: "
+            f"{existing_text}. "
+            "Use --force-output only when "
+            "intentionally replacing an invalid run."
+        )
+
+    if args.force_output:
+        for path in (
+            raw_trace_file,
+            normalized_trace_file,
+            record_file,
+        ):
+            path.unlink(
+                missing_ok=True,
+            )
 
     record, _ = prepare_runtime_execution(
         project_root=root,
@@ -368,11 +560,33 @@ def main() -> int:
 
     normalized_trace_file = (root / record.otlp_trace_file).resolve()
 
-    if raw_trace_file.exists():
-        raw_trace_file.unlink()
+    existing_outputs = tuple(
+        path
+        for path in (
+            raw_trace_file,
+            normalized_trace_file,
+        )
+        if path.exists()
+    )
 
-    if normalized_trace_file.exists():
-        normalized_trace_file.unlink()
+    if existing_outputs and not args.force_output:
+        formatted = ", ".join(str(path.relative_to(root)) for path in existing_outputs)
+
+        raise AstronomyRuntimeError(
+            "Runtime output already exists; "
+            "refusing to overwrite experimental evidence: "
+            f"{formatted}. "
+            "Use --force-output only when intentionally "
+            "replacing a failed execution."
+        )
+
+    if args.force_output:
+        for path in (
+            raw_trace_file,
+            normalized_trace_file,
+        ):
+            if path.exists():
+                path.unlink()
 
     collector_config = (
         root / "runtime" / "astronomy" / "otelcol-capture.yml"
@@ -386,6 +600,12 @@ def main() -> int:
 
     environment["ARCHDRIFT_CAPTURE_DIR"] = output_directory.as_posix()
 
+    environment["ARCHDRIFT_NETWORK_NAME"] = (
+        f"archdrift-"
+        f"{record.system_id}-"
+        f"{args.mutation.lower()}-"
+        f"{variant.value}"
+    )
     environment["ARCHDRIFT_COLLECTOR_CONFIG"] = collector_config.as_posix()
 
     # Do not use DEMO_VERSION=latest
@@ -465,12 +685,37 @@ def main() -> int:
             environment=environment,
         )
 
+        if profile.compose_mode is AstronomyComposeMode.FULL:
+            print("[INFO] Starting Kafka before the " "application dependency graph.")
+
+            kafka_up_result = run_command(
+                compose
+                + [
+                    "up",
+                    "-d",
+                    "--no-build",
+                    "kafka",
+                ],
+                cwd=workspace,
+                environment=environment,
+                check=False,
+            )
+
+            if kafka_up_result.returncode != 0:
+                raise AstronomyRuntimeError("Kafka container failed to start.")
+
+            wait_for_container_health(
+                container_name="kafka",
+                cwd=workspace,
+                environment=environment,
+                timeout_seconds=600,
+            )
+
+            print("[INFO] Kafka is ready; starting " "Astronomy application services.")
+
         runtime_services = [
             "frontend",
         ]
-
-        if profile.compose_mode is AstronomyComposeMode.FULL:
-            runtime_services.append("kafka")
 
         up_result = run_command(
             compose
@@ -502,7 +747,7 @@ def main() -> int:
                 check=False,
             )
 
-            for diagnostic_service in (
+            diagnostic_services = (
                 "frontend",
                 "checkout",
                 "payment",
@@ -512,7 +757,15 @@ def main() -> int:
                 "recommendation",
                 "cart",
                 "email",
-            ):
+            )
+
+            if profile.compose_mode is AstronomyComposeMode.FULL:
+                diagnostic_services = (
+                    "kafka",
+                    *diagnostic_services,
+                )
+
+            for diagnostic_service in diagnostic_services:
                 run_command(
                     compose
                     + [
@@ -542,6 +795,13 @@ def main() -> int:
 
             raise AstronomyRuntimeError("Astronomy Shop failed to start.")
 
+        wait_for_container_health(
+            container_name="checkout",
+            cwd=workspace,
+            environment=environment,
+            timeout_seconds=600,
+        )
+
         frontend_url = resolve_frontend_url(
             compose=compose,
             cwd=workspace,
@@ -569,7 +829,14 @@ def main() -> int:
                 for diagnostic_service in (
                     "frontend",
                     "checkout",
+                    "cart",
+                    "product-catalog",
+                    "currency",
+                    "shipping",
+                    "quote",
                     "payment",
+                    "email",
+                    "kafka",
                 ):
                     run_command(
                         compose

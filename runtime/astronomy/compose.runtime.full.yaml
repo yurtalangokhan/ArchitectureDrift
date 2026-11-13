@@ -1,5 +1,17 @@
 services:
 
+  kafka:
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          bash -ec
+          'exec 3<>/dev/tcp/kafka/9092'
+      start_period: 180s
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
   otel-collector:
     command:
       - --config=/etc/otelcol-config.yml
